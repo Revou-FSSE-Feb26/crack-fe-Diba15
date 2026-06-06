@@ -1,6 +1,6 @@
 "use client";
 
-import { Palette, Sun, Moon } from "lucide-react";
+import { Palette, Sun, Moon, LogIn } from "lucide-react";
 import { useTrubrush } from "@/context/TrubrushContext";
 
 export default function Navbar() {
@@ -14,14 +14,21 @@ export default function Navbar() {
                 <h1 className="text-2xl font-bold font-outfit">TruBrush</h1>
             </div>
 
-            {/* Theme Toggle */}
-            <button className="transition-all duration-300 text-premium">
-                {theme === "dark" ? (
-                    <Sun className="w-8 h-8" onClick={toggleTheme} />
-                ) : (
-                    <Moon className="w-8 h-8" onClick={toggleTheme} />
-                )}
-            </button>
+            <div className="flex items-center gap-3">
+                {/* Theme Toggle */}
+                <button className="transition-all duration-300 text-premium hover:text-primary cursor-pointer">
+                    {theme === "dark" ? (
+                        <Sun className="w-6 h-6" onClick={toggleTheme} />
+                    ) : (
+                        <Moon className="w-6 h-6" onClick={toggleTheme} />
+                    )}
+                </button>
+
+                {/* Login Button */}
+                <button title="Login Button" className="transition-all duration-300 text-premium hover:text-primary cursor-pointer">
+                    <LogIn className="w-6 h-6" />
+                </button>
+            </div>
         </nav>
     )
 }
