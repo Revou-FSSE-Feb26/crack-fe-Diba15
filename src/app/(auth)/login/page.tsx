@@ -86,7 +86,9 @@ export default function Login() {
                         </div>
                         {/* Email */}
                         <div>
+                            <label htmlFor="email" className="block text-sm font-semibold mb-1.5 text-content">Email</label>
                             <Input
+                                id="email"
                                 type="email"
                                 placeholder="mail@email.com"
                                 {...register("email", {
@@ -106,7 +108,9 @@ export default function Login() {
 
                         {/* Password */}
                         <div>
+                            <label htmlFor="password" className="block text-sm font-semibold mb-1.5 text-content">Password</label>
                             <Input
+                                id="password"
                                 type="password"
                                 placeholder="********"
                                 {...register("password", {
@@ -124,7 +128,8 @@ export default function Login() {
                         </div>
                         <Button type="submit" variant="primary">Login</Button>
                     </form>
-                    <Link href="/register" className="text-sm text-content hover:text-content-muted transition-colors">Don&apos;t have an account? Register</Link>
+                    <Link href="/signup" className="text-sm text-content hover:text-content-muted transition-colors">Don&apos;t have an account? Register</Link>
+                    <Link href="/staff-login" className="text-sm text-content hover:text-content-muted transition-colors">Staff login</Link>
                 </div>
             </section>
         </div>

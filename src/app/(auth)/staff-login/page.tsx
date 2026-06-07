@@ -12,7 +12,7 @@ interface LoginForm {
     password: string;
 }
 
-export default function ForgotPassword() {
+export default function StaffLogin() {
     const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
         defaultValues: {
             email: "",
@@ -44,7 +44,9 @@ export default function ForgotPassword() {
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full max-w-xs">
                     {/* Email */}
                     <div>
+                        <label htmlFor="email" className="block text-sm font-semibold mb-1.5 text-content">Email</label>
                         <Input
+                            id="email"
                             type="email"
                             placeholder="mail@email.com"
                             {...register("email", {
@@ -59,6 +61,24 @@ export default function ForgotPassword() {
                         </Input>
                         {errors.email && (
                             <p className="text-danger text-xs mt-1">{errors.email.message}</p>
+                        )}
+                    </div>
+
+                    {/* Password */}
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-semibold mb-1.5 text-content">Password</label>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="********"
+                            {...register("password", {
+                                required: "Password wajib diisi",
+                            })}
+                        >
+                            <Lock className="h-5 w-5 text-gray-400" />
+                        </Input>
+                        {errors.password && (
+                            <p className="text-danger text-xs mt-1">{errors.password.message}</p>
                         )}
                     </div>
                     <Button type="submit" variant="primary">Login</Button>
