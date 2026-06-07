@@ -2,6 +2,7 @@
 
 import { Palette, Sun, Moon, LogIn } from "lucide-react";
 import { useTrubrush } from "@/context/TrubrushContext";
+import Link from 'next/link'
 
 export default function Navbar() {
     const { theme, toggleTheme } = useTrubrush();
@@ -25,9 +26,9 @@ export default function Navbar() {
                 </button>
 
                 {/* Login Button */}
-                <button title="Login Button" className="transition-all duration-300 text-premium hover:text-primary cursor-pointer">
+                <Link href="/login" title="Login Button" className="transition-all duration-300 text-premium hover:text-primary cursor-pointer">
                     <LogIn className="w-6 h-6" />
-                </button>
+                </Link>
             </div>
         </nav>
     )

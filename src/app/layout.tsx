@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/ui/Navbar";
 import { TrubrushProvider } from "@/context/TrubrushContext";
 
 // 1. Konfigurasi Font Utama (Heading)
@@ -52,17 +51,9 @@ export default function RootLayout({
       className={`${fontOutfit.variable} ${fontBody.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="h-full">
         <TrubrushProvider>
-          <header>
-            <Navbar />
-          </header>
-
-          <main className="flex flex-col flex-1">
-            {children}
-          </main>
-
-          <footer></footer>
+          {children}
         </TrubrushProvider>
       </body>
     </html>
