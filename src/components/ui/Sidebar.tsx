@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, Layers, Star, MessageSquare, Settings, Users, X, Menu } from "lucide-react";
+import { Home, Layers, Star, MessageSquare, Settings, Users, Menu } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Brand from "@/components/ui/Brand";
 
