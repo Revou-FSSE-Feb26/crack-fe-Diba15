@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
-import { Mail, Lock } from "lucide-react";
+import { Mail } from "lucide-react";
 
 interface LoginForm {
     email: string;
