@@ -2,7 +2,7 @@
 
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/form/Input"
-import { Mail, Lock, User, MoveLeft } from 'lucide-react';
+import { Mail, Lock, MoveLeft } from 'lucide-react';
 import Link from "next/link";
 import { useForm } from "react-hook-form"
 
@@ -62,28 +62,6 @@ export default function Login() {
                     </Link>
                     <h2 className="text-4xl font-bold font-outfit mb-4">Login to TruBrush</h2>
                     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full max-w-xs">
-                        {/* Role */}
-                        <div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <label className="cursor-pointer">
-                                    <input {...register("role", { required: "Pilih role terlebih dahulu" })} value="artist" type="radio" name="role" className="peer sr-only" defaultChecked />
-                                    <div className="text-center py-2 px-3 border border-content-muted/30 rounded-lg peer-checked:bg-primary peer-checked:text-surface peer-checked:border-primary transition-all text-content-muted">
-                                        <User size={18} className="mx-auto mb-1" />
-                                        <span className="text-sm font-medium">Illustrator</span>
-                                    </div>
-                                </label>
-                                <label className="cursor-pointer">
-                                    <input {...register("role", { required: "Pilih role terlebih dahulu" })} value="client" type="radio" name="role" className="peer sr-only" />
-                                    <div className="text-center py-2 px-3 border border-content-muted/30 rounded-lg peer-checked:bg-primary peer-checked:text-surface peer-checked:border-primary transition-all text-content-muted">
-                                        <User size={18} className="mx-auto mb-1" />
-                                        <span className="text-sm font-medium">Client</span>
-                                    </div>
-                                </label>
-                            </div>
-                            {errors.role && (
-                                <p className="text-danger text-xs mt-1">{errors.role.message}</p>
-                            )}
-                        </div>
                         {/* Email */}
                         <div>
                             <label htmlFor="email" className="block text-sm font-semibold mb-1.5 text-content">Email</label>
