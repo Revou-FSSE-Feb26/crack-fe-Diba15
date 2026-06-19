@@ -1,6 +1,7 @@
 "use client";
 
 import { ProfileWithUser } from "@/types";
+import Button from "@/components/ui/Button"
 
 // ── Dummy Data ────────────────────────────────────────────────────────────────
 
@@ -139,9 +140,9 @@ function FeaturedArtistCard({ profile }: { profile: ProfileWithUser }) {
 
             {/* Tombol hire */}
             {is_open_for_commission && (
-                <button className="w-full text-xs font-medium py-1.5 rounded-lg bg-primary text-white hover:bg-primary-hover transition-colors duration-150">
+                <Button className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors duration-150">
                     Hire Artis
-                </button>
+                </Button>
             )}
         </div>
     );

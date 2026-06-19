@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { ArtworkWithRelations } from "@/types";
+import { Heart, Ellipsis } from "lucide-react";
 
 // ── Dummy Data ────────────────────────────────────────────────────────────────
 // Hapus bagian ini dan ganti dengan fetch dari API / Prisma saat backend siap.
@@ -146,12 +147,38 @@ function AvatarInitials({
 }
 
 function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
-    const { artist, artist_profile, tags } = artwork;
+    const { artist, artist_profile} = artwork;
 
     return (
         <article className="group bg-surface border border-content/10 rounded-xl overflow-hidden hover:border-accent transition-colors duration-150">
+            <div className="flex items-center justify-between p-3">
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <AvatarInitials name={artist.name} className="w-8 h-8" />
+                    <span className="text-sm text-content-muted truncate">
+                        {artist.name}
+                    </span>
+                    {artist_profile.is_verified && (
+                        <svg
+                            className="w-3 h-3 text-verified shrink-0"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            aria-label="Terverifikasi"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    )}
+                </div>
+                <div className="rounded-full p-1 hover:bg-content/5 cursor-pointer">
+                    <Ellipsis />
+                </div>
+            </div>
+
             {/* Gambar */}
-            <div className="relative aspect-[4/3] overflow-hidden bg-background">
+            <div className="relative aspect-[4/3] overflow-hidden bg-background p-4">
                 <Image
                     src={artwork.final_image_url}
                     alt={artwork.title}
@@ -159,107 +186,29 @@ function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
                 />
-
-                {/* Badge Bebas AI */}
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1 text-[10px] font-medium text-verified bg-white/90 border border-verified/40 px-2 py-0.5 rounded-full">
-                    <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                        />
-                    </svg>
-                    Bebas AI
-                </span>
             </div>
 
             {/* Meta */}
-            <div className="p-3">
-                <h3 className="text-sm font-medium text-content leading-snug mb-2 line-clamp-1">
-                    {artwork.title}
-                </h3>
+            <div className="flex justify-between p-3">
+                <div>
+                    <h3 className="text-sm font-medium text-content leading-snug mb-2 line-clamp-1">
+                        {artwork.title}
+                    </h3>
 
-                {/* Tags */}
-                {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                        {tags.slice(0, 3).map((tag) => (
-                            <span
-                                key={tag.id}
-                                className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent/20 text-primary"
-                            >
-                                {tag.tag_name}
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Footer: artist + tombol komisi */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                        <AvatarInitials name={artist.name} className="w-5 h-5" />
-                        <span className="text-[11px] text-content-muted truncate">
-                            {artist.name}
-                        </span>
-                        {artist_profile.is_verified && (
-                            <svg
-                                className="w-3 h-3 text-verified shrink-0"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                aria-label="Terverifikasi"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
+                    {/* Footer: artist + tombol komisi */}
+                    <div className="flex items-center justify-between">
+                        {artist_profile.is_open_for_commission && (
+                            <button className="text-[10px] font-medium px-2.5 py-1 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-150 shrink-0">
+                                Komisi
+                            </button>
                         )}
                     </div>
-
-                    {artist_profile.is_open_for_commission && (
-                        <button className="text-[10px] font-medium px-2.5 py-1 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-150 shrink-0">
-                            Komisi
-                        </button>
-                    )}
                 </div>
+
+                {/* Favorite Button */}
+                <Heart className="hover:text-red-500 hover:fill-red-500 transition-colors duration-150 cursor-pointer h-7 w-7" />
             </div>
         </article>
-    );
-}
-
-// ── Filter Bar ─────────────────────────────────────────────────────────────────
-
-const FILTERS = ["Semua", "Tren", "Terbaru", "Komisi Terbuka", "Ilustrasi Digital", "Sketsa", "Fan Art", "Webtoon"];
-
-function FilterBar({
-    active,
-    onChange,
-}: {
-    active: string;
-    onChange: (f: string) => void;
-}) {
-    return (
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {FILTERS.map((f) => (
-                <button
-                    key={f}
-                    onClick={() => onChange(f)}
-                    className={`shrink-0 text-xs px-3.5 py-1.5 rounded-full border transition-colors duration-150 ${active === f
-                            ? "bg-primary text-white border-primary"
-                            : "border-content/20 text-content-muted hover:bg-content/5"
-                        }`}
-                >
-                    {f}
-                </button>
-            ))}
-        </div>
     );
 }
 
@@ -270,17 +219,18 @@ export default function ArtworkList() {
     const artworks = DUMMY_ARTWORKS.filter((a) => a.is_visible_on_feed);
 
     return (
-        <section className="flex flex-col gap-4">
-            <FilterBar active="Semua" onChange={() => { }} />
-
+        <section className="flex flex-col gap-4 bg-surface rounded-2xl border border-content/10">
             {artworks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-content-muted text-sm">
                     <p>Belum ada karya yang ditampilkan.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2 px-4 md:px-20 py-4">
                     {artworks.map((artwork) => (
-                        <ArtworkCard key={artwork.id} artwork={artwork} />
+                        <div key={artwork.id}>
+                            <ArtworkCard artwork={artwork} />
+                            <hr className="border-content/10 my-4" />
+                        </div>
                     ))}
                 </div>
             )}
