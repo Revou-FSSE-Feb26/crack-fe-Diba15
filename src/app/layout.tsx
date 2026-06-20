@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { TrubrushProvider } from "@/context/TrubrushContext";
+import ThemeProvider from "@/components/ui/theme/ThemeProvider";
 
 // 1. Konfigurasi Font Utama (Heading)
 const fontOutfit = Outfit({
@@ -52,9 +52,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="h-full">
-        <TrubrushProvider>
-          {children}
-        </TrubrushProvider>
+        <ThemeProvider />
+        {children}
       </body>
     </html>
   );

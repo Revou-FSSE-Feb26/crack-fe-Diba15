@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { ArtworkWithRelations } from "@/types";
-import { Heart, Ellipsis } from "lucide-react";
+import { ArtworkCard } from "./ArtworkCard";
 
 // ── Dummy Data ────────────────────────────────────────────────────────────────
 // Hapus bagian ini dan ganti dengan fetch dari API / Prisma saat backend siap.
@@ -121,119 +120,25 @@ const DUMMY_ARTWORKS: ArtworkWithRelations[] = [
     },
 ];
 
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function AvatarInitials({
-    name,
-    className = "",
-}: {
-    name: string;
-    className?: string;
-}) {
-    const initials = name
-        .split(" ")
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase();
-
-    return (
-        <span
-            className={`inline-flex items-center justify-center rounded-full bg-primary text-white text-[10px] font-medium shrink-0 ${className}`}
-        >
-            {initials}
-        </span>
-    );
-}
-
-function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
-    const { artist, artist_profile} = artwork;
-
-    return (
-        <article className="group bg-surface border border-content/10 rounded-xl overflow-hidden hover:border-accent transition-colors duration-150">
-            <div className="flex items-center justify-between p-3">
-                <div className="flex items-center gap-1.5 min-w-0">
-                    <AvatarInitials name={artist.name} className="w-8 h-8" />
-                    <span className="text-sm text-content-muted truncate">
-                        {artist.name}
-                    </span>
-                    {artist_profile.is_verified && (
-                        <svg
-                            className="w-3 h-3 text-verified shrink-0"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            aria-label="Terverifikasi"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                    )}
-                </div>
-                <div className="rounded-full p-1 hover:bg-content/5 cursor-pointer">
-                    <Ellipsis />
-                </div>
-            </div>
-
-            {/* Gambar */}
-            <div className="relative aspect-[4/3] overflow-hidden bg-background p-4">
-                <Image
-                    src={artwork.final_image_url}
-                    alt={artwork.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                />
-            </div>
-
-            {/* Meta */}
-            <div className="flex justify-between p-3">
-                <div>
-                    <h3 className="text-sm font-medium text-content leading-snug mb-2 line-clamp-1">
-                        {artwork.title}
-                    </h3>
-
-                    {/* Footer: artist + tombol komisi */}
-                    <div className="flex items-center justify-between">
-                        {artist_profile.is_open_for_commission && (
-                            <button className="text-[10px] font-medium px-2.5 py-1 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-150 shrink-0">
-                                Komisi
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Favorite Button */}
-                <Heart className="hover:text-red-500 hover:fill-red-500 transition-colors duration-150 cursor-pointer h-7 w-7" />
-            </div>
-        </article>
-    );
-}
-
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function ArtworkList() {
     // TODO: ganti dengan useState + fetch dari API saat backend siap
     const artworks = DUMMY_ARTWORKS.filter((a) => a.is_visible_on_feed);
 
+    if (artworks.length === 0) {
+        return (
+            <section className="flex flex-col items-center justify-center py-20 px-4">
+                <p className="text-content-muted text-sm">Belum ada karya yang ditampilkan.</p>
+            </section>
+        );
+    }
+
     return (
-        <section className="flex flex-col gap-4 bg-surface rounded-2xl border border-content/10">
-            {artworks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-content-muted text-sm">
-                    <p>Belum ada karya yang ditampilkan.</p>
-                </div>
-            ) : (
-                <div className="flex flex-col gap-2 px-4 md:px-20 py-4">
-                    {artworks.map((artwork) => (
-                        <div key={artwork.id}>
-                            <ArtworkCard artwork={artwork} />
-                            <hr className="border-content/10 my-4" />
-                        </div>
-                    ))}
-                </div>
-            )}
+        <section className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
+            {artworks.map((artwork) => (
+                <ArtworkCard key={artwork.id} artwork={artwork} />
+            ))}
         </section>
     );
 }

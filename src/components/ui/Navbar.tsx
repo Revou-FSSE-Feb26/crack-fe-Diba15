@@ -1,7 +1,6 @@
 "use client";
 
-import { Sun, Moon, LogIn, Menu, Search } from "lucide-react";
-import { useTrubrush } from "@/context/TrubrushContext";
+import { LogIn, Menu, Search } from "lucide-react";
 import Link from 'next/link'
 import Brand from "@/components/ui/Brand";
 
@@ -10,7 +9,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onMenuToggle }: NavbarProps) {
-    const { theme, toggleTheme } = useTrubrush();
 
     const inputClass = "w-full min-w-md max-w-xl pl-10 pr-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#33658A] dark:focus:ring-[#86BBD8] focus:border-transparent outline-none transition-all"
 
@@ -46,19 +44,6 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
             </div>
 
             <div className="flex items-center gap-3">
-                {/* Theme Toggle */}
-                <button
-                    type="button"
-                    onClick={toggleTheme}
-                    className="transition-all duration-300 text-premium hover:text-primary cursor-pointer"
-                >
-                    {theme === "dark" ? (
-                        <Sun className="w-6 h-6" />
-                    ) : (
-                        <Moon className="w-6 h-6" />
-                    )}
-                </button>
-
                 {/* Login Button */}
                 <Link href="/login" title="Login Button" className="transition-all duration-300 text-premium hover:text-primary cursor-pointer">
                     <LogIn className="w-6 h-6" />
