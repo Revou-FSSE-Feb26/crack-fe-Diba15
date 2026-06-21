@@ -71,7 +71,7 @@ export interface Artwork {
     artists_id: string;
     title: string;
     description: string | null;
-    images_url?: string[];
+    images_url: string[];
     wip_proof_url?: string;
     upload_type: UploadType;
     curation_status: CurationStatus;

@@ -30,7 +30,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
     }, []);
 
     return (
-        <aside className="flex justify-between h-full min-h-screen z-999 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">
+        <aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">
             {/* Bagian Atas: Logo & Navigasi */}
             <div>
                 <div className="mb-6 flex items-center gap-2">
