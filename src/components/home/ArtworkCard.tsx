@@ -2,12 +2,19 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link"; // Tambahkan import Link
 import { ArtworkWithRelations } from "@/types";
 import { Heart, MessageCircle, Share2, MoreHorizontal, Flag, Link as LinkIcon, BadgeCheck } from "lucide-react";
 import { AvatarInitials } from "./AvatarInitials";
+import Button from "@/components/ui/Button";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
     const { artist, artist_profile, tags } = artwork;
+
+    // Asumsi: artwork memiliki properti array `images`. 
+    // Jika tidak ada, kita fallback ke `final_image_url` tunggal.
+    const images = artwork.images_url || ["https://picsum.photos/seed/antariksa/800/600"];
+    const imageCount = images.length;
 
     // State untuk mengatur visibilitas dropdown
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -38,12 +45,9 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                                 {artist.name}
                             </p>
                             {artist_profile.is_verified && (
-                                <BadgeCheck className="w-4 h-4 text-verified" />
+                                <BadgeCheck className="w-4 h-4 text-verified shrink-0" />
                             )}
                         </div>
-                        <p className="text-xs text-content-muted">
-                            {artwork.tags.length > 0 && artwork.tags.map((tag) => tag.tag_name).join(", ")}
-                        </p>
                     </div>
                 </div>
 
@@ -63,7 +67,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                             <button
                                 className="w-full text-left px-4 py-2.5 text-sm text-content hover:bg-content/5 flex items-center gap-2.5 transition-colors"
                                 onClick={() => {
-                                    // Logika salin tautan disini
                                     setIsDropdownOpen(false);
                                 }}
                             >
@@ -73,7 +76,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                             <button
                                 className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
                                 onClick={() => {
-                                    // Logika laporan disini
                                     setIsDropdownOpen(false);
                                 }}
                             >
@@ -85,35 +87,73 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                 </div>
             </div>
 
-            {/* Gambar */}
-            <div className="relative w-full bg-background overflow-hidden aspect-[4/3]">
-                <Image
-                    src={artwork.final_image_url}
-                    alt={artwork.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-                    className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                />
-            </div>
+            {/* Gambar (Sistem Grid Dinamis) */}
+            <Link href={`/detail/${artwork.id}`} className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer">
+
+                {/* Gambar 1 (Kiri - Bisa full atau setengah layar) */}
+                {imageCount > 0 && (
+                    <div className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? 'col-span-2 row-span-2' : 'col-span-1 row-span-2'}`}>
+                        <Image
+                            src={images[0]}
+                            alt={`${artwork.title} - Image 1`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+                            className="object-cover transition-transform duration-300"
+                        />
+                    </div>
+                )}
+
+                {/* Gambar 2 (Kanan Atas / Kanan Full) */}
+                {imageCount > 1 && (
+                    <div className={`relative w-full h-full overflow-hidden ${imageCount === 2 ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1'}`}>
+                        <Image
+                            src={images[1]}
+                            alt={`${artwork.title} - Image 2`}
+                            fill
+                            sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+                            className="object-cover transition-transform duration-300"
+                        />
+                    </div>
+                )}
+
+                {/* Gambar 3 (Kanan Bawah) */}
+                {imageCount > 2 && (
+                    <div className="relative w-full h-full overflow-hidden col-span-1 row-span-1">
+                        <Image
+                            src={images[2]}
+                            alt={`${artwork.title} - Image 3`}
+                            fill
+                            sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+                            className="object-cover transition-transform duration-300"
+                        />
+
+                        {/* Overlay Jika Gambar Lebih Dari 3 */}
+                        {imageCount > 3 && (
+                            <div
+                                className="absolute inset-0 bg-black/40 backdrop-blur-[3px] flex flex-col items-center justify-center gap-1 hover:bg-black/50 transition-colors duration-200 z-10"
+                            >
+                                <span className="text-white text-xl font-bold tracking-wider">
+                                    +{imageCount - 3}
+                                </span>
+                                <span className="text-white text-xs font-medium px-2">
+                                    Tampilkan Semua
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </Link>
 
             {/* Action Bar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-content/5">
-                <div className="flex items-center gap-3">
-                    <button title="Like" className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group">
+            <div className="flex flex-col px-4 py-3 border-b border-content/5">
+                <div className="flex justify-between items-center gap-2 w-full">
+                    <Link href={`/detail/${artwork.id}`} className="text-sm font-semibold text-content">
+                        {artwork.title}
+                    </Link>
+                    <button title="Like" className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group cursor-pointer">
                         <Heart size={20} className="text-content-muted group-hover:text-red-500 group-hover:fill-red-500 transition-colors duration-150" />
                     </button>
                 </div>
-            </div>
-
-            {/* Content */}
-            <div className="px-4 py-3 space-y-2">
-                <h3 className="text-sm font-semibold text-content">
-                    {artwork.title}
-                </h3>
-                <p className="text-sm text-content-muted line-clamp-2 leading-relaxed">
-                    {artwork.description}
-                </p>
-
                 {/* Tags */}
                 {tags && tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
@@ -125,14 +165,36 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                                 #{tag.tag_name}
                             </span>
                         ))}
+                        {tags.length > 3 && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                +{tags.length - 3}
+                            </span>
+                        )}
                     </div>
                 )}
+            </div>
 
+            {/* Content */}
+            <div className="px-4 py-3 space-y-2">
                 {/* Commission Button */}
-                {artist_profile.is_open_for_commission && (
-                    <button className="w-full mt-2 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors duration-150">
-                        Pesan Komisi
-                    </button>
+                {artist_profile.is_verified ? (
+                    <div>
+                        {artist_profile.is_open_for_commission ? (
+                            <Button className="w-full text-sm">
+                                Pesan Komisi
+                            </Button>
+                        ) : (
+                            <Button variant="secondary" className="w-full text-sm pointer-events-none" disabled>
+                                Komisi Tutup
+                            </Button>
+                        )}
+                    </div>
+                ) : (
+                    <div>
+                        <Button variant="danger" className="w-full text-sm pointer-events-none" disabled>
+                            Belum Diverifikasi
+                        </Button>
+                    </div>
                 )}
             </div>
         </article>
