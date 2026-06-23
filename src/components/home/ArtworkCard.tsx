@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link"; // Tambahkan import Link
 import { ArtworkWithRelations } from "@/types";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Flag, Link as LinkIcon, BadgeCheck } from "lucide-react";
+import { Heart, MoreHorizontal, Flag, Link as LinkIcon, BadgeCheck } from "lucide-react";
 import { AvatarInitials } from "./AvatarInitials";
 import Button from "@/components/ui/Button";
 

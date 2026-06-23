@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Home, Layers, Star, MessageSquare, Settings, Users, Sun, Moon, PanelLeftClose, LogIn } from "lucide-react";
+import { Home, Sun, Moon, PanelLeftClose, LogIn } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Brand from "@/components/ui/brand/Brand";
 import { useThemeStore } from "@/store/ThemeStore";

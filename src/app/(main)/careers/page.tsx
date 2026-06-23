@@ -19,7 +19,6 @@ import {
   Mail,
   MapPin,
   ArrowRight,
-  ShieldCheck,
   Users,
   Sparkles,
 } from "lucide-react";
