@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ui/theme/ThemeProvider";
 
@@ -16,6 +16,14 @@ const fontBody = Plus_Jakarta_Sans({
   variable: "--font-body",
   display: "swap",
 });
+
+// 3. Konfigurasi Font Unbounded (Heading)
+const fontSyne = Syne({
+  subsets: ["latin"],
+  variable: "--font-syne",
+  display: "swap",
+});
+
 
 export const metadata: Metadata = {
   title: {
@@ -48,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fontOutfit.variable} ${fontBody.variable} h-full antialiased`}
+      className={`${fontOutfit.variable} ${fontBody.variable} ${fontSyne.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="h-full">

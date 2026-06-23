@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Heart, Share2, BadgeCheck, ArrowLeft, MessageCircle } from "lucide-react";
+import { Heart, Share2, BadgeCheck, ArrowLeft} from "lucide-react";
 
 // Mock Data Imports
 import artworks from "@/data/artworks";
@@ -49,7 +49,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
     return (
         <main className="min-h-screen bg-background text-content pb-20">
             {/* Top Navigation Bar */}
-            <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-content/10 px-4 py-3">
+            <nav className="sticky top-0 z-45 bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
                 <div className=" flex items-center gap-4">
                     <Link
                         href="/"

@@ -1,6 +1,5 @@
 // ============================================================
 // TruBrush — Database Types
-// Di-generate dari ERD final. Gunakan sebagai acuan tipe data
 // untuk Prisma schema, API response, maupun komponen Next.js.
 // ============================================================
 
@@ -11,30 +10,30 @@
 export type UserRole = "artist" | "client" | "admin";
 
 export type CommissionStatus =
-    | "pending"      // Menunggu konfirmasi artist
-    | "accepted"     // Artist menerima
-    | "in_progress"  // Sedang dikerjakan
-    | "revision"     // Dalam proses revisi
-    | "completed"    // Selesai & disetujui client
-    | "cancelled"    // Dibatalkan salah satu pihak
-    | "disputed";    // Dalam sengketa
+  | "pending"      // Menunggu konfirmasi artist
+  | "accepted"     // Artist menerima
+  | "in_progress"  // Sedang dikerjakan
+  | "revision"     // Dalam proses revisi
+  | "completed"    // Selesai & disetujui client
+  | "cancelled"    // Dibatalkan salah satu pihak
+  | "disputed";    // Dalam sengketa
 
 export type PaymentStatus =
-    | "unpaid"
-    | "paid"
-    | "refunded"
-    | "released";    // Dana dilepas ke artist setelah selesai
+  | "unpaid"
+  | "paid"
+  | "refunded"
+  | "released";    // Dana dilepas ke artist setelah selesai
 
 export type CurationStatus =
-    | "pending"      // Menunggu review kurator
-    | "approved"     // Lolos kurasi, tampil di feed
-    | "rejected"     // Ditolak (misal: terdeteksi AI)
-    | "flagged";     // Dilaporkan, ditahan sementara
+  | "pending"      // Menunggu review kurator
+  | "approved"     // Lolos kurasi, tampil di feed
+  | "rejected"     // Ditolak (misal: terdeteksi AI)
+  | "flagged";     // Dilaporkan, ditahan sementara
 
 export type UploadType =
-    | "original"     // Karya orisinal
-    | "fanart"       // Fan art dari IP yang ada
-    | "commission";  // Hasil dari komisi
+  | "original"     // Karya orisinal
+  | "fanart"       // Fan art dari IP yang ada
+  | "commission";  // Hasil dari komisi
 
 export type ReportTargetType = "artwork" | "profile";
 
@@ -45,98 +44,98 @@ export type ReportStatus = "pending" | "resolved" | "dismissed";
 // -----------------------------------------------------------
 
 export interface User {
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-    role: UserRole;
-    created_at: string;
-    updated_at: string;
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Profile {
-    id: string;
-    user_id: string;
-    bio: string | null;
-    is_verified: boolean;
-    approved_portfolio_count: number;
-    is_open_for_commission: boolean;
-    base_price_idr: number | null;
-    strike_count: number;
-    updated_at: string;
+  id: string;
+  user_id: string;
+  bio: string | null;
+  is_verified: boolean;
+  approved_portfolio_count: number;
+  is_open_for_commission: boolean;
+  base_price_idr: number | null;
+  strike_count: number;
+  updated_at: string;
 }
 
 export interface Artwork {
-    id: string;
-    artists_id: string;
-    title: string;
-    description: string | null;
-    images_url: string[];
-    wip_proof_url?: string;
-    upload_type: UploadType;
-    curation_status: CurationStatus;
-    is_visible_on_feed: boolean;
-    created_at: string;
+  id: string;
+  artists_id: string;
+  title: string;
+  description: string | null;
+  images_url: string[];
+  wip_proof_url?: string;
+  upload_type: UploadType;
+  curation_status: CurationStatus;
+  is_visible_on_feed: boolean;
+  created_at: string;
 }
 
 export interface Tag {
-    id: string;
-    tag_name: string;
+  id: string;
+  tag_name: string;
 }
 
 export interface ArtworkTag {
-    artwork_id: string;
-    tag_id: string;
+  artwork_id: string;
+  tag_id: string;
 }
 
 export interface Commission {
-    id: string;
-    artists_id: string;
-    client_id: string;
-    commission_title: string;
-    description: string | null;
-    price: number;
-    status: CommissionStatus;
-    payment_status: PaymentStatus;
-    created_at: string;
-    updated_at: string;
+  id: string;
+  artists_id: string;
+  client_id: string;
+  commission_title: string;
+  description: string | null;
+  price: number;
+  status: CommissionStatus;
+  payment_status: PaymentStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CommissionProgress {
-    id: string;
-    commission_id: string;
-    sketch_url: string | null;
-    sketch_approved: boolean;
-    final_artwork_url: string | null;
-    final_artwork_approved: boolean;
-    updated_at: string;
+  id: string;
+  commission_id: string;
+  sketch_url: string | null;
+  sketch_approved: boolean;
+  final_artwork_url: string | null;
+  final_artwork_approved: boolean;
+  updated_at: string;
 }
 
 export interface Revision {
-    id: string;
-    user_id: string;
-    commission_id: string;
-    comment: string;
-    created_at: string;
+  id: string;
+  user_id: string;
+  commission_id: string;
+  comment: string;
+  created_at: string;
 }
 
 export interface DisputeLog {
-    id: string;
-    commission_id: string;
-    is_disputed: boolean;
-    reason: string;
-    mediator_id: string | null;
-    created_at: string;
+  id: string;
+  commission_id: string;
+  is_disputed: boolean;
+  reason: string;
+  mediator_id: string | null;
+  created_at: string;
 }
 
 export interface Report {
-    id: string;
-    reporter_id: string;
-    target_type: ReportTargetType;
-    target_id: string;
-    reason: string;
-    status: ReportStatus;
-    created_at: string;
+  id: string;
+  reporter_id: string;
+  target_type: ReportTargetType;
+  target_id: string;
+  reason: string;
+  status: ReportStatus;
+  created_at: string;
 }
 
 // -----------------------------------------------------------
@@ -146,23 +145,23 @@ export interface Report {
 
 /** Artwork lengkap dengan data artist dan tags-nya — untuk feed & detail page */
 export interface ArtworkWithRelations extends Artwork {
-    artist: Pick<User, "id" | "name">;
-    artist_profile: Pick<Profile, "is_verified" | "is_open_for_commission">;
-    tags: Tag[];
+  artist: Pick<User, "id" | "name">;
+  artist_profile: Pick<Profile, "is_verified" | "is_open_for_commission">;
+  tags: Tag[];
 }
 
 /** Profile lengkap dengan data user — untuk halaman profil artist */
 export interface ProfileWithUser extends Profile {
-    user: Pick<User, "id" | "name" | "email" | "role">;
+  user: Pick<User, "id" | "name" | "email" | "role">;
 }
 
 /** Komisi lengkap dengan semua relasi — untuk commission detail page */
 export interface CommissionWithRelations extends Commission {
-    artist: Pick<User, "id" | "name">;
-    client: Pick<User, "id" | "name">;
-    progress: CommissionProgress | null;
-    revisions: Revision[];
-    dispute: DisputeLog | null;
+  artist: Pick<User, "id" | "name">;
+  client: Pick<User, "id" | "name">;
+  progress: CommissionProgress | null;
+  revisions: Revision[];
+  dispute: DisputeLog | null;
 }
 
 // -----------------------------------------------------------
@@ -171,16 +170,17 @@ export interface CommissionWithRelations extends Commission {
 // -----------------------------------------------------------
 
 export interface ApiSuccess<T> {
-    success: true;
-    data: T;
+  success: true;
+  data: T;
 }
 
 export interface ApiError {
-    success: false;
-    message: string;
-    code?: string;
+  success: false;
+  message: string;
+  code?: string;
 }
 
+// Digunakan sebagai tipe return dari API route / Server Action
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 
 // -----------------------------------------------------------
@@ -188,11 +188,11 @@ export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 // -----------------------------------------------------------
 
 export interface PaginatedResponse<T> {
-    data: T[];
-    total: number;
-    page: number;
-    per_page: number;
-    total_pages: number;
+  data: T[];
+  total: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
 }
 
 // -----------------------------------------------------------
@@ -200,10 +200,10 @@ export interface PaginatedResponse<T> {
 // -----------------------------------------------------------
 
 export interface FeedFilter {
-    tag_id?: string;
-    curation_status?: CurationStatus;
-    upload_type?: UploadType;
-    sort_by?: "latest" | "popular";
-    page?: number;
-    per_page?: number;
+  tag_id?: string;
+  curation_status?: CurationStatus;
+  upload_type?: UploadType;
+  sort_by?: "latest" | "popular";
+  page?: number;
+  per_page?: number;
 }

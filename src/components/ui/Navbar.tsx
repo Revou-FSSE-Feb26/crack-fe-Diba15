@@ -1,54 +1,101 @@
 "use client";
 
-import { LogIn, Menu, Search } from "lucide-react";
+import { LogIn, Search, X, PanelLeftOpen } from "lucide-react";
 import Link from 'next/link'
-import Brand from "@/components/ui/Brand";
+import NavbarBrand from "@/components/ui/brand/NavbarBrand";
+import { useState, useEffect, useRef } from "react";
 
 interface NavbarProps {
-    onMenuToggle: () => void;
+  onMenuToggle: () => void;
 }
 
 export default function Navbar({ onMenuToggle }: NavbarProps) {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-    const inputClass = "w-full min-w-md max-w-xl pl-10 pr-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#33658A] dark:focus:ring-[#86BBD8] focus:border-transparent outline-none transition-all"
+  const inputClass = "w-full px-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] rounded-lg outline-none"
 
-    return (
-        <nav className={"flex justify-between items-center py-4 px-8"}>
-            <div className="flex gap-4">
-                {/* Sidebar Button */}
-                <button
-                    type="button"
-                    onClick={onMenuToggle}
-                    aria-label="Toggle sidebar"
-                    className="transition-all duration-300 text-primary hover:text-primary cursor-pointer"
-                >
-                    <Menu className="w-6 h-6" />
-                </button>
+  // Auto-focus input saat search dibuka
+  useEffect(() => {
+    if (isSearchOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isSearchOpen]);
 
-                {/* Brand Name */}
-                <Brand />
-            </div>
+  // Tutup search ketika klik di luar area
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    if (isSearchOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSearchOpen]);
 
-            {/* TODO: Search Bar */}
-            <div className="hidden md:flex items-center gap-4">
-                <form className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="w-4 h-4 text-gray-500" />
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        className={inputClass}
-                    />
-                </form>
-            </div>
+  return (
+    <nav className="grid grid-cols-3 items-center py-4 px-8">
+      {/* Kiri: Sidebar toggle + Search */}
+      <div className="flex gap-2 items-center">
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          title="Open sidebar"
+          aria-label="Toggle sidebar"
+          className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer shrink-0"
+        >
+          <PanelLeftOpen className="w-6 h-6 text-primary" />
+        </button>
 
-            <div className="flex items-center gap-3">
-                {/* Login Button */}
-                <Link href="/login" title="Login Button" className="transition-all duration-300 text-premium hover:text-primary cursor-pointer">
-                    <LogIn className="w-6 h-6" />
-                </Link>
-            </div>
-        </nav>
-    )
+        {/* Search — hanya tampil di desktop */}
+        <div ref={searchContainerRef} className="hidden md:flex items-center gap-2">
+          {/* Toggle button: ikon Search / X */}
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen((prev) => !prev)}
+            title={isSearchOpen ? "Close search" : "Open search"}
+            aria-label={isSearchOpen ? "Close search" : "Open search"}
+            className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer shrink-0"
+          >
+            {isSearchOpen
+              ? <X className="w-5 h-5 text-primary" />
+              : <Search className="w-5 h-5 text-primary" />}
+          </button>
+
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${isSearchOpen ? "w-64 opacity-100" : "w-0 opacity-0"
+              }`}
+          >
+            <form onSubmit={(e) => e.preventDefault()}>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search..."
+                className={inputClass}
+              />
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Tengah: Brand — selalu center karena berada di kolom tengah grid */}
+      <div className="flex justify-center text-center">
+        <NavbarBrand />
+      </div>
+
+      {/* Kanan: Login button */}
+      <div className="flex justify-end items-center gap-3">
+        <Link
+          href="/login"
+          title="Login Button"
+          className="hidden md:flex rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+        >
+          <LogIn className="w-6 h-6 text-primary" />
+        </Link>
+      </div>
+    </nav>
+  )
 }

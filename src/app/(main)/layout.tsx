@@ -13,7 +13,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
     return (
         <div className="min-h-full relative">
-            <header className="sticky top-0 bg-background backdrop-blur-md z-50">
+            <header className="sticky top-0 bg-surface backdrop-blur-md z-40">
                 <Navbar onMenuToggle={handleToggleSidebar} />
             </header>
 

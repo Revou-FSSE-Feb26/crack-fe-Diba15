@@ -64,6 +64,10 @@
   --color-verified: var(--status-verified);
   --color-premium: var(--status-premium);
   --color-danger: var(--status-danger);
+
+  --font-body: var(--font-body);
+  --font-outfit: var(--font-outfit);
+  --font-syne: var(--font-syne);
 }
 
 /* Base layer default */
