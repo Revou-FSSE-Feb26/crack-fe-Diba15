@@ -14,7 +14,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const inputClass = "w-full px-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] rounded-lg outline-none"
+  const inputClass = "w-full max-w-sm md:max-w-lg px-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] rounded-lg outline-none"
 
   // Auto-focus input saat search dibuka
   useEffect(() => {

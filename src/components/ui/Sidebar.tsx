@@ -102,10 +102,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         )}
 
         <footer className="border-t border-slate-200/70 pt-4 text-sm text-content-muted dark:border-slate-700/60">
-          <div className="mb-3 flex flex-wrap gap-2 text-xs leading-6">
-            <Link href="#" className="transition-colors hover:text-primary">
-              Announcements
-            </Link>
+          <div className="mb-3 flex flex-wrap gap-2 text-xs max-w-50">
             <Link href="#" className="transition-colors hover:text-primary">
               Help
             </Link>
@@ -113,10 +110,13 @@ export default function Sidebar({ onClose }: SidebarProps) {
               Privacy
             </Link>
             <Link href="#" className="transition-colors hover:text-primary">
+              About TruBrush
+            </Link>
+            <Link href="#" className="transition-colors hover:text-primary">
               Careers
             </Link>
           </div>
-          <p>© TruBrush</p>
+          <p className="font-syne">© TruBrush</p>
         </footer>
       </div>
     </aside>
