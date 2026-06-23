@@ -12,12 +12,12 @@ interface SidebarProps {
 }
 
 const menuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
-  { label: "Dashboard", href: "#", icon: Home },
-  { label: "Collections", href: "#", icon: Layers },
-  { label: "Featured", href: "#", icon: Star },
-  { label: "Messages", href: "#", icon: MessageSquare },
-  { label: "Teams", href: "#", icon: Users },
-  { label: "Settings", href: "#", icon: Settings },
+  { label: "Beranda", href: "/", icon: Home },
+  // { label: "Collections", href: "#", icon: Layers },
+  // { label: "Featured", href: "#", icon: Star },
+  // { label: "Messages", href: "#", icon: MessageSquare },
+  // { label: "Teams", href: "#", icon: Users },
+  // { label: "Settings", href: "#", icon: Settings },
 ];
 
 export default function Sidebar({ onClose }: SidebarProps) {
@@ -103,16 +103,16 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
         <footer className="border-t border-slate-200/70 pt-4 text-sm text-content-muted dark:border-slate-700/60">
           <div className="mb-3 flex flex-wrap gap-2 text-xs max-w-50">
-            <Link href="#" className="transition-colors hover:text-primary">
+            <Link href="/help" className="transition-colors hover:text-primary">
               Help
             </Link>
-            <Link href="#" className="transition-colors hover:text-primary">
+            <Link href="/privacy" className="transition-colors hover:text-primary">
               Privacy
             </Link>
-            <Link href="#" className="transition-colors hover:text-primary">
+            <Link href="/about" className="transition-colors hover:text-primary">
               About TruBrush
             </Link>
-            <Link href="#" className="transition-colors hover:text-primary">
+            <Link href="/careers" className="transition-colors hover:text-primary">
               Careers
             </Link>
           </div>
