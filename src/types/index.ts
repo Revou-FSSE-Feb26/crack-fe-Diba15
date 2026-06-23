@@ -39,6 +39,8 @@ export type ReportTargetType = "artwork" | "profile";
 
 export type ReportStatus = "pending" | "resolved" | "dismissed";
 
+export type Theme = "light" | "dark";
+
 // -----------------------------------------------------------
 // Core Tables
 // -----------------------------------------------------------
@@ -206,4 +208,14 @@ export interface FeedFilter {
   sort_by?: "latest" | "popular";
   page?: number;
   per_page?: number;
+}
+
+// -----------------------------------------------------------
+// Theme
+// -----------------------------------------------------------
+
+export interface ThemeState {
+    theme: Theme;
+    toggleTheme: () => void;
+    setTheme: (theme: Theme) => void;
 }

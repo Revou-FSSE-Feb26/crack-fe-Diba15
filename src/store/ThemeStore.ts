@@ -1,29 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export type Theme = "light" | "dark";
-
-interface ThemeState {
-    theme: Theme;
-    toggleTheme: () => void;
-    setTheme: (theme: Theme) => void;
-}
+import { Theme, ThemeState } from "@/types";
 
 export const useThemeStore = create<ThemeState>()(
-    persist(
-        (set, get) => ({
-            theme: "light",
-            
-            toggleTheme: () => {
-                const currentTheme = get().theme;
-                const newTheme = currentTheme === "light" ? "dark" : "light";
-                set({ theme: newTheme });
-            },
+  persist(
+    (set, get) => ({
+      theme: "light",
 
-            setTheme: (theme: Theme) => set({ theme }),
-        }),
-        {
-            name: "trubrush-theme",
-        }
-    )
+      toggleTheme: () => {
+        const currentTheme = get().theme;
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+        set({ theme: newTheme });
+      },
+
+      setTheme: (theme: Theme) => set({ theme }),
+    }),
+    {
+      name: "trubrush-theme",
+    }
+  )
 );
