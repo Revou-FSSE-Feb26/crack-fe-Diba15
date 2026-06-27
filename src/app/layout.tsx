@@ -55,7 +55,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       className={`${fontOutfit.variable} ${fontBody.variable} ${fontSyne.variable} h-full antialiased`}
       suppressHydrationWarning
     >

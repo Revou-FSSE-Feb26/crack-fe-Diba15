@@ -1,16 +1,13 @@
-export function AvatarInitials({
+import { getInitials } from "@/utils";
+
+export default function AvatarInitials({
     name,
     className = "",
 }: {
     name: string;
     className?: string;
 }) {
-    const initials = name
-        .split(" ")
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase();
+    const initials = getInitials(name);
 
     return (
         <span
