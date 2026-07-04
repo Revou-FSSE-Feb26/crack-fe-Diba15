@@ -8,20 +8,20 @@ import { Heart, MoreHorizontal, Flag, Link as LinkIcon, BadgeCheck } from "lucid
 import AvatarInitials from "./AvatarInitials";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
+import { useToastStore } from "@/store/ToastStore";
+import { useModalStore } from "@/store/ModalStore";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
   const { artist, artist_profile, tags } = artwork;
+  const { addToast } = useToastStore();
+  const { openModal } = useModalStore();
 
-  // Asumsi: artwork memiliki properti array `images`.
-  // Jika tidak ada, kita fallback ke `final_image_url` tunggal.
   const images = artwork.images_url || ["https://picsum.photos/seed/antariksa/800/600"];
   const imageCount = images.length;
 
-  // State untuk mengatur visibilitas dropdown
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Effect untuk menutup dropdown saat user mengklik area di luar menu
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -33,6 +33,28 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleFavorite = (artName: string) => {
+    addToast({
+      message: `Berhasil ditambahkan ke favorite: ${artName}.`,
+      type: "success"
+    })
+  }
+
+  const handleReport = (artName: string) => {
+    openModal({
+      type: "confirm",
+      variant: "danger",
+      title: "Laporkan Karya",
+      description: `Apakah Anda yakin ingin melaporkan karya: ${artName}?`,
+      onConfirm: () => {
+        addToast({
+          message: `Karya: ${artName} berhasil dilaporkan.`,
+          type: "warning"
+        })
+      }
+    })
+  }
 
   return (
     <article className="bg-surface rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -62,7 +84,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
             <MoreHorizontal size={18} className="text-content-muted" />
           </button>
 
-          {/* Dropdown Menu */}
           {isDropdownOpen && (
             <div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-10 overflow-hidden py-1">
               <button
@@ -77,6 +98,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
               <button
                 className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
                 onClick={() => {
+                  handleReport(artwork.title);
                   setIsDropdownOpen(false);
                 }}
               >
@@ -88,10 +110,8 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
         </div>
       </div>
 
-      {/* Gambar (Sistem Grid Dinamis) */}
+      {/* Image Grid */}
       <Link href={`/detail/${artwork.id}`} className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer">
-
-        {/* Gambar 1 (Kiri - Bisa full atau setengah layar) */}
         {imageCount > 0 && (
           <div className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? 'col-span-2 row-span-2' : 'col-span-1 row-span-2'}`}>
             <Image
@@ -104,7 +124,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
           </div>
         )}
 
-        {/* Gambar 2 (Kanan Atas / Kanan Full) */}
         {imageCount > 1 && (
           <div className={`relative w-full h-full overflow-hidden ${imageCount === 2 ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1'}`}>
             <Image
@@ -117,7 +136,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
           </div>
         )}
 
-        {/* Gambar 3 (Kanan Bawah) */}
         {imageCount > 2 && (
           <div className="relative w-full h-full overflow-hidden col-span-1 row-span-1">
             <Image
@@ -128,11 +146,8 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
               className="object-cover transition-transform duration-300"
             />
 
-            {/* Overlay Jika Gambar Lebih Dari 3 */}
             {imageCount > 3 && (
-              <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-[3px] flex flex-col items-center justify-center gap-1 hover:bg-black/50 transition-colors duration-200 z-10"
-              >
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[3px] flex flex-col items-center justify-center gap-1 hover:bg-black/50 transition-colors duration-200 z-10">
                 <span className="text-white text-xl font-bold tracking-wider">
                   +{imageCount - 3}
                 </span>
@@ -151,7 +166,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
           <Link href={`/detail/${artwork.id}`} className="text-sm font-semibold text-content">
             {artwork.title}
           </Link>
-          <button title="Like" className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group cursor-pointer">
+          <button onClick={() => handleFavorite(artwork.title)} title="Like" className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group cursor-pointer">
             <Heart size={20} className="text-content-muted group-hover:text-red-500 group-hover:fill-red-500 transition-colors duration-150" />
           </button>
         </div>
@@ -159,7 +174,12 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {tags.slice(0, 3).map((tag) => (
-              <Pill key={tag.id}>{tag.tag_name}</Pill>
+              <Pill
+                key={tag.id}
+                link={`/search/${encodeURIComponent(`tags:"${tag.tag_name}"`)}`}
+              >
+                {tag.tag_name}
+              </Pill>
             ))}
             {tags.length > 3 && (
               <Pill>+{tags.length - 3}</Pill>
@@ -170,7 +190,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 
       {/* Content */}
       <div className="px-4 py-3 space-y-2">
-        {/* Commission Button */}
         {artist_profile.is_verified ? (
           <div>
             {artist_profile.is_open_for_commission ? (

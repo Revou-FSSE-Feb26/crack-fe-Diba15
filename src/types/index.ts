@@ -210,6 +210,14 @@ export interface FeedFilter {
   per_page?: number;
 }
 
+export type SearchType = "title" | "tags" | "artists";
+
+export interface ParsedQuery {
+  type: SearchType;
+  value: string;
+  raw: string;
+}
+
 // -----------------------------------------------------------
 // Theme
 // -----------------------------------------------------------

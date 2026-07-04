@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Heart, Share2, BadgeCheck, ArrowLeft } from "lucide-react";
 
-// Mock Data Imports
 import artworks from "@/data/artworks";
 import users from "@/data/users";
 import profiles from "@/data/profiles";
@@ -16,15 +15,12 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
   const resolvedParams = await params;
   const id: string = resolvedParams.id;
 
-  // 1. Cari artwork berdasarkan ID
   const rawArtwork = artworks.find((a) => a.id === id);
 
-  // Jika tidak ditemukan, kembalikan halaman 404 bawaan Next.js
   if (!rawArtwork) {
     notFound();
   }
 
-  // 2. Petakan relasi data secara langsung (tanpa state/effect)
   const artist = users.find((user) => user.id === rawArtwork.artists_id);
   const artist_profile = profiles.find((profile) => profile.user_id === artist?.id);
 
@@ -34,10 +30,9 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
 
   const artworkTagList = tags.filter((tag) => artworkTagIds.includes(tag.id));
 
-  // 3. Bentuk objek final
   const artwork: ArtworkWithRelations = {
     ...rawArtwork,
-    images_url: rawArtwork.images_url || ["https://picsum.photos/seed/pasarmalam/800/600"], // Pastikan ada array gambar
+    images_url: rawArtwork.images_url || ["https://picsum.photos/seed/pasarmalam/800/600"],
     artist: { id: artist?.id as string, name: artist?.name || "Unknown Artist" },
     artist_profile: {
       is_verified: artist_profile?.is_verified ?? false,
@@ -64,7 +59,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-          {/* KOLOM KIRI: Galeri Gambar */}
+          {/* Left column: Image gallery */}
           <div className="lg:col-span-2 space-y-4">
             {artwork.images_url.length > 0 ? (
               artwork.images_url.map((imgUrl, index) => (
@@ -90,7 +85,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
             )}
           </div>
 
-          {/* KOLOM KANAN: Informasi Detail (Sticky) */}
+          {/* Right column: Detail info (sticky) */}
           <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
 
             {/* Artist Info */}
@@ -124,13 +119,13 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
                 </p>
               </div>
 
-              {/* Tags */}
+              {/* Tags — linked to search page */}
               {artwork.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {artwork.tags.map((tag) => (
                     <Link
                       key={tag.id}
-                      href={`/tag/${tag.tag_name}`}
+                      href={`/search/${encodeURIComponent(`tags:"${tag.tag_name}"`)}`}
                       className="px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full hover:bg-primary/20 transition-colors"
                     >
                       #{tag.tag_name}

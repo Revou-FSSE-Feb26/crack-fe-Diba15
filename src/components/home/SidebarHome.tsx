@@ -6,8 +6,6 @@ import FeaturedArtistCard from "@/components/home/FeaturedArtist";
 import Divider from "@/components/ui/Divider";
 import SectionLabel from "@/components/ui/SectionLabel";
 
-// ── Dummy Data ────────────────────────────────────────────────────────────────
-
 const DUMMY_FEATURED_ARTISTS: ProfileWithUser[] = [
   {
     id: "p-001",
@@ -58,8 +56,6 @@ const DUMMY_POPULAR_TAGS = [
   { id: "t-010", tag_name: "Cover Art" },
 ];
 
-// ── Main Component ────────────────────────────────────────────────────────────
-
 export default function SidebarHome() {
   return (
     <aside id="sidebar-home" className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)]">
@@ -81,6 +77,7 @@ export default function SidebarHome() {
           {DUMMY_POPULAR_TAGS.map((tag) => (
             <Pill
               key={tag.id}
+              link={`/search/${encodeURIComponent(`tags:"${tag.tag_name}"`)}`}
               className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-accent/15 text-primary hover:bg-accent/30 transition-colors duration-150"
             >
               #{tag.tag_name}
