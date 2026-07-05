@@ -94,7 +94,7 @@ function ModalContent() {
   return (
     <div
       className={[
-        "fixed inset-0 z-[9998] flex items-center justify-center p-4",
+        "fixed inset-0 z-9998 flex items-center justify-center p-4",
         "transition-opacity duration-200",
         visible ? "opacity-100" : "opacity-0",
       ].join(" ")}
