@@ -1,6 +1,6 @@
 "use client";
 
-import { LogIn, Search, X, PanelLeftOpen, ChevronDown, PlusCircle } from "lucide-react";
+import { LogIn, Search, X, PanelLeftOpen, ChevronDown, PlusCircle, LayoutDashboard } from "lucide-react";
 import Link from 'next/link'
 import NavbarBrand from "@/components/ui/brand/NavbarBrand";
 import { useState, useEffect, useRef } from "react";
@@ -17,7 +17,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { isArtist, isClient, logout, user } = useUserStore();
+  const { isArtist, isClient, isAdmin, isCurator, logout, user } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -109,6 +109,16 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
             Post Art
           </Link>
         )}
+
+        {mounted && (isAdmin() || isCurator()) && (
+          <Link
+            href="/dashboard"
+            className="hidden md:inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-background shadow-sm transition-colors hover:bg-primary-hover"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
+        )}
         
       </div>
 
@@ -136,7 +146,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
 
         {/* Right: Login button */}
         <div className="flex justify-end items-center gap-3">
-          {mounted && (isArtist() || isClient()) ? (
+          {mounted && (isArtist() || isClient() || isAdmin() || isCurator()) ? (
             <div className="hidden md:flex">
               <div className="relative">
                 <button

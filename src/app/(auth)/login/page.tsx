@@ -25,9 +25,15 @@ export default function Login() {
   const router = useRouter();
 
   const onSubmit = async (data: LoginForm) => {
-    login(data.email, data.password);
+    const result = login(data.email, data.password);
+    if (!result.success) return;
 
-    router.push("/");
+    const currentUser = useUserStore.getState().user;
+    router.push(
+      currentUser?.role === "admin" || currentUser?.role === "curator"
+        ? "/dashboard"
+        : "/",
+    );
   }
 
   return (
@@ -114,9 +120,10 @@ export default function Login() {
           <div>
             <p className="text-xs">client: dimas@example.com/client123</p>
             <p className="text-xs">artists: rina@example.com/artist123</p>
+            <p className="text-xs">curator: hendra@trubrush.com/curator123</p>
+            <p className="text-xs">admin: admin@trubrush.com/admin123</p>
           </div>
           <Link href="/signup" className="text-sm text-content hover:text-content-muted transition-colors">Don&apos;t have an account? Register</Link>
-          <Link href="/staff-login" className="text-sm text-content hover:text-content-muted transition-colors">Staff login</Link>
         </div>
       </section>
     </div>
