@@ -10,11 +10,16 @@ import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useToastStore } from "@/store/ToastStore";
 import { useModalStore } from "@/store/ModalStore";
+import { useFavoriteStore } from "@/store/FavoriteStore";
+import { useUserStore } from "@/store/UserStore";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
   const { artist, artist_profile, tags } = artwork;
   const { addToast } = useToastStore();
   const { openModal } = useModalStore();
+  const { user, isAuthenticated } = useUserStore();
+  const { isFavorite, toggleFavorite } = useFavoriteStore();
+  const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
 
   const images = artwork.images_url || ["https://picsum.photos/seed/antariksa/800/600"];
   const imageCount = images.length;
@@ -34,11 +39,23 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
     };
   }, []);
 
-  const handleFavorite = (artName: string) => {
+  const handleFavorite = () => {
+    if (!isAuthenticated || !user) {
+      addToast({
+        message: "Login terlebih dahulu untuk menambahkan favorite.",
+        type: "warning",
+      });
+      return;
+    }
+
+    const addedToFavorite = toggleFavorite(user.id, artwork.id);
+
     addToast({
-      message: `Berhasil ditambahkan ke favorite: ${artName}.`,
-      type: "success"
-    })
+      message: addedToFavorite
+        ? `Berhasil ditambahkan ke favorite: ${artwork.title}.`
+        : `Dihapus dari favorite: ${artwork.title}.`,
+      type: addedToFavorite ? "success" : "info",
+    });
   }
 
   const handleReport = (artName: string) => {
@@ -166,8 +183,20 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
           <Link href={`/detail/${artwork.id}`} className="text-sm font-semibold text-content">
             {artwork.title}
           </Link>
-          <button onClick={() => handleFavorite(artwork.title)} title="Like" className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group cursor-pointer">
-            <Heart size={20} className="text-content-muted group-hover:text-red-500 group-hover:fill-red-500 transition-colors duration-150" />
+          <button
+            onClick={handleFavorite}
+            title={isArtworkFavorite ? "Hapus dari favorite" : "Tambah ke favorite"}
+            aria-pressed={isArtworkFavorite}
+            className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group cursor-pointer"
+          >
+            <Heart
+              size={20}
+              className={`transition-colors duration-150 ${
+                isArtworkFavorite
+                  ? "text-red-500 fill-red-500"
+                  : "text-content-muted group-hover:text-red-500 group-hover:fill-red-500"
+              }`}
+            />
           </button>
         </div>
         {/* Tags */}

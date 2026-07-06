@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Heart, Share2, BadgeCheck, ArrowLeft } from "lucide-react";
+import { Share2, BadgeCheck, ArrowLeft } from "lucide-react";
+import FavoriteButton from "@/components/detail/FavoriteButton";
 
 import artworks from "@/data/artworks";
 import users from "@/data/users";
@@ -23,7 +24,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
 
   const artist = users.find((user) => user.id === rawArtwork.artists_id);
   const artist_profile = profiles.find((profile) => profile.user_id === artist?.id);
-
+  
   const artworkTagIds = artworkTags
     .filter((at) => at.artwork_id === rawArtwork.id)
     .map((at) => at.tag_id);
@@ -138,9 +139,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
 
               {/* Action Buttons */}
               <div className="flex items-center gap-4">
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors font-medium">
-                  <Heart size={20} /> Suka
-                </button>
+                <FavoriteButton artworkId={artwork.id} artworkTitle={artwork.title} />
                 <button title="Share" className="p-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors">
                   <Share2 size={20} />
                 </button>

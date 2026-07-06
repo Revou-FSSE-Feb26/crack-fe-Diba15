@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Home, Sun, Moon, PanelLeftClose, LogIn } from "lucide-react";
+import { Home, Sun, Moon, PanelLeftClose, LogIn, Heart, User, Briefcase, LogOut, ChevronUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Brand from "@/components/ui/brand/Brand";
 import { useThemeStore } from "@/store/ThemeStore";
+import { useUserStore } from "@/store/UserStore";
 
 interface SidebarProps {
   onClose: () => void;
@@ -20,9 +21,20 @@ const menuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
   // { label: "Settings", href: "#", icon: Settings },
 ];
 
+const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
+  { label: "Favorites", href: "/favorite", icon: Heart },
+  { label: "Commisions", href: "#", icon: Briefcase },
+  { label: "Profil", href: "/profile", icon: User },
+];
+
 export default function Sidebar({ onClose }: SidebarProps) {
   const { theme, toggleTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
+  const { isAuthenticated, user, logout } = useUserStore();
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+  // Jika isAuth maka satukan menu user dengan menu default
+  const menu = isAuthenticated ? [...menuItems, ...userMenuItems] : menuItems;
 
   // useEffect digunakan untuk mencegah hydration mismatch error di Next.js
   useEffect(() => {
@@ -49,7 +61,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         </div>
 
         <nav className="space-y-2">
-          {menuItems.map((item) => {
+          {menu.map((item) => {
             const Icon = item.icon;
             return (
               <Link
@@ -68,13 +80,50 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Bagian Bawah: Toggle Tema & Footer */}
       <div className="flex flex-col">
         {/* Login button — hanya tampil di mobile */}
-        <Link
-          href="/login"
-          className="group md:hidden mb-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-        >
-          <LogIn className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
-          Login
-        </Link>
+        {!isAuthenticated ? (
+          <Link
+            href="/login"
+            className="group md:hidden mb-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+          >
+            <LogIn className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
+            Login
+          </Link>
+        ) : (
+          <div className="group md:hidden mb-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary">
+            <div className="relative w-full">
+              <button
+                type="button"
+                onClick={() => setProfileMenuOpen((prev) => !prev)}
+                className="w-full flex justify-between items-center gap-3"
+              >
+                <span>{user?.name}</span>
+                <ChevronUp className={`h-5 w-5 transition-all duration-200 group-hover:text-primary ${profileMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {profileMenuOpen && (
+                <div className="absolute bottom-full left-0 mb-2 w-full rounded-2xl border border-slate-200/70 bg-surface shadow-lg dark:border-slate-700/60">
+                  <button
+                    type="button"
+                    onClick={() => setProfileMenuOpen(false)}
+                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 dark:hover:bg-primary/10"
+                  >
+                    <span>{user?.role}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-red-500 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950"
+                  >
+                    <LogOut className="h-5 w-5 rotate-180" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {mounted && (
           <button

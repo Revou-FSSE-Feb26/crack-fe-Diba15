@@ -7,7 +7,7 @@
 // Enums
 // -----------------------------------------------------------
 
-export type UserRole = "artist" | "client" | "admin";
+export type UserRole = "artist" | "client" | "admin" | "curator";
 
 export type CommissionStatus =
   | "pending"      // Menunggu konfirmasi artist

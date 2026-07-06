@@ -18,7 +18,11 @@ export default function ThemeProvider() {
             setTheme("dark");
         }
 
-        setIsMounted(true);
+        const timer = setTimeout(() => {
+            setIsMounted(true);
+        }, 0);
+
+        return () => clearTimeout(timer);
     }, [setTheme]);
 
     useEffect(() => {
