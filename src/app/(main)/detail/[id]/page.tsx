@@ -1,51 +1,56 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Share2, BadgeCheck, ArrowLeft } from "lucide-react";
-import FavoriteButton from "@/components/detail/FavoriteButton";
+import { useParams } from "next/navigation";
+import { Share2, BadgeCheck, ArrowLeft, ImageIcon } from "lucide-react";
 
-import artworks from "@/data/artworks";
 import users from "@/data/users";
 import profiles from "@/data/profiles";
-import tags from "@/data/tags";
-import artworkTags from "@/data/artworkTags";
-import { ArtworkWithRelations, Tag } from "@/types";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import CommissionButton from "@/components/detail/CommissionButton";
+import FavoriteButton from "@/components/detail/FavoriteButton";
+import { useArtworkStore } from "@/store/ArtworkStore";
+import { buildArtworkWithRelations } from "@/utils/search";
 
-export default async function Detail({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params;
-  const id: string = resolvedParams.id;
+export default function Detail() {
+  const params = useParams();
+  const id = params.id as string;
+  const { artworks, artworkTags, tags } = useArtworkStore();
+  const artwork = buildArtworkWithRelations(artworks, artworkTags, tags)
+    .find((item) => item.id === id);
 
-  const rawArtwork = artworks.find((a) => a.id === id);
+  if (!artwork) {
+    return (
+      <main className="min-h-screen bg-background text-content pb-20">
+        <nav className="sticky top-0 z-45 bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 p-2 hover:bg-content/5 rounded-full transition-colors duration-200"
+          >
+            <ArrowLeft size={20} />
+            <span className="text-sm font-medium">Kembali</span>
+          </Link>
+        </nav>
 
-  if (!rawArtwork) {
-    notFound();
+        <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+          <div className="bg-surface border border-content/10 rounded-2xl p-8">
+            <ImageIcon className="w-10 h-10 text-content-muted mx-auto mb-3" />
+            <h1 className="text-2xl font-bold text-content">Artwork tidak ditemukan</h1>
+            <p className="mt-2 text-sm text-content-muted">
+              Karya ini belum tersedia atau sudah tidak ada di daftar artwork.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
   }
 
-  const artist = users.find((user) => user.id === rawArtwork.artists_id);
-  const artist_profile = profiles.find((profile) => profile.user_id === artist?.id);
-  
-  const artworkTagIds = artworkTags
-    .filter((at) => at.artwork_id === rawArtwork.id)
-    .map((at) => at.tag_id);
-
-  const artworkTagList = tags.filter((tag) => artworkTagIds.includes(tag.id));
-
-  const artwork: ArtworkWithRelations = {
-    ...rawArtwork,
-    images_url: rawArtwork.images_url || ["https://picsum.photos/seed/pasarmalam/800/600"],
-    artist: { id: artist?.id as string, name: artist?.name || "Unknown Artist" },
-    artist_profile: {
-      is_verified: artist_profile?.is_verified ?? false,
-      is_open_for_commission: artist_profile?.is_open_for_commission ?? false,
-    },
-    tags: artworkTagList as Tag[],
-  };
+  const artist = users.find((user) => user.id === artwork.artists_id);
+  const artistProfile = profiles.find((profile) => profile.user_id === artist?.id);
 
   return (
     <main className="min-h-screen bg-background text-content pb-20">
-      {/* Top Navigation Bar */}
       <nav className="sticky top-0 z-45 bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
         <div className=" flex items-center gap-4">
           <Link
@@ -60,13 +65,11 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-
-          {/* Left column: Image gallery */}
           <div className="lg:col-span-2 space-y-4">
             {artwork.images_url.length > 0 ? (
               artwork.images_url.map((imgUrl, index) => (
                 <div
-                  key={index}
+                  key={`${imgUrl}-${index}`}
                   className="relative w-full bg-content/5 rounded-xl overflow-hidden shadow-sm"
                 >
                   <Image
@@ -87,10 +90,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
             )}
           </div>
 
-          {/* Right column: Detail info (sticky) */}
           <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
-
-            {/* Artist Info */}
             <div className="bg-surface p-5 rounded-xl border border-content/5 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <AvatarInitials name={artwork.artist.name} className="w-12 h-12 text-lg" />
@@ -111,12 +111,11 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
                   artworkTitle={artwork.title}
                   artistId={artwork.artist.id}
                   artistName={artwork.artist.name}
-                  basePrice={artist_profile?.base_price_idr ?? null}
+                  basePrice={artistProfile?.base_price_idr ?? null}
                 />
               )}
             </div>
 
-            {/* Artwork Detail */}
             <div className="space-y-4">
               <div>
                 <h1 className="text-2xl font-bold mb-2">{artwork.title}</h1>
@@ -125,7 +124,6 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
                 </p>
               </div>
 
-              {/* Tags — linked to search page */}
               {artwork.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {artwork.tags.map((tag) => (
@@ -142,7 +140,6 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
 
               <hr className="border-content/10 my-4" />
 
-              {/* Action Buttons */}
               <div className="flex items-center gap-4">
                 <FavoriteButton artworkId={artwork.id} artworkTitle={artwork.title} />
                 <button title="Share" className="p-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors">
@@ -150,7 +147,6 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
                 </button>
               </div>
             </div>
-
           </aside>
         </div>
       </div>

@@ -8,6 +8,8 @@ import { Heart, MoreHorizontal, Flag, Link as LinkIcon, BadgeCheck } from "lucid
 import AvatarInitials from "./AvatarInitials";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
+import CommissionButton from "@/components/detail/CommissionButton";
+import profiles from "@/data/profiles";
 import { useToastStore } from "@/store/ToastStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useFavoriteStore } from "@/store/FavoriteStore";
@@ -20,6 +22,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
   const { user, isAuthenticated } = useUserStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
   const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
+  const basePrice = profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ?? null;
 
   const images = artwork.images_url || ["https://picsum.photos/seed/antariksa/800/600"];
   const imageCount = images.length;
@@ -191,11 +194,10 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
           >
             <Heart
               size={20}
-              className={`transition-colors duration-150 ${
-                isArtworkFavorite
-                  ? "text-red-500 fill-red-500"
-                  : "text-content-muted group-hover:text-red-500 group-hover:fill-red-500"
-              }`}
+              className={`transition-colors duration-150 ${isArtworkFavorite
+                ? "text-red-500 fill-red-500"
+                : "text-content-muted group-hover:text-red-500 group-hover:fill-red-500"
+                }`}
             />
           </button>
         </div>
@@ -222,9 +224,16 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
         {artist_profile.is_verified ? (
           <div>
             {artist_profile.is_open_for_commission ? (
-              <Button className="w-full text-sm">
+              <CommissionButton
+                artworkId={artwork.id}
+                artworkTitle={artwork.title}
+                artistId={artist.id}
+                artistName={artist.name}
+                basePrice={basePrice}
+                className="text-sm"
+              >
                 Pesan Komisi
-              </Button>
+              </CommissionButton>
             ) : (
               <Button variant="secondary" className="w-full text-sm pointer-events-none" disabled>
                 Komisi Tutup

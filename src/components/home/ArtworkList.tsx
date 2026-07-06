@@ -1,34 +1,15 @@
 "use client";
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
-import artworks from "@/data/artworks";
-import users from "@/data/users";
-import profiles from "@/data/profiles";
-import tags from "@/data/tags";
-import artworkTags from "@/data/artworkTags";
-import { ArtworkWithRelations, Tag } from "@/types";
+import { useArtworkStore } from "@/store/ArtworkStore";
+import { buildArtworkWithRelations } from "@/utils/search";
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function ArtworkList() {
-    const artwork: ArtworkWithRelations[] = artworks.map((artwork) => {
-        const artist = users.find((user) => user.id === artwork.artists_id);
-        const artist_profile = profiles.find((profile) => profile.user_id === artist?.id);
-        const artworkTagIds = artworkTags.filter((artworkTag) => artworkTag.artwork_id === artwork.id);
-        const artworkTagList = tags.filter((tag) => artworkTagIds.some((artworkTag) => artworkTag.tag_id === tag.id));
-
-        const artworkWithRelations: ArtworkWithRelations = {
-            ...artwork,
-            artist: { id: artist?.id as string, name: artist?.name as string },
-            artist_profile: {
-                is_verified: artist_profile?.is_verified as boolean,
-                is_open_for_commission: artist_profile?.is_open_for_commission as boolean,
-            },
-            tags: artworkTagList as Tag[],
-        };
-
-        return artworkWithRelations;
-    });
+    const { artworks, artworkTags, tags } = useArtworkStore();
+    const artwork = buildArtworkWithRelations(artworks, artworkTags, tags)
+        .filter((item) => item.is_visible_on_feed);
 
     if (artwork.length === 0) {
         return (

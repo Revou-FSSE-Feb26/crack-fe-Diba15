@@ -161,20 +161,21 @@ export const useCommissionStore = create<CommissionState>()(
       addRevision: (commission_id, user_id, comment) => {
         const trimmed = comment.trim();
         if (!trimmed) return;
+        const updatedAt = now();
 
         const revision: Revision = {
           id: `r-${Date.now()}`,
           commission_id,
           user_id,
           comment: trimmed,
-          created_at: now(),
+          created_at: updatedAt,
         };
 
         set((state) => ({
           revisions: [revision, ...state.revisions],
           commissions: state.commissions.map((commission) =>
             commission.id === commission_id
-              ? { ...commission, status: "revision", updated_at: now() }
+              ? { ...commission, updated_at: updatedAt }
               : commission,
           ),
         }));

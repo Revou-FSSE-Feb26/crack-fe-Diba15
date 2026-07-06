@@ -1,10 +1,10 @@
 import { ProfileWithUser } from "@/types";
-import Button from "@/components/ui/Button"
 import { formatPrice } from "@/utils";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import { BadgeCheck } from "lucide-react";
 import Pill from "@/components/ui/Pill";
 import Link from "next/link";
+import CommissionButton from "@/components/detail/CommissionButton";
 
 export default function FeaturedArtist({ profile }: { profile: ProfileWithUser }) {
   const { user, is_verified, is_open_for_commission, base_price_idr, approved_portfolio_count } = profile;
@@ -44,9 +44,14 @@ export default function FeaturedArtist({ profile }: { profile: ProfileWithUser }
 
       {/* Tombol hire */}
       {is_open_for_commission && (
-        <Button className="w-full text-xs font-medium py-1.5 rounded-lg transition-colors duration-150">
+        <CommissionButton
+          artistId={user.id}
+          artistName={user.name}
+          basePrice={base_price_idr}
+          className="text-xs font-medium py-1.5 rounded-lg transition-colors duration-150"
+        >
           Hire Artis
-        </Button>
+        </CommissionButton>
       )}
     </div>
   );

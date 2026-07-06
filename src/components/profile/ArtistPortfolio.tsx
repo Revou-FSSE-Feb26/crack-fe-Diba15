@@ -3,11 +3,10 @@ import Link from "next/link";
 import { ImageIcon } from "lucide-react";
 
 import EmptyState from "@/components/profile/EmptyState";
-import artworks from "@/data/artworks";
-import tags from "@/data/tags";
+import type { ArtworkWithRelations } from "@/types";
 
 interface ArtistPortfolioProps {
-  artworksWithTags: Array<(typeof artworks)[number] & { tags: typeof tags }>;
+  artworksWithTags: ArtworkWithRelations[];
 }
 
 export default function ArtistPortfolio({ artworksWithTags }: ArtistPortfolioProps) {

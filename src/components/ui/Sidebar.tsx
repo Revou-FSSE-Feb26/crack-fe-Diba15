@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Home, Sun, Moon, PanelLeftClose, LogIn, Heart, User, Briefcase, LogOut, ChevronUp } from "lucide-react";
+import { Home, Sun, Moon, PanelLeftClose, LogIn, Heart, User, Briefcase, ChevronUp, PlusCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Brand from "@/components/ui/brand/Brand";
 import { useThemeStore } from "@/store/ThemeStore";
@@ -30,11 +30,14 @@ const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> = 
 export default function Sidebar({ onClose }: SidebarProps) {
   const { theme, toggleTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
-  const { isAuthenticated, user, logout } = useUserStore();
+  const { isAuthenticated, user, logout, isArtist } = useUserStore();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   // Jika isAuth maka satukan menu user dengan menu default
-  const menu = isAuthenticated ? [...menuItems, ...userMenuItems] : menuItems;
+  const postArtMenu = mounted && isArtist()
+    ? [{ label: "Post Art", href: "/post-art", icon: PlusCircle }]
+    : [];
+  const menu = isAuthenticated ? [...menuItems, ...postArtMenu, ...userMenuItems] : menuItems;
 
   // useEffect digunakan untuk mencegah hydration mismatch error di Next.js
   useEffect(() => {
@@ -67,6 +70,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <Link
                 key={item.label}
                 href={item.href}
+                onClick={onClose}
                 className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
               >
                 <Icon className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
@@ -116,7 +120,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                     }}
                     className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-red-500 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950"
                   >
-                    <LogOut className="h-5 w-5 rotate-180" />
+                    <LogIn className="h-5 w-5" />
                     Logout
                   </button>
                 </div>

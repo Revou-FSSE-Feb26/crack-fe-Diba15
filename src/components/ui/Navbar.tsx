@@ -1,6 +1,6 @@
 "use client";
 
-import { LogIn, Search, X, PanelLeftOpen } from "lucide-react";
+import { LogIn, Search, X, PanelLeftOpen, ChevronDown, PlusCircle } from "lucide-react";
 import Link from 'next/link'
 import NavbarBrand from "@/components/ui/brand/NavbarBrand";
 import { useState, useEffect, useRef } from "react";
@@ -20,6 +20,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const { isArtist, isClient, logout, user } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Set mounted to true when component mounts on client
   useEffect(() => {
@@ -54,6 +55,22 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSearchOpen]);
 
+  // Close Dropdown when click outside
+  useEffect(() => {
+    const handleClickDropdownOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickDropdownOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickDropdownOutside)
+  })
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
@@ -61,6 +78,12 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
     router.push(`/search/${encodeURIComponent(q)}`);
     setIsSearchOpen(false);
     setSearchQuery("");
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -76,6 +99,17 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
         >
           <PanelLeftOpen className="w-6 h-6 text-primary" />
         </button>
+
+        {mounted && isArtist() && (
+          <Link
+            href="/post-art"
+            className="hidden md:inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-background shadow-sm transition-colors hover:bg-primary-hover"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Post Art
+          </Link>
+        )}
+        
       </div>
 
       {/* Center: Brand */}
@@ -111,16 +145,17 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
                   className="flex items-center gap-2 rounded-full px-3 py-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
                 >
                   <span className="text-sm font-medium text-primary">{user?.name}</span>
+                  <span className="text-sm font-medium text-primary">
+                    <ChevronDown className={`h-5 w-5 transition-all duration-200 group-hover:text-primary ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  </span>
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-40 rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50">
+                  <div ref={dropdownRef} className="absolute right-0 mt-2 w-40 rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50">
+
                     <button
                       type="button"
-                      onClick={() => {
-                        logout();
-                        setIsDropdownOpen(false);
-                      }}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors duration-200 cursor-pointer"
                     >
                       Logout

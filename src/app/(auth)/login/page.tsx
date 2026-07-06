@@ -111,6 +111,10 @@ export default function Login() {
             </div>
             <Button type="submit" variant="primary">Login</Button>
           </form>
+          <div>
+            <p className="text-xs">client: dimas@example.com/client123</p>
+            <p className="text-xs">artists: rina@example.com/artist123</p>
+          </div>
           <Link href="/signup" className="text-sm text-content hover:text-content-muted transition-colors">Don&apos;t have an account? Register</Link>
           <Link href="/staff-login" className="text-sm text-content hover:text-content-muted transition-colors">Staff login</Link>
         </div>

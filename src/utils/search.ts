@@ -3,7 +3,7 @@ import users from "@/data/users";
 import profiles from "@/data/profiles";
 import tags from "@/data/tags";
 import artworkTags from "@/data/artworkTags";
-import { ArtworkWithRelations, Tag, ParsedQuery } from "@/types";
+import { Artwork, ArtworkTag, ArtworkWithRelations, ParsedQuery, Tag } from "@/types";
 
 
 /**
@@ -32,15 +32,19 @@ export function parseSearchQuery(raw: string): ParsedQuery {
   return { type: "title", value: trimmed, raw: trimmed };
 }
 
-/** Assembles the full ArtworkWithRelations list from static data sources. */
-export function buildArtworkWithRelations(): ArtworkWithRelations[] {
-  return artworks.map((artwork) => {
+/** Assembles the full ArtworkWithRelations list from artwork data sources. */
+export function buildArtworkWithRelations(
+  sourceArtworks: Artwork[] = artworks,
+  sourceArtworkTags: ArtworkTag[] = artworkTags,
+  sourceTags: Tag[] = tags,
+): ArtworkWithRelations[] {
+  return sourceArtworks.map((artwork) => {
     const artist = users.find((u) => u.id === artwork.artists_id);
     const artist_profile = profiles.find((p) => p.user_id === artist?.id);
-    const tagIds = artworkTags
+    const tagIds = sourceArtworkTags
       .filter((at) => at.artwork_id === artwork.id)
       .map((at) => at.tag_id);
-    const artworkTagList = tags.filter((t) => tagIds.includes(t.id));
+    const artworkTagList = sourceTags.filter((t) => tagIds.includes(t.id));
 
     return {
       ...artwork,
@@ -56,8 +60,13 @@ export function buildArtworkWithRelations(): ArtworkWithRelations[] {
 }
 
 /** Filters artworks based on a parsed search query. */
-export function searchArtworks(query: ParsedQuery): ArtworkWithRelations[] {
-  const all = buildArtworkWithRelations();
+export function searchArtworks(
+  query: ParsedQuery,
+  sourceArtworks?: Artwork[],
+  sourceArtworkTags?: ArtworkTag[],
+  sourceTags?: Tag[],
+): ArtworkWithRelations[] {
+  const all = buildArtworkWithRelations(sourceArtworks, sourceArtworkTags, sourceTags);
   if (!query.value) return all;
   const q = query.value.toLowerCase();
 

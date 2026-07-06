@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Wallet,
 } from "lucide-react";
+import Link from "next/link";
 
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
@@ -15,12 +16,11 @@ import StatItem from "@/components/profile/StatItem";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
 import Button from "@/components/ui/Button";
-import artworks from "@/data/artworks";
-import artworkTags from "@/data/artworkTags";
 import profiles from "@/data/profiles";
-import tags from "@/data/tags";
+import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { formatPrice } from "@/utils";
+import { buildArtworkWithRelations } from "@/utils/search";
 
 interface ArtistProfileProps {
   user: ProfileUser;
@@ -28,24 +28,14 @@ interface ArtistProfileProps {
 
 export default function ArtistProfile({ user }: ArtistProfileProps) {
   const { commissions } = useCommissionStore();
+  const { artworks, artworkTags, tags } = useArtworkStore();
   const profile = profiles.find((item) => item.user_id === user.id);
-  const artistArtworks = artworks.filter(
+  const artistArtworks = buildArtworkWithRelations(artworks, artworkTags, tags).filter(
     (artwork) => artwork.artists_id === user.id && artwork.is_visible_on_feed,
   );
   const artistCommissions = commissions.filter(
     (commission) => commission.artists_id === user.id,
   );
-
-  const artworksWithTags = artistArtworks.map((artwork) => {
-    const tagIds = artworkTags
-      .filter((artworkTag) => artworkTag.artwork_id === artwork.id)
-      .map((artworkTag) => artworkTag.tag_id);
-
-    return {
-      ...artwork,
-      tags: tags.filter((tag) => tagIds.includes(tag.id)),
-    };
-  });
 
   const joinedDate = new Date(user.created_at).toLocaleDateString("id-ID", {
     year: "numeric",
@@ -163,18 +153,18 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
               <Button className="w-full text-sm justify-center">
                 Edit Profil
               </Button>
-              <Button
-                variant="secondary"
-                className="w-full text-sm justify-center"
+              <Link
+                href="/post-art"
+                className="flex w-full justify-center rounded-lg bg-accent/20 px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-accent/40 dark:text-accent"
               >
                 Upload Karya
-              </Button>
+              </Link>
             </div>
           </div>
         </aside>
       </div>
 
-      <ArtistPortfolio artworksWithTags={artworksWithTags} />
+      <ArtistPortfolio artworksWithTags={artistArtworks} />
     </div>
   );
 }

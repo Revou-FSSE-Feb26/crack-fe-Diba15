@@ -134,6 +134,14 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
   const status = statusStyle[commission.status];
   const canCancel = !["completed", "cancelled", "disputed"].includes(commission.status);
   const canApprove = Boolean(progressItem?.final_artwork_url) && commission.status !== "completed";
+  const canPay =
+    !isArtistView &&
+    commission.payment_status === "unpaid" &&
+    ["accepted", "in_progress", "revision"].includes(commission.status);
+  const canUploadResult =
+    isArtistView &&
+    commission.payment_status === "paid" &&
+    ["accepted", "in_progress", "revision"].includes(commission.status);
   const counterpartName = isArtistView ? client?.name ?? "Client" : artist?.name ?? "Artist";
 
   const confirmStatus = (selectedCommission: Commission, statusValue: Commission["status"], title: string) => {
@@ -192,8 +200,9 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_320px]">
+        <div className="flex flex-col gap-5">
           <div className="space-y-3">
+            {/*Artwork Preview Section*/}
             <div className="grid gap-3 sm:grid-cols-2">
               <ProofPreview
                 title="WIP Proof"
@@ -207,6 +216,102 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
               />
             </div>
 
+            {/*Button Section*/}
+            <div className="space-y-2">
+              {!isArtistView && commission.status === "pending" && (
+                <p className="rounded-lg bg-content/5 px-3 py-2 text-xs text-content-muted">
+                  Menunggu artist menerima pengajuan. Diskusikan harga dan detail lewat komentar sebelum pembayaran.
+                </p>
+              )}
+  
+              {canPay && (
+                <Button
+                  className="flex gap-1 items-center w-full justify-center text-sm"
+                  onClick={() => setPaymentStatus(commission.id, "paid")}
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Bayar Uang Muka
+                </Button>
+              )}
+  
+              {isArtistView && commission.status === "pending" && (
+                <>
+                  <Button
+                    className="flex items-center gap-1 w-full justify-center text-sm"
+                    onClick={() => confirmStatus(commission, "accepted", "Terima commission?")}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Terima
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="flex items-center gap-1 w-full justify-center text-sm"
+                    onClick={() => confirmStatus(commission, "cancelled", "Tolak commission?")}
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Tolak
+                  </Button>
+                </>
+              )}
+  
+            {isArtistView && commission.status === "accepted" && commission.payment_status === "paid" && (
+              <Button
+                className="flex items-center gap-1 w-full justify-center text-sm"
+                onClick={() => setCommissionStatus(commission.id, "in_progress")}
+              >
+                  Mulai Kerjakan
+              </Button>
+            )}
+
+            {isArtistView && commission.status === "accepted" && commission.payment_status === "unpaid" && (
+              <p className="rounded-lg bg-content/5 px-3 py-2 text-xs text-content-muted">
+                Menunggu client membayar uang muka sebelum artist bisa mulai kerja atau upload hasil.
+              </p>
+            )}
+
+            {canUploadResult && (
+              <Button
+                variant="secondary"
+                className="flex items-center gap-1 w-full justify-center text-sm"
+                  onClick={() => uploadDummyResult(commission.id)}
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload Hasil Dummy
+                </Button>
+              )}
+  
+              {!isArtistView && canApprove && (
+                <>
+                  <Button
+                    className="flex gap-1 items-center w-full justify-center text-sm"
+                    onClick={() => approveResult(commission.id)}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Approve Hasil
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="flex gap-1 items-center w-full justify-center text-sm"
+                    onClick={() => confirmStatus(commission, "disputed", "Ajukan dispute?")}
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    Ajukan Dispute
+                  </Button>
+                </>
+              )}
+  
+              {!isArtistView && canCancel && (
+                <Button
+                  variant="secondary"
+                  className="flex gap-1 items-center w-full justify-center text-sm"
+                  onClick={() => confirmStatus(commission, "cancelled", "Batalkan commission?")}
+                >
+                  Batalkan Commission
+                </Button>
+              )}
+            </div>
+
+            {/*Comments Section*/}
             <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
               <div className="flex items-center gap-2 mb-3">
                 <MessageSquare className="w-4 h-4 text-primary" />
@@ -240,7 +345,7 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
                 <input
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
-                  placeholder="Tulis komentar revisi atau balasan..."
+                  placeholder="Tulis komentar, negosiasi harga, atau balasan..."
                   className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-background px-3 py-2 text-sm outline-none focus:border-primary dark:border-slate-700"
                 />
                 <Button type="submit" className="justify-center text-sm">
@@ -248,88 +353,6 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
                 </Button>
               </form>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            {!isArtistView && commission.payment_status === "unpaid" && (
-              <Button
-                className="w-full justify-center text-sm"
-                onClick={() => setPaymentStatus(commission.id, "paid")}
-              >
-                <CreditCard className="w-4 h-4" />
-                Bayar Uang Muka
-              </Button>
-            )}
-
-            {isArtistView && commission.status === "pending" && (
-              <>
-                <Button
-                  className="flex items-center gap-1 w-full justify-center text-sm"
-                  onClick={() => confirmStatus(commission, "accepted", "Terima commission?")}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Terima
-                </Button>
-                <Button
-                  variant="danger"
-                  className="flex items-center gap-1 w-full justify-center text-sm"
-                  onClick={() => confirmStatus(commission, "cancelled", "Tolak commission?")}
-                >
-                  <XCircle className="w-4 h-4" />
-                  Tolak
-                </Button>
-              </>
-            )}
-
-            {isArtistView && commission.status === "accepted" && commission.payment_status === "paid" && (
-              <Button
-                className="flex items-center gap-1 w-full justify-center text-sm"
-                onClick={() => setCommissionStatus(commission.id, "in_progress")}
-              >
-                Mulai Kerjakan
-              </Button>
-            )}
-
-            {isArtistView && ["accepted", "in_progress", "revision"].includes(commission.status) && (
-              <Button
-                variant="secondary"
-                className="flex items-center gap-1 w-full justify-center text-sm"
-                onClick={() => uploadDummyResult(commission.id)}
-              >
-                <Upload className="w-4 h-4" />
-                Upload Hasil Dummy
-              </Button>
-            )}
-
-            {!isArtistView && canApprove && (
-              <>
-                <Button
-                  className="w-full justify-center text-sm"
-                  onClick={() => approveResult(commission.id)}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Approve Hasil
-                </Button>
-                <Button
-                  variant="danger"
-                  className="w-full justify-center text-sm"
-                  onClick={() => confirmStatus(commission, "disputed", "Ajukan dispute?")}
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                  Ajukan Dispute
-                </Button>
-              </>
-            )}
-
-            {!isArtistView && canCancel && (
-              <Button
-                variant="secondary"
-                className="w-full justify-center text-sm"
-                onClick={() => confirmStatus(commission, "cancelled", "Batalkan commission?")}
-              >
-                Batalkan Commission
-              </Button>
-            )}
           </div>
         </div>
       </article>
