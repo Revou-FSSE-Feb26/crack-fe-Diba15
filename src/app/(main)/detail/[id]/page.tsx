@@ -11,6 +11,7 @@ import tags from "@/data/tags";
 import artworkTags from "@/data/artworkTags";
 import { ArtworkWithRelations, Tag } from "@/types";
 import AvatarInitials from "@/components/home/AvatarInitials";
+import CommissionButton from "@/components/detail/CommissionButton";
 
 export default async function Detail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -105,9 +106,13 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
               </div>
 
               {artwork.artist_profile.is_open_for_commission && (
-                <button className="w-full py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors">
-                  Pesan Komisi
-                </button>
+                <CommissionButton
+                  artworkId={artwork.id}
+                  artworkTitle={artwork.title}
+                  artistId={artwork.artist.id}
+                  artistName={artwork.artist.name}
+                  basePrice={artist_profile?.base_price_idr ?? null}
+                />
               )}
             </div>
 

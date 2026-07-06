@@ -8,7 +8,7 @@ import ProfileHeading from "@/components/profile/ProfileHeading";
 import StatItem from "@/components/profile/StatItem";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
-import commissions from "@/data/commissions";
+import { useCommissionStore } from "@/store/CommissionStore";
 import { formatPrice } from "@/utils";
 
 interface ClientProfileProps {
@@ -16,6 +16,7 @@ interface ClientProfileProps {
 }
 
 export default function ClientProfile({ user }: ClientProfileProps) {
+  const { commissions } = useCommissionStore();
   const clientCommissions = useMemo(
     () =>
       commissions
@@ -24,7 +25,7 @@ export default function ClientProfile({ user }: ClientProfileProps) {
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         ),
-    [user.id],
+    [commissions, user.id],
   );
 
   const activeCommissions = clientCommissions.filter((commission) =>

@@ -17,9 +17,9 @@ import type { ProfileUser } from "@/components/profile/types";
 import Button from "@/components/ui/Button";
 import artworks from "@/data/artworks";
 import artworkTags from "@/data/artworkTags";
-import commissions from "@/data/commissions";
 import profiles from "@/data/profiles";
 import tags from "@/data/tags";
+import { useCommissionStore } from "@/store/CommissionStore";
 import { formatPrice } from "@/utils";
 
 interface ArtistProfileProps {
@@ -27,6 +27,7 @@ interface ArtistProfileProps {
 }
 
 export default function ArtistProfile({ user }: ArtistProfileProps) {
+  const { commissions } = useCommissionStore();
   const profile = profiles.find((item) => item.user_id === user.id);
   const artistArtworks = artworks.filter(
     (artwork) => artwork.artists_id === user.id && artwork.is_visible_on_feed,

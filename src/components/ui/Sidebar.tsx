@@ -23,7 +23,7 @@ const menuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
 
 const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
   { label: "Favorites", href: "/favorite", icon: Heart },
-  { label: "Commisions", href: "#", icon: Briefcase },
+  { label: "Commissions", href: "/commissions", icon: Briefcase },
   { label: "Profil", href: "/profile", icon: User },
 ];
 

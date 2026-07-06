@@ -1,7 +1,7 @@
-TODO 1 = Membuat halaman searching, untuk search berdasarkan nama, tags, dan artists. Search akan dibuat dengan prefix system, dimana prefix yang akan diterapkan adalah "title", tags:"tags-name", dan artists:"artists-name".
-TODO 2 = Tags yang diklik harus bisa di arahkan ke halaman search dengan filter yang sesuai.
+TODO 1 = Membuat halaman searching, untuk search berdasarkan nama, tags, dan artists. Search akan dibuat dengan prefix system, dimana prefix yang akan diterapkan adalah "title", tags:"tags-name", dan artists:"artists-name". (Clear)
+TODO 2 = Tags yang diklik harus bisa di arahkan ke halaman search dengan filter yang sesuai. (Clear)
 TODO 3 = Membuat action button on header artwork card berfungsi sepert salin link ke clipboard dan laporkan yang nantinya akan memunculkan modal untuk melaporkan artwork.
-TODO 4 = Membuat modal global bukan hanya untuk melaporkan artwork namun juga untuk notifikasi ketika menampilkan teks biasa dan konfirmasi ketika melakukan aksi tertentu.
+TODO 4 = Membuat modal global bukan hanya untuk melaporkan artwork namun juga untuk notifikasi ketika menampilkan teks biasa dan konfirmasi ketika melakukan aksi tertentu. (Clear)
 TODO 5 = Menerapkan alur dummy commision, dimana nantinya user dapat melakukan commision pada artwork yang ditampilkan. Condition: User harus login terlebih dahulu. Jika belum login, maka tidak dapat melakukan commision dan diarahkan ke halaman login.
 <!--Core Features-->
 TODO 6 = Membuat halaman upload artwork untuk user. User juga bisa edit artwork yang sudah diupload.
