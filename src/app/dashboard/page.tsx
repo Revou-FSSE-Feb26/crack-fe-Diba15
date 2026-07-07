@@ -66,7 +66,9 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => {
+      setMounted(true);
+    }, 0)
   }, []);
 
   const isStaff = user?.role === "admin" || user?.role === "curator";
@@ -162,11 +164,10 @@ export default function DashboardPage() {
                   key={item.label}
                   type="button"
                   disabled={!item.active}
-                  className={`flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
-                    item.active
+                  className={`flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors ${item.active
                       ? "bg-primary/10 text-primary"
                       : "text-content-muted opacity-70 cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   <Icon className="mt-0.5 h-5 w-5 shrink-0" />
                   <span>
