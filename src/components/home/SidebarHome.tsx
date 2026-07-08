@@ -56,6 +56,12 @@ const DUMMY_POPULAR_TAGS = [
   { id: "t-010", tag_name: "Cover Art" },
 ];
 
+const tagColorVariants = [
+  "bg-primary/10 text-primary hover:bg-primary/20",
+  "bg-warm/15 text-warm-hover hover:bg-warm/25",
+  "bg-mint/20 text-verified hover:bg-mint/30",
+];
+
 export default function SidebarHome() {
   return (
     <aside id="sidebar-home" className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)]">
@@ -74,11 +80,11 @@ export default function SidebarHome() {
       <section>
         <SectionLabel>Tag Populer</SectionLabel>
         <div className="flex flex-wrap gap-1.5">
-          {DUMMY_POPULAR_TAGS.map((tag) => (
+          {DUMMY_POPULAR_TAGS.map((tag, i) => (
             <Pill
               key={tag.id}
               link={`/search/${encodeURIComponent(`tags:"${tag.tag_name}"`)}`}
-              className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-accent/15 text-primary hover:bg-accent/30 transition-colors duration-150"
+               className={`text-[11px] font-medium px-2.5 py-1 rounded-full transition-colors duration-150 ${tagColorVariants[i % tagColorVariants.length]}`}
             >
               #{tag.tag_name}
             </Pill>

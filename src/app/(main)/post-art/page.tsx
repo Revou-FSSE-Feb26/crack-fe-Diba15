@@ -163,6 +163,7 @@ export default function PostArtPage() {
               </label>
               <Input
                 id="title"
+                className="bg-background"
                 placeholder="Contoh: Neon Samurai"
                 {...register("title", {
                   required: "Judul artwork wajib diisi",

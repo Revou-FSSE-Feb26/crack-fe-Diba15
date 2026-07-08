@@ -24,7 +24,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const inputClass =
-    "w-full max-w-sm md:max-w-lg px-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] rounded-lg outline-none";
+    "w-full max-w-sm md:max-w-lg px-4 py-2 text-primary bg-background rounded-lg outline-none";
 
   // Auto-focus input when search opens
   useEffect(() => {
@@ -194,7 +194,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
             placeholder='Cari karya, tags:"nama", artists:"nama"'
             className={inputClass}
           />
-          <button type="submit" className="p-2 text-primary bg-gray-50 dark:bg-[#1D2D37] rounded-full cursor-pointer">
+          <button type="submit" className="p-2 text-primary bg-background rounded-full cursor-pointer">
             <Search className="w-5 h-5 text-primary" />
           </button>
         </form>

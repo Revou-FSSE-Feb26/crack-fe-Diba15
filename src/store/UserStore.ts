@@ -18,6 +18,7 @@ interface UserState {
   // Actions
   login: (email: string, password: string) => LoginResult;
   logout: () => void;
+  updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 
   // Role helpers — berguna untuk guard di page/layout
   hasRole: (role: UserRole) => boolean;
@@ -50,6 +51,8 @@ export const useUserStore = create<UserState>()(
       },
 
       logout: () => set({ user: null, isAuthenticated: false }),
+
+      updateCurrentUser: (payload) => set((state) => (state.user ? { user: { ...state.user, ...payload } } : state)),
 
       hasRole: (role) => get().user?.role === role,
       isArtist: () => get().user?.role === "artist",

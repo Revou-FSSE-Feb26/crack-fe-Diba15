@@ -1,30 +1,43 @@
-'use client';
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArtworkWithRelations } from "@/types";
-import { Heart, MoreHorizontal, Flag, Link as LinkIcon, BadgeCheck } from "lucide-react";
+import {
+  Heart,
+  MoreHorizontal,
+  Flag,
+  Link as LinkIcon,
+  BadgeCheck,
+} from "lucide-react";
 import AvatarInitials from "./AvatarInitials";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import CommissionButton from "@/components/detail/CommissionButton";
-import profiles from "@/data/profiles";
 import { useToastStore } from "@/store/ToastStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useFavoriteStore } from "@/store/FavoriteStore";
 import { useUserStore } from "@/store/UserStore";
+import { useProfileStore } from "@/store/ProfileStore";
+import { useCopyLink } from "@/hooks/useCopyLink";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
   const { artist, artist_profile, tags } = artwork;
+  const { copyPath } = useCopyLink();
   const { addToast } = useToastStore();
   const { openModal } = useModalStore();
   const { user, isAuthenticated } = useUserStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
+  const { profiles } = useProfileStore();
   const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
-  const basePrice = profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ?? null;
+  const basePrice =
+    profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ??
+    null;
 
-  const images = artwork.images_url || ["https://picsum.photos/seed/antariksa/800/600"];
+  const images = artwork.images_url || [
+    "https://picsum.photos/seed/antariksa/800/600",
+  ];
   const imageCount = images.length;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,7 +45,10 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     }
@@ -59,7 +75,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
         : `Dihapus dari favorite: ${artwork.title}.`,
       type: addedToFavorite ? "success" : "info",
     });
-  }
+  };
 
   const handleReport = (artName: string) => {
     openModal({
@@ -70,17 +86,25 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
       onConfirm: () => {
         addToast({
           message: `Karya: ${artName} berhasil dilaporkan.`,
-          type: "warning"
-        })
-      }
-    })
-  }
+          type: "warning",
+        });
+      },
+    });
+  };
+
+  const handleCopyLink = (id: string) => {
+    copyPath(`/detail/${id}`);
+    setIsDropdownOpen(false);
+  };
 
   return (
-    <article className="bg-surface rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+    <article className="bg-surface rounded-lg overflow-hidden shadow-sm border border-transparent hover:border-warm/30 hover:shadow-md transition-all duration-200">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-content/5">
-        <Link href={`/artists/${artist.id}`} className="flex items-center gap-2.5 flex-1 min-w-0">
+        <Link
+          href={`/artists/${artist.id}`}
+          className="flex items-center gap-2.5 flex-1 min-w-0"
+        >
           <AvatarInitials name={artist.name} className="w-9 h-9" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -99,7 +123,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
           <button
             title="More"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={`p-2 rounded-full transition-colors duration-150 -mr-1 cursor-pointer ${isDropdownOpen ? 'bg-content/5' : 'hover:bg-content/5'}`}
+            className={`p-2 rounded-full transition-colors duration-150 -mr-1 cursor-pointer ${isDropdownOpen ? "bg-content/5" : "hover:bg-content/5"}`}
           >
             <MoreHorizontal size={18} className="text-content-muted" />
           </button>
@@ -109,7 +133,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
               <button
                 className="w-full text-left px-4 py-2.5 text-sm text-content hover:bg-content/5 flex items-center gap-2.5 transition-colors"
                 onClick={() => {
-                  setIsDropdownOpen(false);
+                  handleCopyLink(artwork.id);
                 }}
               >
                 <LinkIcon size={16} className="text-content-muted" />
@@ -131,9 +155,14 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
       </div>
 
       {/* Image Grid */}
-      <Link href={`/detail/${artwork.id}`} className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer">
+      <Link
+        href={`/detail/${artwork.id}`}
+        className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer"
+      >
         {imageCount > 0 && (
-          <div className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? 'col-span-2 row-span-2' : 'col-span-1 row-span-2'}`}>
+          <div
+            className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? "col-span-2 row-span-2" : "col-span-1 row-span-2"}`}
+          >
             <Image
               src={images[0]}
               alt={`${artwork.title} - Image 1`}
@@ -145,7 +174,9 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
         )}
 
         {imageCount > 1 && (
-          <div className={`relative w-full h-full overflow-hidden ${imageCount === 2 ? 'col-span-1 row-span-2' : 'col-span-1 row-span-1'}`}>
+          <div
+            className={`relative w-full h-full overflow-hidden ${imageCount === 2 ? "col-span-1 row-span-2" : "col-span-1 row-span-1"}`}
+          >
             <Image
               src={images[1]}
               alt={`${artwork.title} - Image 2`}
@@ -183,38 +214,47 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
       {/* Action Bar */}
       <div className="flex flex-col px-4 py-3 border-b border-content/5">
         <div className="flex justify-between items-center gap-2 w-full">
-          <Link href={`/detail/${artwork.id}`} className="text-sm font-semibold text-content">
+          <Link
+            href={`/detail/${artwork.id}`}
+            className="text-sm font-semibold text-content"
+          >
             {artwork.title}
           </Link>
           <button
             onClick={handleFavorite}
-            title={isArtworkFavorite ? "Hapus dari favorite" : "Tambah ke favorite"}
+            title={
+              isArtworkFavorite ? "Hapus dari favorite" : "Tambah ke favorite"
+            }
             aria-pressed={isArtworkFavorite}
             className="p-2 hover:bg-content/5 rounded-full transition-colors duration-150 -ml-2 group cursor-pointer"
           >
             <Heart
               size={20}
-              className={`transition-colors duration-150 ${isArtworkFavorite
-                ? "text-red-500 fill-red-500"
-                : "text-content-muted group-hover:text-red-500 group-hover:fill-red-500"
-                }`}
+              className={`transition-colors duration-150 ${
+                isArtworkFavorite
+                  ? "text-red-500 fill-red-500"
+                  : "text-content-muted group-hover:text-red-500 group-hover:fill-red-500"
+              }`}
             />
           </button>
         </div>
         {/* Tags */}
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {tags.slice(0, 3).map((tag) => (
+            {tags.slice(0, 3).map((tag, i) => (
               <Pill
                 key={tag.id}
                 link={`/search/${encodeURIComponent(`tags:"${tag.tag_name}"`)}`}
+                className={
+                  i % 2 === 0
+                    ? "text-[11px] px-2 py-1 rounded-full bg-primary/10 text-primary"
+                    : "text-[11px] px-2 py-1 rounded-full bg-warm/15 text-warm-hover"
+                }
               >
                 {tag.tag_name}
               </Pill>
             ))}
-            {tags.length > 3 && (
-              <Pill>+{tags.length - 3}</Pill>
-            )}
+            {tags.length > 3 && <Pill>+{tags.length - 3}</Pill>}
           </div>
         )}
       </div>
@@ -235,14 +275,22 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
                 Pesan Komisi
               </CommissionButton>
             ) : (
-              <Button variant="secondary" className="w-full text-sm pointer-events-none" disabled>
+              <Button
+                variant="secondary"
+                className="w-full text-sm pointer-events-none"
+                disabled
+              >
                 Komisi Tutup
               </Button>
             )}
           </div>
         ) : (
           <div>
-            <Button variant="danger" className="w-full text-sm pointer-events-none" disabled>
+            <Button
+              variant="danger"
+              className="w-full text-sm pointer-events-none"
+              disabled
+            >
               Belum Diverifikasi
             </Button>
           </div>

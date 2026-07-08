@@ -2,13 +2,16 @@
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import { useArtworkStore } from "@/store/ArtworkStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
+
 import { buildArtworkWithRelations } from "@/utils/search";
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function ArtworkList() {
     const { artworks, artworkTags, tags } = useArtworkStore();
-    const artwork = buildArtworkWithRelations(artworks, artworkTags, tags)
+    const { users } = useUserManagementStore();
+    const artwork = buildArtworkWithRelations(artworks, artworkTags, tags, users)
         .filter((item) => item.is_visible_on_feed);
 
     if (artwork.length === 0) {

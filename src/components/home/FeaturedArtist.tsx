@@ -37,7 +37,7 @@ export default function FeaturedArtist({ profile }: { profile: ProfileWithUser }
         >
           {is_open_for_commission ? "Open Komisi" : "Closed"}
         </Pill>
-        <Pill className="text-[11px] text-content-muted">
+        <Pill className="text-[11px] font-medium text-warm-hover bg-warm/10 px-2 py-0.5 rounded-full">
           mulai {formatPrice(base_price_idr)}
         </Pill>
       </div>

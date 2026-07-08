@@ -16,10 +16,10 @@ import {
 
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
-import Meta from "@/components/commission/Meta";
+import Stat from "@/components/ui/Stat";
 import ProofPreview from "@/components/commission/ProofPreview";
-import { statusStyle } from "@/components/commission/CommissionProgressContent";
 import { useCommissionStore } from "@/store/CommissionStore";
+import { commissionStatusConfig } from "@/utils/commissionStatus";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 import users from "@/data/users";
@@ -125,7 +125,7 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
   const client = users.find((item) => item.id === commission.client_id);
   const progressItem = progress.find((item) => item.commission_id === commission.id);
   const thread = revisions.filter((item) => item.commission_id === commission.id);
-  const status = statusStyle[commission.status];
+  const status = commissionStatusConfig[commission.status];
   const canCancel = !["completed", "cancelled", "disputed"].includes(commission.status);
   const canApprove = Boolean(progressItem?.final_artwork_url) && commission.status !== "completed";
   const canPay =
@@ -141,7 +141,7 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
   const confirmStatus = (selectedCommission: Commission, statusValue: Commission["status"], title: string) => {
     openModal({
       title,
-      description: `Status "${selectedCommission.commission_title}" akan diubah menjadi ${statusStyle[statusValue].label}.`,
+      description: `Status "${selectedCommission.commission_title}" akan diubah menjadi ${commissionStatusConfig[statusValue].label}.`,
       type: "confirm",
       variant: statusValue === "cancelled" || statusValue === "disputed" ? "danger" : "default",
       confirmLabel: "Konfirmasi",
@@ -187,10 +187,10 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-107.5">
-            <Meta icon={CreditCard} label="Bayar" value={commission.payment_status} />
-            <Meta icon={Clock3} label="Update" value={formatDate(commission.updated_at)} />
-            <Meta icon={CheckCircle2} label="Harga" value={formatPrice(commission.price)} />
-            <Meta icon={Briefcase} label="Dibuat" value={formatDate(commission.created_at)} />
+            <Stat icon={CreditCard} label="Bayar" value={commission.payment_status} />
+            <Stat icon={Clock3} label="Update" value={formatDate(commission.updated_at)} />
+            <Stat icon={CheckCircle2} label="Harga" value={formatPrice(commission.price)} />
+            <Stat icon={Briefcase} label="Dibuat" value={formatDate(commission.created_at)} />
           </div>
         </div>
 

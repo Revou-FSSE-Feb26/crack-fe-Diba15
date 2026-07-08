@@ -1,46 +1,13 @@
 import { Briefcase, CheckCircle2, Clock3, CreditCard } from "lucide-react";
 
 import AvatarInitials from "@/components/home/AvatarInitials";
-import CommissionMeta from "@/components/profile/CommissionMeta";
+import Stat from "@/components/ui/Stat";
 import EmptyState from "@/components/profile/EmptyState";
 import { formatDate } from "@/utils";
 import users from "@/data/users";
 import type { Commission } from "@/types";
 import { formatPrice } from "@/utils";
-
-export const commissionStatus: Record<
-  Commission["status"],
-  { label: string; className: string }
-> = {
-  pending: {
-    label: "Menunggu",
-    className: "bg-premium/10 text-premium",
-  },
-  accepted: {
-    label: "Diterima",
-    className: "bg-primary/10 text-primary",
-  },
-  in_progress: {
-    label: "Dikerjakan",
-    className: "bg-primary/10 text-primary",
-  },
-  revision: {
-    label: "Revisi",
-    className: "bg-premium/10 text-premium",
-  },
-  completed: {
-    label: "Selesai",
-    className: "bg-verified/10 text-verified",
-  },
-  cancelled: {
-    label: "Dibatalkan",
-    className: "bg-danger/10 text-danger",
-  },
-  disputed: {
-    label: "Sengketa",
-    className: "bg-danger/10 text-danger",
-  },
-};
+import { commissionStatusConfig } from "@/utils/commissionStatus";
 
 interface ClientCommissionHistoryProps {
   commissions: Commission[];
@@ -70,7 +37,7 @@ export default function ClientCommissionHistory({
         <div className="space-y-3">
           {clientCommissions.map((commission) => {
             const artist = users.find((item) => item.id === commission.artists_id);
-            const status = commissionStatus[commission.status];
+            const status = commissionStatusConfig[commission.status];
 
             return (
               <article
@@ -116,20 +83,27 @@ export default function ClientCommissionHistory({
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <CommissionMeta
+                  <Stat
                     icon={CreditCard}
                     label="Pembayaran"
                     value={commission.payment_status}
+                    tone="primary"
+                    iconPlacement="left"
+                    formatUnderscore
                   />
-                  <CommissionMeta
+                  <Stat
                     icon={Clock3}
                     label="Update"
                     value={formatDate(commission.updated_at)}
+                    tone="primary"
+                    iconPlacement="left"
                   />
-                  <CommissionMeta
+                  <Stat
                     icon={CheckCircle2}
                     label="Status"
                     value={status.label}
+                    tone="primary"
+                    iconPlacement="left"
                   />
                 </div>
               </article>

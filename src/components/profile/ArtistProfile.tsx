@@ -7,20 +7,27 @@ import {
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
+import EditProfileModal, {
+  type EditProfileFormValues,
+} from "@/components/profile/EditProfileModal";
 import ProfileHeading from "@/components/profile/ProfileHeading";
-import StatItem from "@/components/profile/StatItem";
+import Stat from "@/components/ui/Stat";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
 import Button from "@/components/ui/Button";
-import profiles from "@/data/profiles";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { formatPrice } from "@/utils";
 import { buildArtworkWithRelations } from "@/utils/search";
+import { useToastStore } from "@/store/ToastStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useUserStore } from "@/store/UserStore";
+import { useProfileStore } from "@/store/ProfileStore";
 
 interface ArtistProfileProps {
   user: ProfileUser;
@@ -29,8 +36,18 @@ interface ArtistProfileProps {
 export default function ArtistProfile({ user }: ArtistProfileProps) {
   const { commissions } = useCommissionStore();
   const { artworks, artworkTags, tags } = useArtworkStore();
+  const { profiles, updateProfile } = useProfileStore();
+  const { updateUser: updateUserRecord, users } = useUserManagementStore();
+  const { updateCurrentUser } = useUserStore();
+  const { addToast } = useToastStore();
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const profile = profiles.find((item) => item.user_id === user.id);
-  const artistArtworks = buildArtworkWithRelations(artworks, artworkTags, tags).filter(
+  const artistArtworks = buildArtworkWithRelations(
+    artworks,
+    artworkTags,
+    tags,
+    users,
+  ).filter(
     (artwork) => artwork.artists_id === user.id && artwork.is_visible_on_feed,
   );
   const artistCommissions = commissions.filter(
@@ -44,6 +61,36 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
   const formattedPrice = profile?.base_price_idr
     ? formatPrice(profile.base_price_idr)
     : null;
+
+  const handleEditSubmit = (values: EditProfileFormValues) => {
+    const trimmedName = values.name.trim();
+    const nameChanged = trimmedName !== user.name;
+
+    const nameResult = nameChanged
+      ? updateUserRecord(user.id, { name: trimmedName })
+      : { success: true, message: "" };
+
+    const profileResult = updateProfile(user.id, {
+      bio: values.bio.trim() || null,
+      base_price_idr: values.base_price_idr,
+      is_open_for_commission: values.is_open_for_commission,
+    });
+
+    if (nameChanged && nameResult.success) {
+      updateCurrentUser({ name: trimmedName });
+    }
+
+    const success = nameResult.success && profileResult.success;
+
+    addToast({
+      message: success
+        ? "Profil berhasil diperbarui"
+        : (!nameResult.success ? nameResult.message : profileResult.message),
+        type: success ? "success" : "error",
+    });
+
+    if (success) setIsEditOpen(false);
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -82,16 +129,18 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                <StatItem icon={ImageIcon}>
+                <Stat variant="inline" icon={ImageIcon}>
                   <strong className="text-content">
                     {profile?.approved_portfolio_count ?? artistArtworks.length}
                   </strong>{" "}
                   Karya
-                </StatItem>
-                <StatItem icon={CalendarDays}>Bergabung {joinedDate}</StatItem>
-                <StatItem icon={Palette}>
+                </Stat>
+                <Stat variant="inline" icon={CalendarDays}>
+                  Bergabung {joinedDate}
+                </Stat>
+                <Stat variant="inline" icon={Palette}>
                   {artistArtworks.length} karya di portfolio
-                </StatItem>
+                </Stat>
               </div>
             </div>
           </div>
@@ -133,7 +182,9 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
             <SummaryRow label="Komisi">
               {profile?.is_open_for_commission ? "Dibuka" : "Ditutup"}
             </SummaryRow>
-            <SummaryRow label="Order masuk">{artistCommissions.length}</SummaryRow>
+            <SummaryRow label="Order masuk">
+              {artistCommissions.length}
+            </SummaryRow>
 
             {formattedPrice && (
               <div className="flex items-center gap-2 rounded-xl bg-primary/5 px-3 py-3">
@@ -150,7 +201,10 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
             <hr className="border-slate-200 dark:border-slate-700" />
 
             <div className="space-y-2">
-              <Button className="w-full text-sm justify-center">
+              <Button
+                onClick={() => setIsEditOpen(true)}
+                className="w-full text-sm justify-center"
+              >
                 Edit Profil
               </Button>
               <Link
@@ -165,6 +219,14 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
       </div>
 
       <ArtistPortfolio artworksWithTags={artistArtworks} />
+
+      <EditProfileModal
+        userName={user.name}
+        profile={profile}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSubmit={handleEditSubmit}
+      />
     </div>
   );
 }
