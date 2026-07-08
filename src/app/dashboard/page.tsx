@@ -4,13 +4,14 @@ import { useMemo } from "react";
 import { Briefcase, CheckCircle2, FileWarning, ImageIcon, Users } from "lucide-react";
 
 import StatCard from "@/components/dashboard/StatCard";
-import users from "@/data/users";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 
 export default function DashboardPage() {
   const { user } = useUserStore();
+  const { users } = useUserManagementStore();
   const { artworks } = useArtworkStore();
   const { commissions } = useCommissionStore();
 
@@ -29,7 +30,7 @@ export default function DashboardPage() {
       disputedCommissions: disputedCommissions.length,
       activeCommissions: activeCommissions.length,
     };
-  }, [artworks, commissions]);
+  }, [artworks, commissions, users]);
 
   return (
     <>

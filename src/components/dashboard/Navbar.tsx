@@ -45,7 +45,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="grid grid-cols-3 items-center py-4 px-8">
+    <nav className="flex justify-between items-center py-4 px-8">
 
       {/* Left: Brand */}
       <div className="flex justify-start text-center">
@@ -62,7 +62,7 @@ export default function Navbar() {
         {/* Right: Login button */}
         <div className="flex justify-end items-center gap-3">
           {mounted && (isAdmin() || isCurator()) ? (
-            <div className="hidden md:flex">
+            <div className="flex">
               <div className="relative">
                 <button
                   type="button"

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, LayoutDashboard } from "lucide-react";
+import { AlertTriangle, LayoutDashboard, AlertCircle, X } from "lucide-react";
 
 import Navbar from "@/components/dashboard/Navbar";
 import DashboardSidebar from "@/components/dashboard/Sidebar";
@@ -15,6 +15,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const { user, isAuthenticated } = useUserStore();
   const [mounted, setMounted] = useState(false);
+  const [showWarn, setShowWarn] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setTimeout(() => {
+        setShowWarn(true);
+      }, 0);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -23,6 +32,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }, []);
 
   const isStaff = user?.role === "admin" || user?.role === "curator";
+
+  const handleWarn = () => {
+    setShowWarn(false);
+  }
 
   return (
     <div className="min-h-full relative">
@@ -69,11 +82,38 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         ) : (
-          <div className="mx-auto max-w-dvw px-4 sm:px-6 py-8 space-y-6">
+          <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 py-8 space-y-6">
+
             <DashboardHeader />
 
+            {/*Peringatan Desktop*/}
+            {showWarn && (
+              <div className="rounded-2xl border border-content/10 bg-surface p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex p-4 items-center justify-center rounded-xl bg-danger/10 text-danger">
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-heading text-lg font-semibold text-content">
+                      Peringatan Pengguna
+                    </h2>
+                    <p className="mt-1 text-sm leading-relaxed text-content-muted">
+                      Harap gunakan desktop ketika mengakses halaman dashboard,
+                      sehingga tampilan dan fungsionalitas dapat optimal.
+                    </p>
+                  </div>
+                  <button onClick={handleWarn} className="ml-auto text-sm text-content-muted cursor-pointer">
+                    <span className="flex items-center gap-1"><X className="h-4 w-4" /></span>
+                  </button>
+                </div>
+              </div>
+            )
+            }
+
             <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-              <DashboardSidebar />
+              <div>
+                <DashboardSidebar />
+              </div>
               <section className="space-y-4">{children}</section>
             </div>
           </div>

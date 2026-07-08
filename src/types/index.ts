@@ -3,6 +3,8 @@
 // untuk Prisma schema, API response, maupun komponen Next.js.
 // ============================================================
 
+import { ReactNode } from "react";
+
 // -----------------------------------------------------------
 // Enums
 // -----------------------------------------------------------
@@ -77,6 +79,9 @@ export interface Artwork {
   upload_type: UploadType;
   curation_status: CurationStatus;
   is_visible_on_feed: boolean;
+  rejection_reason?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
   created_at: string;
 }
 
@@ -226,4 +231,28 @@ export interface ThemeState {
     theme: Theme;
     toggleTheme: () => void;
     setTheme: (theme: Theme) => void;
+}
+
+// -----------------------------------------------------------
+// Data Table
+// -----------------------------------------------------------
+
+export interface DataTableColumn<T> {
+  key: string;
+  header: ReactNode;
+  headerClassName?: string;
+  cellClassName?: string;
+  cell: (row: T) => ReactNode;
+}
+
+export interface DataTableProps<T> {
+  columns: DataTableColumn<T>[];
+  pagination: PaginatedResponse<T>;
+  getRowKey: (row: T) => string;
+  emptyState?: ReactNode;
+  isLoading?: boolean;
+  toolbar?: ReactNode;
+  onPageChange: (page: number) => void;
+  onPerPageChange: (perPage: 5 | 10) => void;
+  itemLabel?: string;
 }

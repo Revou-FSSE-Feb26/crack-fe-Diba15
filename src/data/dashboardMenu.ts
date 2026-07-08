@@ -28,7 +28,7 @@ export const adminMenu: DashboardMenuItem[] = [
     description: "Kelola role dan status user",
     icon: Users,
     href: "/dashboard/manage-users",
-    enabled: false,
+    enabled: true,
   },
 ];
 
@@ -41,25 +41,25 @@ export const curatorMenu: DashboardMenuItem[] = [
     enabled: true,
   },
   {
-    label: "Manage Artwork",
+    label: "Review Artwork",
     description: "Review artwork pending",
     icon: ImageIcon,
-    href: "/dashboard/artworks",
-    enabled: false,
+    href: "/dashboard/review-artworks",
+    enabled: true,
   },
   {
-    label: "Manage Dispute",
+    label: "Review Dispute",
     description: "Pantau sengketa komisi",
     icon: FileWarning,
-    href: "/dashboard/disputes",
-    enabled: false,
+    href: "/dashboard/review-disputes",
+    enabled: true,
   },
   {
-    label: "Manage User",
+    label: "Review User",
     description: "Review user yang dilaporkan",
     icon: Users,
-    href: "/dashboard/users",
-    enabled: false,
+    href: "/dashboard/review-users",
+    enabled: true,
   },
 ];
 

@@ -20,11 +20,18 @@ interface CreateArtworkPayload {
   tag_names: string[];
 }
 
+interface ActionResult {
+  success: boolean;
+  message: string;
+}
+
 interface ArtworkState {
   artworks: Artwork[];
   artworkTags: ArtworkTag[];
   tags: Tag[];
   createArtwork: (payload: CreateArtworkPayload) => Artwork;
+  approveArtwork: (id: string, curatorId: string) => ActionResult;
+  rejectArtwork: (id: string, curatorId: string, reason: string) => ActionResult;
 }
 
 const now = () => new Date().toISOString();
@@ -82,6 +89,69 @@ export const useArtworkStore = create<ArtworkState>()(
         }));
 
         return artwork;
+      },
+
+      approveArtwork: (id, curatorId) => {
+        const target = get().artworks.find((artwork) => artwork.id === id);
+
+        if (!target) {
+          return { success: false, message: "Artwork tidak ditemukan." };
+        }
+
+        if (target.curation_status !== "pending") {
+          return { success: false, message: "Artwork ini sudah diproses sebelumnya." };
+        }
+
+        set((state) => ({
+          artworks: state.artworks.map((artwork) =>
+            artwork.id === id
+              ? {
+                  ...artwork,
+                  curation_status: "approved",
+                  is_visible_on_feed: true,
+                  rejection_reason: null,
+                  reviewed_at: now(),
+                  reviewed_by: curatorId,
+                }
+              : artwork,
+          ),
+        }));
+
+        return { success: true, message: `"${target.title}" berhasil disetujui dan tampil di feed.` };
+      },
+
+      rejectArtwork: (id, curatorId, reason) => {
+        const trimmedReason = reason.trim();
+        const target = get().artworks.find((artwork) => artwork.id === id);
+
+        if (!target) {
+          return { success: false, message: "Artwork tidak ditemukan." };
+        }
+
+        if (target.curation_status !== "pending") {
+          return { success: false, message: "Artwork ini sudah diproses sebelumnya." };
+        }
+
+        if (trimmedReason.length < 10) {
+          return { success: false, message: "Alasan penolakan minimal 10 karakter." };
+        }
+
+        set((state) => ({
+          artworks: state.artworks.map((artwork) =>
+            artwork.id === id
+              ? {
+                  ...artwork,
+                  curation_status: "rejected",
+                  is_visible_on_feed: false,
+                  rejection_reason: trimmedReason,
+                  reviewed_at: now(),
+                  reviewed_by: curatorId,
+                }
+              : artwork,
+          ),
+        }));
+
+        return { success: true, message: `"${target.title}" ditolak. Artist akan menerima alasan penolakan.` };
       },
     }),
     {

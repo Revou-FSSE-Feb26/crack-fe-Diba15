@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User, UserRole } from "@/types";
-import mockUsers from "@/data/users";
+import { useUserManagementStore } from "@/store/UserManagementStore";
 
 // User yang disimpan di store tidak mengandung password
 type SafeUser = Omit<User, "password">;
@@ -34,9 +34,9 @@ export const useUserStore = create<UserState>()(
       isAuthenticated: false,
 
       login: (email, password) => {
-        const found = mockUsers.find(
-          (u) => u.email === email && u.password === password
-        );
+        const found = useUserManagementStore
+          .getState()
+          .users.find((u) => u.email === email && u.password === password);
 
         if (!found) {
           return { success: false, message: "Email atau password salah." };

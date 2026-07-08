@@ -68,6 +68,30 @@ const artworkTags: ArtworkTag[] = [
     {
         artwork_id: "a-006",
         tag_id: "t-012"
+    },
+    {
+        artwork_id: "a-007",
+        tag_id: "t-008"
+    },
+    {
+        artwork_id: "a-007",
+        tag_id: "t-006"
+    },
+    {
+        artwork_id: "a-008",
+        tag_id: "t-003"
+    },
+    {
+        artwork_id: "a-008",
+        tag_id: "t-006"
+    },
+    {
+        artwork_id: "a-009",
+        tag_id: "t-004"
+    },
+    {
+        artwork_id: "a-009",
+        tag_id: "t-005"
     }
 ]
 
