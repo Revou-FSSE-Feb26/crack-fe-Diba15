@@ -1,26 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Heart } from "lucide-react";
+import { useMemo } from "react";
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import { useFavoriteStore } from "@/store/FavoriteStore";
 import { useUserStore } from "@/store/UserStore";
 import { buildArtworkWithRelations } from "@/utils/search";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function FavoriteList() {
   const { user, isAuthenticated } = useUserStore();
   const favoritesByUser = useFavoriteStore((state) => state.favoritesByUser);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const mounted = useMounted();
 
   const favoriteArtworks = useMemo(() => {
     if (!user) return [];

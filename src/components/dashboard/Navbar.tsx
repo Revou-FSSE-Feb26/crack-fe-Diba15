@@ -7,20 +7,14 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/UserStore";
 import Clock from "@/components/dashboard/Clock";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function Navbar() {
   const router = useRouter();
   const { isAdmin, isCurator, logout, user } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Set mounted to true when component mounts on client
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-    }, 0)
-  }, []);
 
   // Close Dropdown when click outside
   useEffect(() => {

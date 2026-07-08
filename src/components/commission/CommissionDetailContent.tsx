@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -25,6 +25,8 @@ import { useUserStore } from "@/store/UserStore";
 import users from "@/data/users";
 import { formatDate, formatPrice } from "@/utils";
 import type { Commission } from "@/types";
+import { useMounted } from "@/hooks/useMounted";
+
 
 interface CommissionDetailContentProps {
   commissionId: string;
@@ -43,16 +45,8 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
     approveResult,
     addRevision,
   } = useCommissionStore();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [comment, setComment] = useState("");
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const commission = useMemo(
     () => commissions.find((item) => item.id === commissionId),

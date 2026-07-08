@@ -10,11 +10,12 @@ import DashboardSidebar from "@/components/dashboard/Sidebar";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Button from "@/components/ui/Button";
 import { useUserStore } from "@/store/UserStore";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isAuthenticated } = useUserStore();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [showWarn, setShowWarn] = useState(false);
 
   useEffect(() => {
@@ -24,12 +25,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       }, 0);
     }
   }, [isAuthenticated]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-    }, 0);
-  }, []);
 
   const isStaff = user?.role === "admin" || user?.role === "curator";
 

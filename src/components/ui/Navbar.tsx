@@ -6,6 +6,7 @@ import NavbarBrand from "@/components/ui/brand/NavbarBrand";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/UserStore";
+import { useMounted } from "@/hooks/useMounted";
 
 interface NavbarProps {
   onMenuToggle: () => void;
@@ -19,15 +20,8 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
   const router = useRouter();
   const { isArtist, isClient, isAdmin, isCurator, logout, user } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Set mounted to true when component mounts on client
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-    }, 0)
-  }, []);
 
   const inputClass =
     "w-full max-w-sm md:max-w-lg px-4 py-2 text-primary bg-gray-50 dark:bg-[#1D2D37] rounded-lg outline-none";

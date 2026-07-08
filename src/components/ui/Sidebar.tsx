@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Home, Sun, Moon, PanelLeftClose, LogIn, Heart, User, Briefcase, ChevronUp, PlusCircle, LayoutDashboard } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Brand from "@/components/ui/brand/Brand";
 import { useThemeStore } from "@/store/ThemeStore";
 import { useUserStore } from "@/store/UserStore";
+import { useMounted } from "@/hooks/useMounted";
 
 interface SidebarProps {
   onClose: () => void;
@@ -14,11 +15,6 @@ interface SidebarProps {
 
 const menuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
   { label: "Beranda", href: "/", icon: Home },
-  // { label: "Collections", href: "#", icon: Layers },
-  // { label: "Featured", href: "#", icon: Star },
-  // { label: "Messages", href: "#", icon: MessageSquare },
-  // { label: "Teams", href: "#", icon: Users },
-  // { label: "Settings", href: "#", icon: Settings },
 ];
 
 const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> = [
@@ -29,7 +25,7 @@ const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> = 
 
 export default function Sidebar({ onClose }: SidebarProps) {
   const { theme, toggleTheme } = useThemeStore();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const { isAuthenticated, user, logout, isArtist, isAdmin, isCurator } = useUserStore();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -43,13 +39,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const menu = isAuthenticated
     ? [...menuItems, ...postArtMenu, ...dashboardMenu, ...userMenuItems]
     : menuItems;
-
-  // useEffect digunakan untuk mencegah hydration mismatch error di Next.js
-  useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-    }, 0)
-  }, []);
 
   return (
     <aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">

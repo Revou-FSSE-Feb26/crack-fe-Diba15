@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   Briefcase,
@@ -17,6 +17,8 @@ import users from "@/data/users";
 import { formatDate, formatPrice } from "@/utils";
 import type { Commission } from "@/types";
 import Meta from "@/components/commission/Meta";
+import { useMounted } from "@/hooks/useMounted";
+
 
 export const statusStyle: Record<Commission["status"], { label: string; className: string }> = {
   pending: { label: "Menunggu artist", className: "bg-premium/10 text-premium" },
@@ -31,15 +33,7 @@ export const statusStyle: Record<Commission["status"], { label: string; classNam
 export default function CommissionProgressContent() {
   const { user, isAuthenticated } = useUserStore();
   const { commissions } = useCommissionStore();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const mounted = useMounted();
 
   const visibleCommissions = useMemo(() => {
     if (!user) return [];
@@ -147,7 +141,7 @@ export default function CommissionProgressContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[430px]">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-107.5">
                     <Meta icon={CreditCard} label="Bayar" value={commission.payment_status} />
                     <Meta icon={Clock3} label="Update" value={formatDate(commission.updated_at)} />
                     <Meta icon={CheckCircle2} label="Harga" value={formatPrice(commission.price)} />

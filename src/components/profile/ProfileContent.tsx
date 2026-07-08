@@ -1,24 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import ArtistProfile from "@/components/profile/ArtistProfile";
 import ClientProfile from "@/components/profile/ClientProfile";
 import GuestProfile from "@/components/profile/GuestProfile";
 import StaffProfile from "@/components/profile/StaffProfile";
 import { useUserStore } from "@/store/UserStore";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function ProfileContent() {
   const { user, isArtist, isClient } = useUserStore();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const mounted = useMounted();
 
   if (!mounted) {
     return (
