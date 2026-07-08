@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { X, Info, HelpCircle, AlertTriangle } from "lucide-react";
 import {
   useModalStore,
@@ -18,6 +18,13 @@ function ModalIcon({
   type: ModalType;
   variant: ModalVariant;
 }) {
+  if (type === "form") {
+    return (
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mx-auto mb-4">
+        <HelpCircle size={24} className="text-primary" />
+      </div>
+    );
+  }
   if (type === "confirm" && variant === "danger") {
     return (
       <div className="flex items-center justify-center w-12 h-12 rounded-full bg-danger/10 mx-auto mb-4">
@@ -73,12 +80,16 @@ function ModalContent() {
     content,
     type = "alert",
     variant = "default",
+    maxWidthClassName = "max-w-md",
+    formClassName,
     onConfirm,
+    onSubmit,
     onCancel,
   } = config;
 
   const confirmLabel =
-    config.confirmLabel ?? (type === "confirm" ? "Konfirmasi" : "OK");
+    config.confirmLabel
+    ?? (type === "confirm" ? "Konfirmasi" : type === "form" ? "Simpan" : "OK");
   const cancelLabel = config.cancelLabel ?? "Batal";
 
   const handleConfirm = () => {
@@ -90,6 +101,56 @@ function ModalContent() {
     onCancel?.();
     closeModal();
   };
+
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const shouldClose = onSubmit?.(event);
+    if (shouldClose !== false) {
+      closeModal();
+    }
+  };
+
+  const bodyContent = content ? (
+    <div
+      className={[
+        "mb-6",
+        type === "form" ? "" : "text-sm text-content-muted",
+      ].join(" ")}
+    >
+      {content}
+    </div>
+  ) : description ? (
+    <p className="text-sm text-content-muted text-center mb-6">
+      {description}
+    </p>
+  ) : (
+    <div className="mb-4" />
+  );
+
+  const actionButtons = type === "confirm" || type === "form" ? (
+    <div className="flex gap-3 flex-row-reverse">
+      <Button
+        type={type === "form" ? "submit" : "button"}
+        variant={variant === "danger" ? "danger" : "primary"}
+        className="flex-1 justify-center"
+        onClick={type === "form" ? undefined : handleConfirm}
+      >
+        {confirmLabel}
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        className="flex-1 justify-center"
+        onClick={handleCancel}
+      >
+        {cancelLabel}
+      </Button>
+    </div>
+  ) : (
+    <Button className="w-full justify-center" onClick={handleConfirm}>
+      {confirmLabel}
+    </Button>
+  );
 
   return (
     <div
@@ -112,7 +173,7 @@ function ModalContent() {
         aria-modal="true"
         aria-labelledby="modal-title"
         className={[
-          "relative z-10 w-full max-w-md",
+          `relative z-10 w-full ${maxWidthClassName}`,
           "bg-surface rounded-2xl shadow-2xl border border-content/10 p-6",
           "transition-all duration-200",
           visible ? "scale-100 translate-y-0" : "scale-95 translate-y-3",
@@ -139,39 +200,16 @@ function ModalContent() {
           {title}
         </h2>
 
-        {/* Body: custom content OR simple description */}
-        {content ? (
-          <div className="text-sm text-content-muted mb-6">{content}</div>
-        ) : description ? (
-          <p className="text-sm text-content-muted text-center mb-6">
-            {description}
-          </p>
+        {type === "form" ? (
+          <form onSubmit={handleFormSubmit} className={formClassName}>
+            {bodyContent}
+            {actionButtons}
+          </form>
         ) : (
-          <div className="mb-4" />
-        )}
-
-        {/* Action buttons */}
-        {type === "confirm" ? (
-          <div className="flex gap-3 flex-row-reverse">
-            <Button
-              variant={variant === "danger" ? "danger" : "primary"}
-              className="flex-1 justify-center"
-              onClick={handleConfirm}
-            >
-              {confirmLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-1 justify-center"
-              onClick={handleCancel}
-            >
-              {cancelLabel}
-            </Button>
-          </div>
-        ) : (
-          <Button className="w-full justify-center" onClick={handleConfirm}>
-            {confirmLabel}
-          </Button>
+          <>
+            {bodyContent}
+            {actionButtons}
+          </>
         )}
       </div>
     </div>

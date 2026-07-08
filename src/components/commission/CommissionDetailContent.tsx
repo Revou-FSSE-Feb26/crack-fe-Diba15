@@ -192,7 +192,7 @@ export default function CommissionDetailContent({ commissionId }: CommissionDeta
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[430px]">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-107.5">
             <Meta icon={CreditCard} label="Bayar" value={commission.payment_status} />
             <Meta icon={Clock3} label="Update" value={formatDate(commission.updated_at)} />
             <Meta icon={CheckCircle2} label="Harga" value={formatPrice(commission.price)} />
