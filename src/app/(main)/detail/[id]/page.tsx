@@ -6,18 +6,19 @@ import { useParams } from "next/navigation";
 import { Share2, BadgeCheck, ArrowLeft, ImageIcon } from "lucide-react";
 
 import users from "@/data/users";
-import profiles from "@/data/profiles";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import CommissionButton from "@/components/detail/CommissionButton";
 import FavoriteButton from "@/components/detail/FavoriteButton";
 import { useArtworkStore } from "@/store/ArtworkStore";
+import { useProfileStore } from "@/store/ProfileStore";
 import { buildArtworkWithRelations } from "@/utils/search";
 
 export default function Detail() {
   const params = useParams();
   const id = params.id as string;
   const { artworks, artworkTags, tags } = useArtworkStore();
-  const artwork = buildArtworkWithRelations(artworks, artworkTags, tags)
+  const { profiles } = useProfileStore();
+  const artwork = buildArtworkWithRelations(artworks, artworkTags, tags, profiles)
     .find((item) => item.id === id);
 
   if (!artwork) {

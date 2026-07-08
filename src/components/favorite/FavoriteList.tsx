@@ -9,24 +9,28 @@ import { useFavoriteStore } from "@/store/FavoriteStore";
 import { useUserStore } from "@/store/UserStore";
 import { buildArtworkWithRelations } from "@/utils/search";
 import { useMounted } from "@/hooks/useMounted";
+import { useProfileStore } from "@/store/ProfileStore";
 
 export default function FavoriteList() {
   const { user, isAuthenticated } = useUserStore();
   const favoritesByUser = useFavoriteStore((state) => state.favoritesByUser);
+  const { profiles } = useProfileStore();
   const mounted = useMounted();
 
   const favoriteArtworks = useMemo(() => {
     if (!user) return [];
 
     const favoriteIds = favoritesByUser[user.id] ?? [];
-    const allArtworks = buildArtworkWithRelations();
-    const artworkById = new Map(allArtworks.map((artwork) => [artwork.id, artwork]));
+    const allArtworks = buildArtworkWithRelations(undefined, undefined, undefined, profiles);
+    const artworkById = new Map(
+      allArtworks.map((artwork) => [artwork.id, artwork]),
+    );
 
     return [...favoriteIds]
       .reverse()
       .map((id) => artworkById.get(id))
       .filter((artwork) => artwork !== undefined);
-  }, [user, favoritesByUser]);
+  }, [user, favoritesByUser, profiles]);
 
   return (
     <main className="min-h-screen bg-background text-content pb-20">
@@ -58,7 +62,9 @@ export default function FavoriteList() {
               <Heart size={28} className="text-content-muted" />
             </div>
             <div>
-              <p className="font-semibold text-content">Login untuk melihat favorites</p>
+              <p className="font-semibold text-content">
+                Login untuk melihat favorites
+              </p>
               <p className="text-sm text-content-muted mt-1">
                 Simpan karya favoritmu dan akses kembali kapan saja.
               </p>
@@ -87,9 +93,12 @@ export default function FavoriteList() {
               <Heart size={28} className="text-content-muted" />
             </div>
             <div>
-              <p className="font-semibold text-content">Belum ada karya favorit</p>
+              <p className="font-semibold text-content">
+                Belum ada karya favorit
+              </p>
               <p className="text-sm text-content-muted mt-1">
-                Tekan ikon hati di beranda atau halaman detail untuk menyimpan karya.
+                Tekan ikon hati di beranda atau halaman detail untuk menyimpan
+                karya.
               </p>
             </div>
             <Link

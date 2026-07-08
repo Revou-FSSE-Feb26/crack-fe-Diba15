@@ -9,11 +9,11 @@ import AvatarInitials from "./AvatarInitials";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import CommissionButton from "@/components/detail/CommissionButton";
-import profiles from "@/data/profiles";
 import { useToastStore } from "@/store/ToastStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useFavoriteStore } from "@/store/FavoriteStore";
 import { useUserStore } from "@/store/UserStore";
+import { useProfileStore } from "@/store/ProfileStore";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
   const { artist, artist_profile, tags } = artwork;
@@ -21,6 +21,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
   const { openModal } = useModalStore();
   const { user, isAuthenticated } = useUserStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
+  const { profiles } = useProfileStore();
   const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
   const basePrice = profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ?? null;
 
