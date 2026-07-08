@@ -1,26 +1,81 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* 
+* primary untuk 
+*/
+
+/* 1. Mendefinisikan variabel dinamis untuk Light dan Dark mode */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds (Light Mode) */
+  --bg-main: #F8FAFC; /* Slate 50 - Background layar utama yang lembut */
+  --bg-surface: #FFFFFF; /* Putih murni untuk kartu artwork */
+
+  /* Text (Light Mode) */
+  --text-main: #2F4858; /* Charcoal Blue - Teks utama yang sangat elegan */
+  --text-muted: #33658A; /* Baltic Blue - Untuk teks sekunder/deskripsi */
+
+  /* Brand Colors */
+  --brand-primary: #33658A; /* Baltic Blue */
+  --brand-primary-hover: #2F4858; /* Charcoal Blue */
+  --brand-accent: #86BBD8; /* Sky Reflection */
+
+  /* Status Colors */
+  --status-verified: #10B981; /* Tetap Emerald untuk UX kelulusan kurasi yang jelas */
+  --status-premium: #F6AE2D; /* Honey Bronze - Mewah untuk Kurasi Prioritas */
+  --status-danger: #F26419; /* Blaze Orange - Tegas untuk aksi Flagging/AI Slop */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Konfigurasi Dark Mode manual via class .dark dari Context */
+.dark {
+  /* Backgrounds (Dark Mode) */
+  --bg-main: #1D2D37; /* Versi lebih gelap dari Charcoal Blue untuk latar utama */
+  --bg-surface: #2F4858; /* Charcoal Blue untuk kartu (Card) agar menonjol */
+
+  /* Text (Dark Mode) */
+  --text-main: #F8FAFC; /* Putih/Slate 50 agar kontras */
+  --text-muted: #86BBD8; /* Sky Reflection - Cantik dan terbaca di latar gelap */
+
+  /* Brand Colors (Dark Mode) */
+  /* Di mode gelap, warna utama harus lebih terang agar tidak tenggelam */
+  --brand-primary: #86BBD8; /* Sky Reflection */
+  --brand-primary-hover: #33658A; /* Baltic Blue */
+  --brand-accent: #F6AE2D; /* Honey Bronze */
+
+  /* Status Colors (Dark Mode) */
+  --status-verified: #34D399; /* Emerald 400 - Diterangkan sedikit */
+  --status-premium: #F6AE2D; /* Honey Bronze */
+  --status-danger: #F26419; /* Blaze Orange */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 2. Mendaftarkan variabel tersebut ke dalam Tailwind Theme v4 */
+@theme {
+  /* Custom Semantic Colors */
+  --color-background: var(--bg-main);
+  --color-surface: var(--bg-surface);
+  
+  --color-content: var(--text-main);
+  --color-content-muted: var(--text-muted);
+  
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-accent: var(--brand-accent);
+  
+  --color-verified: var(--status-verified);
+  --color-premium: var(--status-premium);
+  --color-danger: var(--status-danger);
+
+  --font-body: var(--font-body);
+  --font-outfit: var(--font-outfit);
+  --font-syne: var(--font-syne);
+}
+
+/* Base layer default */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-content);
+    /* Transisi halus saat toggle theme diklik */
+    transition: background-color 0.3s ease, color 0.3s ease; 
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
