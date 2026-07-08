@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { FormEvent, ReactNode } from "react";
+import type { SubmitEvent, ReactNode } from "react";
 
 export type ModalType = "alert" | "confirm" | "form";
 export type ModalVariant = "default" | "danger";
@@ -29,7 +29,7 @@ export interface ModalConfig {
    * Dipakai saat type === "form". Setelah callback jalan, modal otomatis ditutup.
    * Jika ingin menahan modal tetap terbuka (mis. validasi gagal), return false.
    */
-  onSubmit?: (event: FormEvent<HTMLFormElement>) => void | boolean;
+  onSubmit?: (event: SubmitEvent<HTMLFormElement>) => void | boolean;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm?: () => void;

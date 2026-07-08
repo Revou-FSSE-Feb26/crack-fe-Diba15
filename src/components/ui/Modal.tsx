@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import { X, Info, HelpCircle, AlertTriangle } from "lucide-react";
 import {
   useModalStore,
@@ -102,7 +102,7 @@ function ModalContent() {
     closeModal();
   };
 
-  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const shouldClose = onSubmit?.(event);
     if (shouldClose !== false) {
