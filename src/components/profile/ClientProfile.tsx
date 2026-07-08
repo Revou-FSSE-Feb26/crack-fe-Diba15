@@ -5,7 +5,7 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ClientCommissionHistory from "@/components/profile/ClientCommissionHistory";
 import ProfileHeading from "@/components/profile/ProfileHeading";
-import StatItem from "@/components/profile/StatItem";
+import Stat from "@/components/ui/Stat";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
 import { useCommissionStore } from "@/store/CommissionStore";
@@ -72,16 +72,16 @@ export default function ClientProfile({ user }: ClientProfileProps) {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                <StatItem icon={Briefcase}>
+                <Stat variant="inline" icon={Briefcase}>
                   <strong className="text-content">
                     {clientCommissions.length}
                   </strong>{" "}
                   Komisi
-                </StatItem>
-                <StatItem icon={Clock3}>
+                </Stat>
+                <Stat variant="inline" icon={Clock3}>
                   {activeCommissions.length} sedang berjalan
-                </StatItem>
-                <StatItem icon={CalendarDays}>Bergabung {joinedDate}</StatItem>
+                </Stat>
+                <Stat variant="inline" icon={CalendarDays}>Bergabung {joinedDate}</Stat>
               </div>
             </div>
           </div>

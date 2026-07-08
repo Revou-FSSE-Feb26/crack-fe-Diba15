@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Briefcase, CheckCircle2, FileWarning, ImageIcon, Users } from "lucide-react";
 
-import StatCard from "@/components/dashboard/StatCard";
+import Stat from "@/components/ui/Stat";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
@@ -36,17 +36,17 @@ export default function DashboardPage() {
     <>
       {user?.role === "admin" ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Total User" value={stats.totalUsers} icon={Users} />
-          <StatCard label="Artist" value={stats.totalArtists} icon={ImageIcon} />
-          <StatCard label="Client" value={stats.totalClients} icon={Users} />
-          <StatCard label="Komisi Aktif" value={stats.activeCommissions} icon={Briefcase} />
+          <Stat variant="card" label="Total User" value={stats.totalUsers} icon={Users} />
+          <Stat variant="card" label="Artist" value={stats.totalArtists} icon={ImageIcon} />
+          <Stat variant="card" label="Client" value={stats.totalClients} icon={Users} />
+          <Stat variant="card" label="Komisi Aktif" value={stats.activeCommissions} icon={Briefcase} />
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Artwork Pending" value={stats.pendingArtworks} icon={ImageIcon} />
-          <StatCard label="Dispute" value={stats.disputedCommissions} icon={FileWarning} />
-          <StatCard label="Total Artist" value={stats.totalArtists} icon={Users} />
-          <StatCard label="Komisi Aktif" value={stats.activeCommissions} icon={Briefcase} />
+          <Stat variant="card" label="Artwork Pending" value={stats.pendingArtworks} icon={ImageIcon} />
+          <Stat variant="card" label="Dispute" value={stats.disputedCommissions} icon={FileWarning} />
+          <Stat variant="card" label="Total Artist" value={stats.totalArtists} icon={Users} />
+          <Stat variant="card" label="Komisi Aktif" value={stats.activeCommissions} icon={Briefcase} />
         </div>
       )}
 

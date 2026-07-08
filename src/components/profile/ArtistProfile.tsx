@@ -12,7 +12,7 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
 import ProfileHeading from "@/components/profile/ProfileHeading";
-import StatItem from "@/components/profile/StatItem";
+import Stat from "@/components/ui/Stat";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
 import Button from "@/components/ui/Button";
@@ -82,16 +82,16 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                <StatItem icon={ImageIcon}>
+                <Stat variant="inline" icon={ImageIcon}>
                   <strong className="text-content">
                     {profile?.approved_portfolio_count ?? artistArtworks.length}
                   </strong>{" "}
                   Karya
-                </StatItem>
-                <StatItem icon={CalendarDays}>Bergabung {joinedDate}</StatItem>
-                <StatItem icon={Palette}>
+                </Stat>
+                <Stat variant="inline" icon={CalendarDays}>Bergabung {joinedDate}</Stat>
+                <Stat variant="inline" icon={Palette}>
                   {artistArtworks.length} karya di portfolio
-                </StatItem>
+                </Stat>
               </div>
             </div>
           </div>

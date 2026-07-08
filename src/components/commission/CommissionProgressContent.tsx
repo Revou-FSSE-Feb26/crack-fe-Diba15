@@ -15,20 +15,9 @@ import { useCommissionStore } from "@/store/CommissionStore";
 import { useUserStore } from "@/store/UserStore";
 import users from "@/data/users";
 import { formatDate, formatPrice } from "@/utils";
-import type { Commission } from "@/types";
-import Meta from "@/components/commission/Meta";
+import Stat from "@/components/ui/Stat";
 import { useMounted } from "@/hooks/useMounted";
-
-
-export const statusStyle: Record<Commission["status"], { label: string; className: string }> = {
-  pending: { label: "Menunggu artist", className: "bg-premium/10 text-premium" },
-  accepted: { label: "Diterima", className: "bg-primary/10 text-primary" },
-  in_progress: { label: "Dikerjakan", className: "bg-primary/10 text-primary" },
-  revision: { label: "Review client", className: "bg-premium/10 text-premium" },
-  completed: { label: "Selesai", className: "bg-verified/10 text-verified" },
-  cancelled: { label: "Dibatalkan", className: "bg-danger/10 text-danger" },
-  disputed: { label: "Dispute", className: "bg-danger/10 text-danger" },
-};
+import { commissionStatusConfig } from "@/utils/commissionStatus";
 
 export default function CommissionProgressContent() {
   const { user, isAuthenticated } = useUserStore();
@@ -107,7 +96,7 @@ export default function CommissionProgressContent() {
           {visibleCommissions.map((commission) => {
             const artist = users.find((item) => item.id === commission.artists_id);
             const client = users.find((item) => item.id === commission.client_id);
-            const status = statusStyle[commission.status];
+            const status = commissionStatusConfig[commission.status];
             const counterpartName = isArtistView ? client?.name ?? "Client" : artist?.name ?? "Artist";
 
             return (
@@ -142,10 +131,10 @@ export default function CommissionProgressContent() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-107.5">
-                    <Meta icon={CreditCard} label="Bayar" value={commission.payment_status} />
-                    <Meta icon={Clock3} label="Update" value={formatDate(commission.updated_at)} />
-                    <Meta icon={CheckCircle2} label="Harga" value={formatPrice(commission.price)} />
-                    <Meta icon={Briefcase} label="Dibuat" value={formatDate(commission.created_at)} />
+                    <Stat icon={CreditCard} label="Bayar" value={commission.payment_status} />
+                    <Stat icon={Clock3} label="Update" value={formatDate(commission.updated_at)} />
+                    <Stat icon={CheckCircle2} label="Harga" value={formatPrice(commission.price)} />
+                    <Stat icon={Briefcase} label="Dibuat" value={formatDate(commission.created_at)} />
                   </div>
                 </div>
 
