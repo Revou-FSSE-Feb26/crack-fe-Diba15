@@ -9,7 +9,7 @@ export default function Input({
     label?: string;
     placeholder?: string;
 } & { children?: React.ReactNode }) {
-    const inputClass = "w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-[#1D2D37] border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#33658A] dark:focus:ring-[#86BBD8] focus:border-transparent outline-none transition-all"
+    const inputClass = "w-full pl-10 pr-4 py-2.5 bg-background border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#33658A] dark:focus:ring-[#86BBD8] focus:border-transparent outline-none transition-all"
 
     return (
         <div>

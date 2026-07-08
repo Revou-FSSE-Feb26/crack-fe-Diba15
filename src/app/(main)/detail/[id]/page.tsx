@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { Share2, BadgeCheck, ArrowLeft, ImageIcon } from "lucide-react";
+import { Share2, BadgeCheck, ArrowLeft, ImageIcon, Check } from "lucide-react";
 
 import users from "@/data/users";
 import AvatarInitials from "@/components/home/AvatarInitials";
@@ -12,14 +13,23 @@ import FavoriteButton from "@/components/detail/FavoriteButton";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { buildArtworkWithRelations } from "@/utils/search";
+import { useCopyLink } from "@/hooks/useCopyLink";
 
 export default function Detail() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { artworks, artworkTags, tags } = useArtworkStore();
   const { profiles } = useProfileStore();
-  const artwork = buildArtworkWithRelations(artworks, artworkTags, tags, profiles)
-    .find((item) => item.id === id);
+  const { copied, copyPath } = useCopyLink({
+    successMessage: "Link karya berhasil disalin.",
+  });
+  const artwork = buildArtworkWithRelations(
+    artworks,
+    artworkTags,
+    tags,
+    profiles,
+  ).find((item) => item.id === id);
 
   if (!artwork) {
     return (
@@ -37,7 +47,9 @@ export default function Detail() {
         <div className="max-w-3xl mx-auto px-4 py-16 text-center">
           <div className="bg-surface border border-content/10 rounded-2xl p-8">
             <ImageIcon className="w-10 h-10 text-content-muted mx-auto mb-3" />
-            <h1 className="text-2xl font-bold text-content">Artwork tidak ditemukan</h1>
+            <h1 className="text-2xl font-bold text-content">
+              Artwork tidak ditemukan
+            </h1>
             <p className="mt-2 text-sm text-content-muted">
               Karya ini belum tersedia atau sudah tidak ada di daftar artwork.
             </p>
@@ -48,18 +60,24 @@ export default function Detail() {
   }
 
   const artist = users.find((user) => user.id === artwork.artists_id);
-  const artistProfile = profiles.find((profile) => profile.user_id === artist?.id);
+  const artistProfile = profiles.find(
+    (profile) => profile.user_id === artist?.id,
+  );
+
+  const handleCopyLink = (id: string) => {
+    copyPath(id);
+  };
 
   return (
     <main className="min-h-screen bg-background text-content pb-20">
-      <nav className="sticky top-0 z-45 bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
+      <nav className="bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
         <div className=" flex items-center gap-4">
-          <Link
-            href="/"
-            className="p-2 hover:bg-content/5 rounded-full transition-colors duration-200"
+          <button
+            onClick={() => router.back()}
+            className="p-2 hover:bg-content/5 rounded-full transition-colors duration-200 cursor-pointer"
           >
             <ArrowLeft size={20} />
-          </Link>
+          </button>
           <h1 className="font-semibold truncate">{artwork.title}</h1>
         </div>
       </nav>
@@ -93,8 +111,14 @@ export default function Detail() {
 
           <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
             <div className="bg-surface p-5 rounded-xl border border-content/5 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <AvatarInitials name={artwork.artist.name} className="w-12 h-12 text-lg" />
+              <Link
+                href={`/artists/${artwork.artist.id}`}
+                className="flex items-center gap-3 mb-4"
+              >
+                <AvatarInitials
+                  name={artwork.artist.name}
+                  className="w-12 h-12 text-lg"
+                />
                 <div>
                   <div className="flex items-center gap-1.5">
                     <h2 className="font-bold text-lg">{artwork.artist.name}</h2>
@@ -104,7 +128,7 @@ export default function Detail() {
                   </div>
                   <p className="text-sm text-content-muted">Artist</p>
                 </div>
-              </div>
+              </Link>
 
               {artwork.artist_profile.is_open_for_commission && (
                 <CommissionButton
@@ -142,9 +166,20 @@ export default function Detail() {
               <hr className="border-content/10 my-4" />
 
               <div className="flex items-center gap-4">
-                <FavoriteButton artworkId={artwork.id} artworkTitle={artwork.title} />
-                <button title="Share" className="p-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors">
-                  <Share2 size={20} />
+                <FavoriteButton
+                  artworkId={artwork.id}
+                  artworkTitle={artwork.title}
+                />
+                <button
+                  title="Share"
+                  className="p-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors"
+                  onClick={() => handleCopyLink(artwork.id)}
+                >
+                  {copied ? (
+                    <Check size={20} className="text-verified" />
+                  ) : (
+                    <Share2 size={20} />
+                  )}
                 </button>
               </div>
             </div>

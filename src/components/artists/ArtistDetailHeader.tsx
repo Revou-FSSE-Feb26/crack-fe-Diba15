@@ -9,7 +9,9 @@ import {
   ImageIcon,
   MessageCircle,
   Heart,
+  ArrowLeft,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import users from "@/data/users";
 import AvatarInitials from "@/components/home/AvatarInitials";
@@ -23,6 +25,7 @@ interface ArtistDetailHeaderProps {
 }
 
 export default function ArtistDetailHeader({ artistId }: ArtistDetailHeaderProps) {
+  const router = useRouter();
   const user = users.find((item) => item.id === artistId);
   const { profiles } = useProfileStore();
   const profile = profiles.find((item) => item.user_id === artistId);
@@ -41,7 +44,15 @@ export default function ArtistDetailHeader({ artistId }: ArtistDetailHeaderProps
   });
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col gap-6">
+      <button
+        onClick={() => router.back()}
+        className="inline-flex items-center gap-2 text-sm text-content-muted hover:text-primary transition-colors cursor-pointer"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Kembali
+      </button>
+      
       <div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
         <div className="flex items-start gap-4">
           <AvatarInitials
@@ -107,34 +118,36 @@ export default function ArtistDetailHeader({ artistId }: ArtistDetailHeaderProps
         )}
       </div>
 
-      <div className="lg:w-72 shrink-0">
+      <div className="w-full">
         <div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-5 sticky top-24 space-y-4">
           <h2 className="font-heading font-semibold text-content">Pesan Komisi</h2>
 
-          {formattedPrice && (
-            <div className="flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-primary shrink-0" />
-              <div>
-                <p className="text-xs text-content-muted">Mulai dari</p>
-                <p className="font-display text-xl font-bold text-primary">
-                  {formattedPrice}
-                </p>
+          <div className="flex items-center justify-evenly gap-4 flex-wrap">
+            {formattedPrice && (
+              <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg p-3">
+                <Wallet className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs text-content-muted">Mulai dari</p>
+                  <p className="font-display text-xl font-bold text-primary">
+                    {formattedPrice}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-
-          <div className="space-y-2 text-sm text-content-muted">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-verified shrink-0" />
-              Dana aman dengan sistem Escrow
-            </div>
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 text-primary shrink-0" />
-              Diskusi langsung dengan artist
-            </div>
-            <div className="flex items-center gap-2">
-              <Heart className="w-4 h-4 text-danger shrink-0" />
-              Garansi revisi inklusif
+            )}
+  
+            <div className="space-y-2 text-sm text-content-muted">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-verified shrink-0" />
+                Dana aman dengan sistem Escrow
+              </div>
+              <div className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-primary shrink-0" />
+                Diskusi langsung dengan artist
+              </div>
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-danger shrink-0" />
+                Garansi revisi inklusif
+              </div>
             </div>
           </div>
 

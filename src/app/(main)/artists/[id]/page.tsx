@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import users from "@/data/users";
 import profiles from "@/data/profiles";
@@ -44,14 +42,6 @@ export default async function ArtistDetailPage({
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-sm text-content-muted hover:text-primary transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Kembali ke Feed
-      </Link>
-
       <ArtistDetailHeader artistId={id} />
 
       <ArtistDetailPortfolio artistId={id} />

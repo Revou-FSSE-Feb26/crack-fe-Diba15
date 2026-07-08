@@ -125,26 +125,29 @@ const values = [
 export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-
       {/* ── 1. Hero Section ─────────────────────────────────────────────── */}
-      <section className="mb-16">
+      <section className="mb-16 relative">
         {/* Badge */}
+        <div className="absolute -top-10 -left-10 w-72 h-72 bg-linear-to-br from-primary/10 via-warm/10 to-transparent rounded-full blur-3xl -z-10" />
+
         <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-medium px-3 py-1.5 rounded-full mb-5">
           <Palette className="w-4 h-4" />
           Tentang TruBrush
         </div>
 
-        {/* H1 */}
         <h1 className="font-display text-4xl md:text-5xl font-bold text-content mb-5 leading-tight max-w-3xl">
           Di Sini, Setiap Goresan{" "}
-          <span className="text-primary">Dibuat oleh Manusia</span>
+          <span className="bg-linear-to-r from-primary to-warm-hover bg-clip-text text-transparent">
+            Dibuat oleh Manusia
+          </span>
         </h1>
 
         {/* Tagline */}
         <p className="text-lg text-content-muted leading-relaxed max-w-2xl mb-10">
-          TruBrush lahir dari satu keyakinan sederhana: seni sejati berasal dari jiwa manusia,
-          bukan dari algoritma. Kami membangun platform tempat artis terverifikasi terhubung
-          dengan kolektor yang menghargai keaslian — setiap karya, setiap komisi, 100% human-made.
+          TruBrush lahir dari satu keyakinan sederhana: seni sejati berasal dari
+          jiwa manusia, bukan dari algoritma. Kami membangun platform tempat
+          artis terverifikasi terhubung dengan kolektor yang menghargai keaslian
+          — setiap karya, setiap komisi, 100% human-made.
         </p>
 
         {/* Stats Row */}
@@ -152,12 +155,14 @@ export default function AboutPage() {
           {stats.map(({ value, label }) => (
             <div
               key={label}
-              className="flex flex-col items-center text-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface px-4 py-5"
+              className="flex flex-col items-center text-center rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-warm/40 bg-surface px-4 py-5 transition-colors"
             >
               <span className="font-display text-2xl md:text-3xl font-bold text-primary mb-1">
                 {value}
               </span>
-              <span className="text-xs md:text-sm text-content-muted">{label}</span>
+              <span className="text-xs md:text-sm text-content-muted">
+                {label}
+              </span>
             </div>
           ))}
         </div>
@@ -177,21 +182,24 @@ export default function AboutPage() {
               Krisis AI Mengancam Ekosistem Seni Manusia
             </h2>
             <p className="text-content-muted leading-relaxed mb-4">
-              Dalam beberapa tahun terakhir, generator gambar AI telah membanjiri internet
-              dengan jutaan citra setiap harinya. Platform generik tidak membedakan mana
-              yang dibuat manusia dan mana yang dihasilkan mesin — semuanya dicampur aduk
-              dalam satu feed yang sama.
+              Dalam beberapa tahun terakhir, generator gambar AI telah
+              membanjiri internet dengan jutaan citra setiap harinya. Platform
+              generik tidak membedakan mana yang dibuat manusia dan mana yang
+              dihasilkan mesin — semuanya dicampur aduk dalam satu feed yang
+              sama.
             </p>
             <p className="text-content-muted leading-relaxed mb-4">
-              Akibatnya, artis manusia terpinggirkan. Karya yang lahir dari jam-jam latihan,
-              eksperimen, dan emosi nyata harus bersaing harga dengan output AI yang diproduksi
-              dalam hitungan detik. Ini bukan persaingan yang adil — dan kami menolak
-              membiarkannya terus terjadi.
+              Akibatnya, artis manusia terpinggirkan. Karya yang lahir dari
+              jam-jam latihan, eksperimen, dan emosi nyata harus bersaing harga
+              dengan output AI yang diproduksi dalam hitungan detik. Ini bukan
+              persaingan yang adil — dan kami menolak membiarkannya terus
+              terjadi.
             </p>
             <p className="text-content-muted leading-relaxed">
-              TruBrush hadir sebagai garis pertahanan bagi komunitas artis. Kami membangun
-              ruang khusus yang hanya untuk seni manusia, dengan sistem verifikasi yang ketat
-              dan komunitas yang peduli pada keaslian karya.
+              TruBrush hadir sebagai garis pertahanan bagi komunitas artis. Kami
+              membangun ruang khusus yang hanya untuk seni manusia, dengan
+              sistem verifikasi yang ketat dan komunitas yang peduli pada
+              keaslian karya.
             </p>
           </div>
 
@@ -200,10 +208,13 @@ export default function AboutPage() {
             {/* Pull quote */}
             <blockquote className="border-l-4 border-primary pl-4 mb-5">
               <p className="font-heading text-base font-medium text-content italic leading-relaxed">
-                &ldquo;Seni bukan sekadar gambar — ia adalah keringat, kegelisahan, dan kejujuran
-                seorang manusia yang dituangkan ke atas kanvas.&rdquo;
+                &ldquo;Seni bukan sekadar gambar — ia adalah keringat,
+                kegelisahan, dan kejujuran seorang manusia yang dituangkan ke
+                atas kanvas.&rdquo;
               </p>
-              <footer className="mt-2 text-sm text-content-muted">— Manifesto TruBrush</footer>
+              <footer className="mt-2 text-sm text-content-muted">
+                — Manifesto TruBrush
+              </footer>
             </blockquote>
 
             {/* Problem list */}
@@ -216,7 +227,9 @@ export default function AboutPage() {
                   <div className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-danger/10 flex items-center justify-center">
                     <AlertTriangle className="w-3 h-3 text-danger" />
                   </div>
-                  <p className="text-sm text-content-muted leading-relaxed">{item}</p>
+                  <p className="text-sm text-content-muted leading-relaxed">
+                    {item}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -235,8 +248,9 @@ export default function AboutPage() {
           Cara Kerja TruBrush
         </h2>
         <p className="text-content-muted mb-8 max-w-2xl">
-          Dari verifikasi artis hingga pengiriman karya — prosesnya dirancang untuk
-          melindungi semua pihak dan memastikan setiap transaksi berjalan dengan percaya diri.
+          Dari verifikasi artis hingga pengiriman karya — prosesnya dirancang
+          untuk melindungi semua pihak dan memastikan setiap transaksi berjalan
+          dengan percaya diri.
         </p>
 
         <div className="space-y-4">
@@ -260,7 +274,9 @@ export default function AboutPage() {
                 <h3 className="font-heading font-semibold text-content text-base mb-1">
                   {title}
                 </h3>
-                <p className="text-sm text-content-muted leading-relaxed">{description}</p>
+                <p className="text-sm text-content-muted leading-relaxed">
+                  {description}
+                </p>
               </div>
             </div>
           ))}
@@ -278,8 +294,8 @@ export default function AboutPage() {
           Prinsip yang Memandu Kami
         </h2>
         <p className="text-content-muted mb-8 max-w-2xl">
-          Enam nilai ini bukan sekadar kata-kata — mereka tertanam dalam setiap keputusan
-          produk dan kebijakan yang kami buat di TruBrush.
+          Enam nilai ini bukan sekadar kata-kata — mereka tertanam dalam setiap
+          keputusan produk dan kebijakan yang kami buat di TruBrush.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -308,8 +324,9 @@ export default function AboutPage() {
           Bergabunglah dengan Gerakan Ini
         </h2>
         <p className="text-content-muted text-center mb-8 max-w-xl mx-auto">
-          Apakah Anda seorang artis yang ingin karya Anda dihargai, atau kolektor yang
-          ingin memiliki seni autentik — TruBrush adalah rumah Anda.
+          Apakah Anda seorang artis yang ingin karya Anda dihargai, atau
+          kolektor yang ingin memiliki seni autentik — TruBrush adalah rumah
+          Anda.
         </p>
 
         <div className="grid sm:grid-cols-2 gap-4">
@@ -322,8 +339,9 @@ export default function AboutPage() {
               Untuk Artis
             </h3>
             <p className="text-sm text-content-muted leading-relaxed mb-5 flex-1">
-              Daftarkan diri sebagai artis terverifikasi, tampilkan portofolio Anda, dan
-              mulai terima komisi dari klien yang menghargai seni buatan manusia.
+              Daftarkan diri sebagai artis terverifikasi, tampilkan portofolio
+              Anda, dan mulai terima komisi dari klien yang menghargai seni
+              buatan manusia.
             </p>
             <Link
               href="/signup"
@@ -343,8 +361,9 @@ export default function AboutPage() {
               Untuk Kolektor
             </h3>
             <p className="text-sm text-content-muted leading-relaxed mb-5 flex-1">
-              Jelajahi ribuan karya autentik dari artis terverifikasi. Pesan komisi dengan
-              aman menggunakan sistem Escrow dan terima Sertifikat Human-Made bersama karya Anda.
+              Jelajahi ribuan karya autentik dari artis terverifikasi. Pesan
+              komisi dengan aman menggunakan sistem Escrow dan terima Sertifikat
+              Human-Made bersama karya Anda.
             </p>
             <Link
               href="/"
