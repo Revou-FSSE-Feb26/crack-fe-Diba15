@@ -15,7 +15,7 @@ import Link from "next/link";
 import { parseSearchQuery, searchArtworks } from "@/utils/search";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import { useArtworkStore } from "@/store/ArtworkStore";
-import { useProfileStore } from "@/store/ProfileStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
 
 const TYPE_CONFIG = {
   title: {
@@ -42,10 +42,10 @@ export default function SearchPage() {
   const rawQuery = decodeURIComponent(params.param as string);
   const [inputValue, setInputValue] = useState(rawQuery);
   const { artworks, artworkTags, tags } = useArtworkStore();
-  const { profiles } = useProfileStore();  
+  const { users } = useUserManagementStore();  
 
   const parsed = parseSearchQuery(rawQuery);
-  const results = searchArtworks(parsed, artworks, artworkTags, tags, profiles)
+  const results = searchArtworks(parsed, artworks, artworkTags, tags, users)
     .filter((artwork) => artwork.is_visible_on_feed);
 
   const { label, Icon, pill } = TYPE_CONFIG[parsed.type];

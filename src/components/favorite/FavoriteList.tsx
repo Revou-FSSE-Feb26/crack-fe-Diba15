@@ -5,23 +5,30 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { useMemo } from "react";
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
+import { useArtworkStore } from "@/store/ArtworkStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useFavoriteStore } from "@/store/FavoriteStore";
 import { useUserStore } from "@/store/UserStore";
 import { buildArtworkWithRelations } from "@/utils/search";
 import { useMounted } from "@/hooks/useMounted";
-import { useProfileStore } from "@/store/ProfileStore";
 
 export default function FavoriteList() {
   const { user, isAuthenticated } = useUserStore();
   const favoritesByUser = useFavoriteStore((state) => state.favoritesByUser);
-  const { profiles } = useProfileStore();
+  const { artworks, artworkTags, tags } = useArtworkStore();
+  const { users } = useUserManagementStore();
   const mounted = useMounted();
 
   const favoriteArtworks = useMemo(() => {
     if (!user) return [];
 
     const favoriteIds = favoritesByUser[user.id] ?? [];
-    const allArtworks = buildArtworkWithRelations(undefined, undefined, undefined, profiles);
+    const allArtworks = buildArtworkWithRelations(
+      artworks,
+      artworkTags,
+      tags,
+      users,
+    );
     const artworkById = new Map(
       allArtworks.map((artwork) => [artwork.id, artwork]),
     );
@@ -30,7 +37,7 @@ export default function FavoriteList() {
       .reverse()
       .map((id) => artworkById.get(id))
       .filter((artwork) => artwork !== undefined);
-  }, [user, favoritesByUser, profiles]);
+  }, [user, favoritesByUser, artworks, artworkTags, tags, users]);
 
   return (
     <main className="min-h-screen bg-background text-content pb-20">

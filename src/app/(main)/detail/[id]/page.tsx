@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Share2, BadgeCheck, ArrowLeft, ImageIcon, Check } from "lucide-react";
 
-import users from "@/data/users";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import CommissionButton from "@/components/detail/CommissionButton";
 import FavoriteButton from "@/components/detail/FavoriteButton";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useProfileStore } from "@/store/ProfileStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
 import { buildArtworkWithRelations } from "@/utils/search";
 import { useCopyLink } from "@/hooks/useCopyLink";
 
@@ -20,6 +20,7 @@ export default function Detail() {
   const router = useRouter();
   const id = params.id as string;
   const { artworks, artworkTags, tags } = useArtworkStore();
+  const { users } = useUserManagementStore();
   const { profiles } = useProfileStore();
   const { copied, copyPath } = useCopyLink({
     successMessage: "Link karya berhasil disalin.",
@@ -28,7 +29,7 @@ export default function Detail() {
     artworks,
     artworkTags,
     tags,
-    profiles,
+    users
   ).find((item) => item.id === id);
 
   if (!artwork) {

@@ -3,8 +3,7 @@ import users from "@/data/users";
 import profiles from "@/data/profiles";
 import tags from "@/data/tags";
 import artworkTags from "@/data/artworkTags";
-import { Artwork, ArtworkTag, ArtworkWithRelations, ParsedQuery, Profile, Tag } from "@/types";
-
+import { Artwork, ArtworkTag, ArtworkWithRelations, ParsedQuery, Tag, User, Profile } from "@/types";
 
 /**
  * Parses a raw search string with optional prefix into a structured query.
@@ -37,10 +36,11 @@ export function buildArtworkWithRelations(
   sourceArtworks: Artwork[] = artworks,
   sourceArtworkTags: ArtworkTag[] = artworkTags,
   sourceTags: Tag[] = tags,
-  sourceProfiles: Profile[] = profiles,
+  sourceUsers: User[] = users,       // NEW
+  sourceProfiles: Profile[] = profiles, // NEW
 ): ArtworkWithRelations[] {
   return sourceArtworks.map((artwork) => {
-    const artist = users.find((u) => u.id === artwork.artists_id);
+    const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
     const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
     const tagIds = sourceArtworkTags
       .filter((at) => at.artwork_id === artwork.id)
@@ -66,9 +66,16 @@ export function searchArtworks(
   sourceArtworks?: Artwork[],
   sourceArtworkTags?: ArtworkTag[],
   sourceTags?: Tag[],
-  sourceProfiles?: Profile[],
+  sourceUsers?: User[],       // NEW
+  sourceProfiles?: Profile[], // NEW
 ): ArtworkWithRelations[] {
-  const all = buildArtworkWithRelations(sourceArtworks, sourceArtworkTags, sourceTags, sourceProfiles);
+  const all = buildArtworkWithRelations(
+    sourceArtworks,
+    sourceArtworkTags,
+    sourceTags,
+    sourceUsers,
+    sourceProfiles,
+  );
   if (!query.value) return all;
   const q = query.value.toLowerCase();
 

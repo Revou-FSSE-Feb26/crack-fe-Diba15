@@ -104,7 +104,6 @@ export default function EditProfileModal({
             id="profile-price"
             type="number"
             min={0}
-            step={10000}
             {...register("base_price_idr", {
               valueAsNumber: true,
               required: "Harga wajib diisi",

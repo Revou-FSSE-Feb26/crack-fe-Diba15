@@ -21,13 +21,13 @@ import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
 import Button from "@/components/ui/Button";
 import { useArtworkStore } from "@/store/ArtworkStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { formatPrice } from "@/utils";
 import { buildArtworkWithRelations } from "@/utils/search";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
+import { useProfileStore } from "@/store/ProfileStore";
 
 interface ArtistProfileProps {
   user: ProfileUser;
@@ -37,7 +37,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
   const { commissions } = useCommissionStore();
   const { artworks, artworkTags, tags } = useArtworkStore();
   const { profiles, updateProfile } = useProfileStore();
-  const { updateUser: updateUserRecord } = useUserManagementStore();
+  const { updateUser: updateUserRecord, users } = useUserManagementStore();
   const { updateCurrentUser } = useUserStore();
   const { addToast } = useToastStore();
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -46,7 +46,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
     artworks,
     artworkTags,
     tags,
-    profiles,
+    users,
   ).filter(
     (artwork) => artwork.artists_id === user.id && artwork.is_visible_on_feed,
   );
