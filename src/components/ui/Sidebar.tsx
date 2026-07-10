@@ -61,7 +61,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 			{/* Bagian Atas: Logo & Navigasi */}
 			<div>
 				<div className="mb-6 flex items-center justify-between gap-2">
-					<Brand />
+					<Brand onClick={onClose} />
 					<button
 						type="button"
 						onClick={onClose}
@@ -97,6 +97,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 				{!isAuthenticated ? (
 					<Link
 						href="/login"
+						onClick={onClose}
 						className="group md:hidden mb-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
 					>
 						<LogIn className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
@@ -170,23 +171,30 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
 				<footer className="border-t border-slate-200/70 pt-4 text-sm text-content-muted dark:border-slate-700/60">
 					<div className="mb-3 flex flex-wrap gap-2 text-xs max-w-50">
-						<Link href="/help" className="transition-colors hover:text-primary">
+						<Link
+							href="/help"
+							onClick={onClose}
+							className="transition-colors hover:text-primary"
+						>
 							Help
 						</Link>
 						<Link
 							href="/privacy"
+							onClick={onClose}
 							className="transition-colors hover:text-primary"
 						>
 							Privacy
 						</Link>
 						<Link
 							href="/about"
+							onClick={onClose}
 							className="transition-colors hover:text-primary"
 						>
 							About TruBrush
 						</Link>
 						<Link
 							href="/careers"
+							onClick={onClose}
 							className="transition-colors hover:text-primary"
 						>
 							Careers

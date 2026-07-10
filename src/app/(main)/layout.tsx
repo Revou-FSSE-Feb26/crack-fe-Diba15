@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/ui/Navbar";
 import Sidebar from "@/components/ui/Sidebar";
 
@@ -10,6 +10,12 @@ export default function MainLayout({
 	children: React.ReactNode;
 }) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	// const pathname = usePathname();
+
+	// Close sidebar automatically when the pathname/route changes
+	useEffect(() => {
+		setIsSidebarOpen(false);
+	}, []);
 
 	const handleToggleSidebar = () => {
 		setIsSidebarOpen((prev) => !prev);
