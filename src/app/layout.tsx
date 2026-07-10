@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/ui/theme/ThemeProvider";
 import ToastContainer from "@/components/ui/Toast";
 import Modal from "@/components/ui/Modal";
+import ImageLightbox from "@/components/ui/ImageLightbox";
 
 const fontOutfit = Outfit({
   subsets: ["latin"],
@@ -64,6 +65,7 @@ export default function RootLayout({
         {/* Global UI layers — rendered above all page content */}
         <Modal />
         <ToastContainer />
+        <ImageLightbox />
       </body>
     </html>
   );

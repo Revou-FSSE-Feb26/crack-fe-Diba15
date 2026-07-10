@@ -2,11 +2,8 @@
 
 import { type SubmitEvent, useEffect, useState } from "react";
 import { X, Info, HelpCircle, AlertTriangle } from "lucide-react";
-import {
-  useModalStore,
-  type ModalType,
-  type ModalVariant,
-} from "@/store/ModalStore";
+import { useModalStore } from "@/store/ModalStore";
+import { ModalType, ModalVariant } from "@/types";
 import Button from "@/components/ui/Button";
 
 // ── Icon area at top of modal ─────────────────────────────────────────────────
@@ -55,7 +52,7 @@ function ModalContent() {
   // Enter animation: double-rAF so CSS transition has a starting frame to diff against
   useEffect(() => {
     const id = requestAnimationFrame(() =>
-      requestAnimationFrame(() => setVisible(true))
+      requestAnimationFrame(() => setVisible(true)),
     );
     return () => cancelAnimationFrame(id);
   }, []);
@@ -88,8 +85,8 @@ function ModalContent() {
   } = config;
 
   const confirmLabel =
-    config.confirmLabel
-    ?? (type === "confirm" ? "Konfirmasi" : type === "form" ? "Simpan" : "OK");
+    config.confirmLabel ??
+    (type === "confirm" ? "Konfirmasi" : type === "form" ? "Simpan" : "OK");
   const cancelLabel = config.cancelLabel ?? "Batal";
 
   const handleConfirm = () => {
@@ -120,37 +117,36 @@ function ModalContent() {
       {content}
     </div>
   ) : description ? (
-    <p className="text-sm text-content-muted text-center mb-6">
-      {description}
-    </p>
+    <p className="text-sm text-content-muted text-center mb-6">{description}</p>
   ) : (
     <div className="mb-4" />
   );
 
-  const actionButtons = type === "confirm" || type === "form" ? (
-    <div className="flex gap-3 flex-row-reverse">
-      <Button
-        type={type === "form" ? "submit" : "button"}
-        variant={variant === "danger" ? "danger" : "primary"}
-        className="flex-1 justify-center"
-        onClick={type === "form" ? undefined : handleConfirm}
-      >
+  const actionButtons =
+    type === "confirm" || type === "form" ? (
+      <div className="flex gap-3 flex-row-reverse">
+        <Button
+          type={type === "form" ? "submit" : "button"}
+          variant={variant === "danger" ? "danger" : "primary"}
+          className="flex-1 justify-center"
+          onClick={type === "form" ? undefined : handleConfirm}
+        >
+          {confirmLabel}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex-1 justify-center"
+          onClick={handleCancel}
+        >
+          {cancelLabel}
+        </Button>
+      </div>
+    ) : (
+      <Button className="w-full justify-center" onClick={handleConfirm}>
         {confirmLabel}
       </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        className="flex-1 justify-center"
-        onClick={handleCancel}
-      >
-        {cancelLabel}
-      </Button>
-    </div>
-  ) : (
-    <Button className="w-full justify-center" onClick={handleConfirm}>
-      {confirmLabel}
-    </Button>
-  );
+    );
 
   return (
     <div

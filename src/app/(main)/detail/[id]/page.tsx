@@ -22,6 +22,7 @@ import FavoriteButton from "@/components/detail/FavoriteButton";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useLightboxStore } from "@/store/LightboxStore";
 import { buildArtworkWithRelations } from "@/utils/search";
 import { useCopyLink } from "@/hooks/useCopyLink";
 
@@ -30,6 +31,7 @@ export default function Detail() {
   const router = useRouter();
   const id = params.id as string;
   const { artworks, artworkTags, tags } = useArtworkStore();
+  const { openLightbox } = useLightboxStore();
   const [showWip, setShowWip] = useState(false);
   const { users } = useUserManagementStore();
   const { profiles } = useProfileStore();
@@ -101,17 +103,25 @@ export default function Detail() {
               artwork.images_url.map((imgUrl, index) => (
                 <div
                   key={`${imgUrl}-${index}`}
-                  className="relative w-full bg-content/5 rounded-xl overflow-hidden shadow-sm"
+                  className="relative w-full rounded-xl overflow-hidden shadow-sm"
                 >
-                  <Image
-                    src={imgUrl}
-                    alt={`${artwork.title} - Image ${index + 1}`}
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    className="w-full h-auto"
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openLightbox(artwork.images_url, index, artwork.title)
+                    }
+                    className="w-full h-auto bg-transparent cursor-pointer"
+                  >
+                    <Image
+                      src={imgUrl}
+                      alt={`${artwork.title} - Image ${index + 1}`}
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      className="w-full h-auto"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  </button>
                 </div>
               ))
             ) : (
@@ -141,13 +151,29 @@ export default function Detail() {
                       sebelum karya ini disetujui tampil.
                     </p>
                     <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-content/5">
-                      <Image
-                        src={artwork.wip_proof_url}
-                        alt={`WIP proof ${artwork.title}`}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 700px"
-                        className="object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openLightbox(
+                            [
+                              artwork.wip_proof_url
+                                ? artwork.wip_proof_url
+                                : "",
+                            ],
+                            0,
+                            artwork.title,
+                          )
+                        }
+                        className="w-full h-auto bg-transparent cursor-pointer"
+                      >
+                        <Image
+                          src={artwork.wip_proof_url}
+                          alt={`WIP proof ${artwork.title}`}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 700px"
+                          className="object-cover"
+                        />
+                      </button>
                     </div>
                   </div>
                 )}
