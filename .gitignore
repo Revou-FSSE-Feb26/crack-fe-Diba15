@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# Zed
+.zed/
+
 # production
 /build
 
