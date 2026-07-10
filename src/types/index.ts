@@ -3,7 +3,7 @@
 // untuk Prisma schema, API response, maupun komponen Next.js.
 // ============================================================
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 // -----------------------------------------------------------
 // Enums
@@ -12,31 +12,27 @@ import { ReactNode } from "react";
 export type UserRole = "artist" | "client" | "admin" | "curator";
 
 export type CommissionStatus =
-  | "pending"      // Menunggu konfirmasi artist
-  | "accepted"     // Artist menerima
-  | "in_progress"  // Sedang dikerjakan
-  | "revision"     // Dalam proses revisi
-  | "completed"    // Selesai & disetujui client
-  | "cancelled"    // Dibatalkan salah satu pihak
-  | "disputed";    // Dalam sengketa
+	| "pending" // Menunggu konfirmasi artist
+	| "accepted" // Artist menerima
+	| "in_progress" // Sedang dikerjakan
+	| "revision" // Dalam proses revisi
+	| "completed" // Selesai & disetujui client
+	| "cancelled" // Dibatalkan salah satu pihak
+	| "disputed"; // Dalam sengketa
 
-export type PaymentStatus =
-  | "unpaid"
-  | "paid"
-  | "refunded"
-  | "released";    // Dana dilepas ke artist setelah selesai
+export type PaymentStatus = "unpaid" | "paid" | "refunded" | "released"; // Dana dilepas ke artist setelah selesai
 
 export type CurationStatus =
-  | "unapproved"   // Jika user tidak check periksa oleh kurator
-  | "pending"      // Menunggu review kurator
-  | "approved"     // Lolos kurasi, tampil di feed
-  | "rejected"     // Ditolak (misal: terdeteksi AI)
-  | "flagged";     // Dilaporkan, ditahan sementara
+	| "unapproved" // Jika user tidak check periksa oleh kurator
+	| "pending" // Menunggu review kurator
+	| "approved" // Lolos kurasi, tampil di feed
+	| "rejected" // Ditolak (misal: terdeteksi AI)
+	| "flagged"; // Dilaporkan, ditahan sementara
 
 export type UploadType =
-  | "original"     // Karya orisinal
-  | "fanart"       // Fan art dari IP yang ada
-  | "commission";  // Hasil dari komisi
+	| "original" // Karya orisinal
+	| "fanart" // Fan art dari IP yang ada
+	| "commission"; // Hasil dari komisi
 
 export type ReportTargetType = "artwork" | "profile";
 
@@ -49,101 +45,101 @@ export type Theme = "light" | "dark";
 // -----------------------------------------------------------
 
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
+	id: string;
+	name: string;
+	email: string;
+	password: string;
+	role: UserRole;
+	created_at: string;
+	updated_at: string;
 }
 
 export interface Profile {
-  id: string;
-  user_id: string;
-  bio: string | null;
-  is_verified: boolean;
-  approved_portfolio_count: number;
-  is_open_for_commission: boolean;
-  base_price_idr: number | null;
-  strike_count: number;
-  updated_at: string;
+	id: string;
+	user_id: string;
+	bio: string | null;
+	is_verified: boolean;
+	approved_portfolio_count: number;
+	is_open_for_commission: boolean;
+	base_price_idr: number | null;
+	strike_count: number;
+	updated_at: string;
 }
 
 export interface Artwork {
-  id: string;
-  artists_id: string;
-  title: string;
-  description: string | null;
-  images_url: string[];
-  wip_proof_url?: string;
-  upload_type: UploadType;
-  curation_status: CurationStatus;
-  is_visible_on_feed: boolean;
-  rejection_reason?: string | null;
-  reviewed_at?: string | null;
-  reviewed_by?: string | null;
-  created_at: string;
+	id: string;
+	artists_id: string;
+	title: string;
+	description: string | null;
+	images_url: string[];
+	wip_proof_url?: string;
+	upload_type: UploadType;
+	curation_status: CurationStatus;
+	is_visible_on_feed: boolean;
+	rejection_reason?: string | null;
+	reviewed_at?: string | null;
+	reviewed_by?: string | null;
+	created_at: string;
 }
 
 export interface Tag {
-  id: string;
-  tag_name: string;
+	id: string;
+	tag_name: string;
 }
 
 export interface ArtworkTag {
-  artwork_id: string;
-  tag_id: string;
+	artwork_id: string;
+	tag_id: string;
 }
 
 export interface Commission {
-  id: string;
-  artists_id: string;
-  client_id: string;
-  commission_title: string;
-  description: string | null;
-  price: number;
-  status: CommissionStatus;
-  payment_status: PaymentStatus;
-  created_at: string;
-  updated_at: string;
+	id: string;
+	artists_id: string;
+	client_id: string;
+	commission_title: string;
+	description: string | null;
+	price: number;
+	status: CommissionStatus;
+	payment_status: PaymentStatus;
+	created_at: string;
+	updated_at: string;
 }
 
 export interface CommissionProgress {
-  id: string;
-  commission_id: string;
-  sketch_url: string | null;
-  sketch_approved: boolean;
-  final_artwork_url: string | null;
-  final_artwork_approved: boolean;
-  updated_at: string;
+	id: string;
+	commission_id: string;
+	sketch_url: string | null;
+	sketch_approved: boolean;
+	final_artwork_url: string | null;
+	final_artwork_approved: boolean;
+	updated_at: string;
 }
 
 export interface Revision {
-  id: string;
-  user_id: string;
-  commission_id: string;
-  comment: string;
-  created_at: string;
+	id: string;
+	user_id: string;
+	commission_id: string;
+	comment: string;
+	created_at: string;
 }
 
 export interface DisputeLog {
-  id: string;
-  commission_id: string;
-  is_disputed: boolean;
-  reason: string;
-  mediator_id: string | null;
-  created_at: string;
+	id: string;
+	commission_id: string;
+	is_disputed: boolean;
+	reason: string;
+	mediator_id: string | null;
+	created_at: string;
 }
 
 export interface Report {
-  id: string;
-  reporter_id: string;
-  target_type: ReportTargetType;
-  target_id: string;
-  reason: string;
-  status: ReportStatus;
-  created_at: string;
+	id: string;
+	reporter_id: string;
+	target_type: ReportTargetType;
+	target_id: string;
+	reason: string;
+	status: ReportStatus;
+	created_at: string;
 }
 
 // -----------------------------------------------------------
@@ -153,23 +149,23 @@ export interface Report {
 
 /** Artwork lengkap dengan data artist dan tags-nya — untuk feed & detail page */
 export interface ArtworkWithRelations extends Artwork {
-  artist: Pick<User, "id" | "name">;
-  artist_profile: Pick<Profile, "is_verified" | "is_open_for_commission">;
-  tags: Tag[];
+	artist: Pick<User, "id" | "name">;
+	artist_profile: Pick<Profile, "is_verified" | "is_open_for_commission">;
+	tags: Tag[];
 }
 
 /** Profile lengkap dengan data user — untuk halaman profil artist */
 export interface ProfileWithUser extends Profile {
-  user: Pick<User, "id" | "name" | "email" | "role">;
+	user: Pick<User, "id" | "name" | "email" | "role">;
 }
 
 /** Komisi lengkap dengan semua relasi — untuk commission detail page */
 export interface CommissionWithRelations extends Commission {
-  artist: Pick<User, "id" | "name">;
-  client: Pick<User, "id" | "name">;
-  progress: CommissionProgress | null;
-  revisions: Revision[];
-  dispute: DisputeLog | null;
+	artist: Pick<User, "id" | "name">;
+	client: Pick<User, "id" | "name">;
+	progress: CommissionProgress | null;
+	revisions: Revision[];
+	dispute: DisputeLog | null;
 }
 
 // -----------------------------------------------------------
@@ -178,14 +174,14 @@ export interface CommissionWithRelations extends Commission {
 // -----------------------------------------------------------
 
 export interface ApiSuccess<T> {
-  success: true;
-  data: T;
+	success: true;
+	data: T;
 }
 
 export interface ApiError {
-  success: false;
-  message: string;
-  code?: string;
+	success: false;
+	message: string;
+	code?: string;
 }
 
 // Digunakan sebagai tipe return dari API route / Server Action
@@ -196,11 +192,11 @@ export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 // -----------------------------------------------------------
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  per_page: number;
-  total_pages: number;
+	data: T[];
+	total: number;
+	page: number;
+	per_page: number;
+	total_pages: number;
 }
 
 // -----------------------------------------------------------
@@ -208,20 +204,20 @@ export interface PaginatedResponse<T> {
 // -----------------------------------------------------------
 
 export interface FeedFilter {
-  tag_id?: string;
-  curation_status?: CurationStatus;
-  upload_type?: UploadType;
-  sort_by?: "latest" | "popular";
-  page?: number;
-  per_page?: number;
+	tag_id?: string;
+	curation_status?: CurationStatus;
+	upload_type?: UploadType;
+	sort_by?: "latest" | "popular";
+	page?: number;
+	per_page?: number;
 }
 
 export type SearchType = "title" | "tags" | "artists";
 
 export interface ParsedQuery {
-  type: SearchType;
-  value: string;
-  raw: string;
+	type: SearchType;
+	value: string;
+	raw: string;
 }
 
 // -----------------------------------------------------------
@@ -229,9 +225,9 @@ export interface ParsedQuery {
 // -----------------------------------------------------------
 
 export interface ThemeState {
-    theme: Theme;
-    toggleTheme: () => void;
-    setTheme: (theme: Theme) => void;
+	theme: Theme;
+	toggleTheme: () => void;
+	setTheme: (theme: Theme) => void;
 }
 
 // -----------------------------------------------------------
@@ -239,23 +235,23 @@ export interface ThemeState {
 // -----------------------------------------------------------
 
 export interface DataTableColumn<T> {
-  key: string;
-  header: ReactNode;
-  headerClassName?: string;
-  cellClassName?: string;
-  cell: (row: T) => ReactNode;
+	key: string;
+	header: ReactNode;
+	headerClassName?: string;
+	cellClassName?: string;
+	cell: (row: T) => ReactNode;
 }
 
 export interface DataTableProps<T> {
-  columns: DataTableColumn<T>[];
-  pagination: PaginatedResponse<T>;
-  getRowKey: (row: T) => string;
-  emptyState?: ReactNode;
-  isLoading?: boolean;
-  toolbar?: ReactNode;
-  onPageChange: (page: number) => void;
-  onPerPageChange: (perPage: 5 | 10) => void;
-  itemLabel?: string;
+	columns: DataTableColumn<T>[];
+	pagination: PaginatedResponse<T>;
+	getRowKey: (row: T) => string;
+	emptyState?: ReactNode;
+	isLoading?: boolean;
+	toolbar?: ReactNode;
+	onPageChange: (page: number) => void;
+	onPerPageChange: (perPage: 5 | 10) => void;
+	itemLabel?: string;
 }
 
 // -----------------------------------------------------------
@@ -264,29 +260,33 @@ export interface DataTableProps<T> {
 
 // Digunakan untuk return result dari operasi yang berhasil atau gagal
 export interface ActionResult {
-  success: boolean;
-  message: string;
+	success: boolean;
+	message: string;
 }
 
 export interface CreateArtworkPayload {
-  artists_id: string;
-  title: string;
-  description: string | null;
-  images_url: string[];
-  wip_proof_url?: string;
-  upload_type: UploadType;
-  curation_status: CurationStatus;
-  is_visible_on_feed: boolean;
-  tag_names: string[];
+	artists_id: string;
+	title: string;
+	description: string | null;
+	images_url: string[];
+	wip_proof_url?: string;
+	upload_type: UploadType;
+	curation_status: CurationStatus;
+	is_visible_on_feed: boolean;
+	tag_names: string[];
 }
 
 export interface ArtworkState {
-  artworks: Artwork[];
-  artworkTags: ArtworkTag[];
-  tags: Tag[];
-  createArtwork: (payload: CreateArtworkPayload) => Artwork;
-  approveArtwork: (id: string, curatorId: string) => ActionResult;
-  rejectArtwork: (id: string, curatorId: string, reason: string) => ActionResult;
+	artworks: Artwork[];
+	artworkTags: ArtworkTag[];
+	tags: Tag[];
+	createArtwork: (payload: CreateArtworkPayload) => Artwork;
+	approveArtwork: (id: string, curatorId: string) => ActionResult;
+	rejectArtwork: (
+		id: string,
+		curatorId: string,
+		reason: string,
+	) => ActionResult;
 }
 
 // -----------------------------------------------------------
@@ -294,17 +294,20 @@ export interface ArtworkState {
 // -----------------------------------------------------------
 
 export interface UpdateProfilePayload {
-  bio?: string | null;
-  is_open_for_commission?: boolean;
-  base_price_idr?: number | null;
-  is_verified?: boolean;
-  approved_portfolio_count?: number;
+	bio?: string | null;
+	is_open_for_commission?: boolean;
+	base_price_idr?: number | null;
+	is_verified?: boolean;
+	approved_portfolio_count?: number;
 }
 
 export interface ProfileState {
-  profiles: Profile[];
-  getProfileByUserId: (userId: string) => Profile | undefined;
-  updateProfile: (userId: string, payload: UpdateProfilePayload) => ActionResult;
+	profiles: Profile[];
+	getProfileByUserId: (userId: string) => Profile | undefined;
+	updateProfile: (
+		userId: string,
+		payload: UpdateProfilePayload,
+	) => ActionResult;
 }
 
 // -----------------------------------------------------------
@@ -312,23 +315,27 @@ export interface ProfileState {
 // -----------------------------------------------------------
 
 export interface CreateCommissionPayload {
-  artists_id: string;
-  client_id: string;
-  commission_title: string;
-  description: string | null;
-  price: number;
+	artists_id: string;
+	client_id: string;
+	commission_title: string;
+	description: string | null;
+	price: number;
 }
 
 export interface CommissionState {
-  commissions: Commission[];
-  progress: CommissionProgress[];
-  revisions: Revision[];
-  createCommission: (payload: CreateCommissionPayload) => Commission;
-  setCommissionStatus: (id: string, status: CommissionStatus) => void;
-  setPaymentStatus: (id: string, payment_status: PaymentStatus) => void;
-  uploadDummyResult: (id: string) => void;
-  approveResult: (id: string) => void;
-  addRevision: (commission_id: string, user_id: string, comment: string) => void;
+	commissions: Commission[];
+	progress: CommissionProgress[];
+	revisions: Revision[];
+	createCommission: (payload: CreateCommissionPayload) => Commission;
+	setCommissionStatus: (id: string, status: CommissionStatus) => void;
+	setPaymentStatus: (id: string, payment_status: PaymentStatus) => void;
+	uploadDummyResult: (id: string) => void;
+	approveResult: (id: string) => void;
+	addRevision: (
+		commission_id: string,
+		user_id: string,
+		comment: string,
+	) => void;
 }
 
 // -----------------------------------------------------------
@@ -338,13 +345,13 @@ export interface CommissionState {
 export type FavoriteByUser = Record<string, string[]>;
 
 export interface FavoriteState {
-  favoritesByUser: FavoriteByUser;
-  getFavoriteIds: (userId: string) => string[];
-  isFavorite: (userId: string, artworkId: string) => boolean;
-  addFavorite: (userId: string, artworkId: string) => void;
-  removeFavorite: (userId: string, artworkId: string) => void;
-  toggleFavorite: (userId: string, artworkId: string) => boolean;
-  clearFavorites: (userId: string) => void;
+	favoritesByUser: FavoriteByUser;
+	getFavoriteIds: (userId: string) => string[];
+	isFavorite: (userId: string, artworkId: string) => boolean;
+	addFavorite: (userId: string, artworkId: string) => void;
+	removeFavorite: (userId: string, artworkId: string) => void;
+	toggleFavorite: (userId: string, artworkId: string) => boolean;
+	clearFavorites: (userId: string) => void;
 }
 
 // -----------------------------------------------------------
@@ -352,18 +359,18 @@ export interface FavoriteState {
 // -----------------------------------------------------------
 
 export interface UserPayload {
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
+	name: string;
+	email: string;
+	password: string;
+	role: UserRole;
 }
 
 export interface UserManagementState {
-  users: User[];
-  createUser: (payload: UserPayload) => ActionResult;
-  createCurator: (payload: Omit<UserPayload, "role">) => ActionResult;
-  updateUser: (id: string, payload: Partial<UserPayload>) => ActionResult;
-  deleteUser: (id: string) => ActionResult;
+	users: User[];
+	createUser: (payload: UserPayload) => ActionResult;
+	createCurator: (payload: Omit<UserPayload, "role">) => ActionResult;
+	updateUser: (id: string, payload: Partial<UserPayload>) => ActionResult;
+	deleteUser: (id: string) => ActionResult;
 }
 
 // -----------------------------------------------------------
@@ -374,20 +381,20 @@ export interface UserManagementState {
 export type SafeUser = Omit<User, "password">;
 
 export interface UserState {
-  user: SafeUser | null;
-  isAuthenticated: boolean;
+	user: SafeUser | null;
+	isAuthenticated: boolean;
 
-  // Actions
-  login: (email: string, password: string) => ActionResult;
-  logout: () => void;
-  updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
+	// Actions
+	login: (email: string, password: string) => ActionResult;
+	logout: () => void;
+	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 
-  // Role helpers — berguna untuk guard di page/layout
-  hasRole: (role: UserRole) => boolean;
-  isArtist: () => boolean;
-  isClient: () => boolean;
-  isCurator: () => boolean;
-  isAdmin: () => boolean;
+	// Role helpers — berguna untuk guard di page/layout
+	hasRole: (role: UserRole) => boolean;
+	isArtist: () => boolean;
+	isClient: () => boolean;
+	isCurator: () => boolean;
+	isAdmin: () => boolean;
 }
 
 // -----------------------------------------------------------
@@ -398,61 +405,61 @@ export type ModalType = "alert" | "confirm" | "form";
 export type ModalVariant = "default" | "danger";
 
 export interface ModalConfig {
-  /** Optional identifier for ownership checks. */
-  id?: string;
-  /** Title displayed at the top of the modal. */
-  title: string;
-  /** Simple text description. Ignored if `content` is provided. */
-  description?: string;
-  /** Custom React content rendered in the modal body — overrides `description`. */
-  content?: ReactNode;
-  /**
-   * "alert" = single OK button
-   * "confirm" = Cancel + Confirm buttons
-   * "form" = body dibungkus <form> dengan tombol submit + cancel
-   */
-  type?: ModalType;
-  /** Styles the confirm button red. Defaults to "default". */
-  variant?: ModalVariant;
-  /** Optional width utility classes, e.g. "max-w-2xl". */
-  maxWidthClassName?: string;
-  /** Extra classes for form body when type is "form". */
-  formClassName?: string;
-  /**
-   * Dipakai saat type === "form". Setelah callback jalan, modal otomatis ditutup.
-   * Jika ingin menahan modal tetap terbuka (mis. validasi gagal), return false.
-   */
-  onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void | boolean;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  onConfirm?: () => void;
-  onCancel?: () => void;
+	/** Optional identifier for ownership checks. */
+	id?: string;
+	/** Title displayed at the top of the modal. */
+	title: string;
+	/** Simple text description. Ignored if `content` is provided. */
+	description?: string;
+	/** Custom React content rendered in the modal body — overrides `description`. */
+	content?: ReactNode;
+	/**
+	 * "alert" = single OK button
+	 * "confirm" = Cancel + Confirm buttons
+	 * "form" = body dibungkus <form> dengan tombol submit + cancel
+	 */
+	type?: ModalType;
+	/** Styles the confirm button red. Defaults to "default". */
+	variant?: ModalVariant;
+	/** Optional width utility classes, e.g. "max-w-2xl". */
+	maxWidthClassName?: string;
+	/** Extra classes for form body when type is "form". */
+	formClassName?: string;
+	/**
+	 * Dipakai saat type === "form". Setelah callback jalan, modal otomatis ditutup.
+	 * Jika ingin menahan modal tetap terbuka (mis. validasi gagal), return false.
+	 */
+	onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void | boolean;
+	confirmLabel?: string;
+	cancelLabel?: string;
+	onConfirm?: () => void;
+	onCancel?: () => void;
 }
 
 export interface ModalState {
-  isOpen: boolean;
-  config: ModalConfig | null;
-  openModal: (config: ModalConfig) => void;
-  closeModal: () => void;
+	isOpen: boolean;
+	config: ModalConfig | null;
+	openModal: (config: ModalConfig) => void;
+	closeModal: () => void;
 }
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
 export interface Toast {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration: number;
+	id: string;
+	message: string;
+	type: ToastType;
+	duration: number;
 }
 
 export interface AddToastOptions {
-  message: string;
-  type?: ToastType;
-  duration?: number;
+	message: string;
+	type?: ToastType;
+	duration?: number;
 }
 
 export interface ToastState {
-  toasts: Toast[];
-  addToast: (options: AddToastOptions) => void;
-  removeToast: (id: string) => void;
+	toasts: Toast[];
+	addToast: (options: AddToastOptions) => void;
+	removeToast: (id: string) => void;
 }

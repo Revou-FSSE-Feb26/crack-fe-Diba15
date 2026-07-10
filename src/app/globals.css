@@ -2,82 +2,84 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Backgrounds (Light Mode) */
-  --bg-main: #F8FAFC;
-  --bg-surface: #FFFFFF;
+	/* Backgrounds (Light Mode) */
+	--bg-main: #f8fafc;
+	--bg-surface: #ffffff;
 
-  /* Text (Light Mode) */
-  --text-main: #2F4858;
-  --text-muted: #33658A;
+	/* Text (Light Mode) */
+	--text-main: #2f4858;
+	--text-muted: #33658a;
 
-  /* Brand Colors */
-  --brand-primary: #33658A;
-  --brand-primary-hover: #2F4858;
-  --brand-accent: #86BBD8;
+	/* Brand Colors */
+	--brand-primary: #33658a;
+	--brand-primary-hover: #2f4858;
+	--brand-accent: #86bbd8;
 
-  /* baru — Warm accent (art/creative feel, dipakai untuk highlight & dekorasi) */
-  --brand-warm: #E8A87C;
-  --brand-warm-hover: #DC935F;
+	/* baru — Warm accent (art/creative feel, dipakai untuk highlight & dekorasi) */
+	--brand-warm: #e8a87c;
+	--brand-warm-hover: #dc935f;
 
-  /* baru — Soft mint accent (pelengkap, untuk badge/aksen sekunder) */
-  --brand-mint: #A8D8B0;
+	/* baru — Soft mint accent (pelengkap, untuk badge/aksen sekunder) */
+	--brand-mint: #a8d8b0;
 
-  /* Status Colors */
-  --status-verified: #10B981;
-  --status-premium: #F6AE2D;
-  --status-danger: #F26419;
+	/* Status Colors */
+	--status-verified: #10b981;
+	--status-premium: #f6ae2d;
+	--status-danger: #f26419;
 }
 
 .dark {
-  --bg-main: #0F172A;
-  --bg-surface: #2F4858;
+	--bg-main: #0f172a;
+	--bg-surface: #2f4858;
 
-  --text-main: #F8FAFC;
-  --text-muted: #86BBD8;
+	--text-main: #f8fafc;
+	--text-muted: #86bbd8;
 
-  --brand-primary: #86BBD8;
-  --brand-primary-hover: #33658A;
-  --brand-accent: #F6AE2D;
+	--brand-primary: #86bbd8;
+	--brand-primary-hover: #33658a;
+	--brand-accent: #f6ae2d;
 
-  /* baru — sedikit lebih cerah supaya tetap kontras di dark mode */
-  --brand-warm: #F0B98F;
-  --brand-warm-hover: #E8A87C;
-  --brand-mint: #8FCC9E;
+	/* baru — sedikit lebih cerah supaya tetap kontras di dark mode */
+	--brand-warm: #f0b98f;
+	--brand-warm-hover: #e8a87c;
+	--brand-mint: #8fcc9e;
 
-  --status-verified: #34D399;
-  --status-premium: #F6AE2D;
-  --status-danger: #F26419;
+	--status-verified: #34d399;
+	--status-premium: #f6ae2d;
+	--status-danger: #f26419;
 }
 
 @theme {
-  --color-background: var(--bg-main);
-  --color-surface: var(--bg-surface);
+	--color-background: var(--bg-main);
+	--color-surface: var(--bg-surface);
 
-  --color-content: var(--text-main);
-  --color-content-muted: var(--text-muted);
+	--color-content: var(--text-main);
+	--color-content-muted: var(--text-muted);
 
-  --color-primary: var(--brand-primary);
-  --color-primary-hover: var(--brand-primary-hover);
-  --color-accent: var(--brand-accent);
+	--color-primary: var(--brand-primary);
+	--color-primary-hover: var(--brand-primary-hover);
+	--color-accent: var(--brand-accent);
 
-  /* NEW */
-  --color-warm: var(--brand-warm);
-  --color-warm-hover: var(--brand-warm-hover);
-  --color-mint: var(--brand-mint);
+	/* NEW */
+	--color-warm: var(--brand-warm);
+	--color-warm-hover: var(--brand-warm-hover);
+	--color-mint: var(--brand-mint);
 
-  --color-verified: var(--status-verified);
-  --color-premium: var(--status-premium);
-  --color-danger: var(--status-danger);
+	--color-verified: var(--status-verified);
+	--color-premium: var(--status-premium);
+	--color-danger: var(--status-danger);
 
-  --font-body: var(--font-body);
-  --font-outfit: var(--font-outfit);
-  --font-syne: var(--font-syne);
+	--font-body: var(--font-body);
+	--font-outfit: var(--font-outfit);
+	--font-syne: var(--font-syne);
 }
 
 @layer base {
-  body {
-    background-color: var(--color-background);
-    color: var(--color-content);
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
+	body {
+		background-color: var(--color-background);
+		color: var(--color-content);
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
+	}
 }

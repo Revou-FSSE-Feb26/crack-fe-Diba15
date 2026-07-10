@@ -2,27 +2,27 @@
 
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
 import { useArtworkStore } from "@/store/ArtworkStore";
-import { buildArtworkWithRelations } from "@/utils/search";
 import { useUserManagementStore } from "@/store/UserManagementStore";
+import { buildArtworkWithRelations } from "@/utils/search";
 
 interface ArtistDetailPortfolioProps {
-  artistId: string;
+	artistId: string;
 }
 
 export default function ArtistDetailPortfolio({
-  artistId,
+	artistId,
 }: ArtistDetailPortfolioProps) {
-  const { artworks, artworkTags, tags } = useArtworkStore();
-  const { users } = useUserManagementStore();
+	const { artworks, artworkTags, tags } = useArtworkStore();
+	const { users } = useUserManagementStore();
 
-  const artistArtworks = buildArtworkWithRelations(
-    artworks,
-    artworkTags,
-    tags,
-    users,
-  ).filter(
-    (artwork) => artwork.artists_id === artistId && artwork.is_visible_on_feed,
-  );
+	const artistArtworks = buildArtworkWithRelations(
+		artworks,
+		artworkTags,
+		tags,
+		users,
+	).filter(
+		(artwork) => artwork.artists_id === artistId && artwork.is_visible_on_feed,
+	);
 
-  return <ArtistPortfolio artworksWithTags={artistArtworks} />;
+	return <ArtistPortfolio artworksWithTags={artistArtworks} />;
 }

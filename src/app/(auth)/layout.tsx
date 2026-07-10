@@ -1,21 +1,17 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Auth",
+	title: "Auth",
 };
 
 export default function AuthLayout({
-    children,
+	children,
 }: Readonly<{
-    children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-    return (
-        <>
-            <div className="min-h-full flex flex-col">
-                <div className="flex flex-col flex-1">
-                    {children}
-                </div>
-            </div>
-        </>
-    );
+	return (
+		<div className="min-h-full flex flex-col">
+			<div className="flex flex-col flex-1">{children}</div>
+		</div>
+	);
 }

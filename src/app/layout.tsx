@@ -1,72 +1,72 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
-import ThemeProvider from "@/components/ui/theme/ThemeProvider";
-import ToastContainer from "@/components/ui/Toast";
-import Modal from "@/components/ui/Modal";
 import ImageLightbox from "@/components/ui/ImageLightbox";
+import Modal from "@/components/ui/Modal";
+import ToastContainer from "@/components/ui/Toast";
+import ThemeProvider from "@/components/ui/theme/ThemeProvider";
 
 const fontOutfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
+	subsets: ["latin"],
+	variable: "--font-outfit",
+	display: "swap",
 });
 
 const fontBody = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
+	subsets: ["latin"],
+	variable: "--font-body",
+	display: "swap",
 });
 
 const fontSyne = Syne({
-  subsets: ["latin"],
-  variable: "--font-syne",
-  display: "swap",
+	subsets: ["latin"],
+	variable: "--font-syne",
+	display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: {
-    template: "%s | TruBrush",
-    default: "TruBrush - Authentic Art & Commission Platform",
-  },
-  description:
-    "Platform media sosial dan komisi ilustrator yang 100% bebas AI. Temukan karya seni asli buatan manusia, pekerjakan artis terverifikasi, dan bertransaksi aman dengan sistem Escrow.",
-  keywords: [
-    "TruBrush",
-    "illustrator",
-    "anti-AI art",
-    "human art",
-    "commission platform",
-    "escrow art commission",
-    "verified artist",
-    "social media for artists",
-    "jasa ilustrasi",
-    "gambar asli",
-  ],
-  authors: [{ name: "Developer TruBrush" }],
-  creator: "TruBrush Team",
-  publisher: "TruBrush",
+	title: {
+		template: "%s | TruBrush",
+		default: "TruBrush - Authentic Art & Commission Platform",
+	},
+	description:
+		"Platform media sosial dan komisi ilustrator yang 100% bebas AI. Temukan karya seni asli buatan manusia, pekerjakan artis terverifikasi, dan bertransaksi aman dengan sistem Escrow.",
+	keywords: [
+		"TruBrush",
+		"illustrator",
+		"anti-AI art",
+		"human art",
+		"commission platform",
+		"escrow art commission",
+		"verified artist",
+		"social media for artists",
+		"jasa ilustrasi",
+		"gambar asli",
+	],
+	authors: [{ name: "Developer TruBrush" }],
+	creator: "TruBrush Team",
+	publisher: "TruBrush",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="id"
-      className={`${fontOutfit.variable} ${fontBody.variable} ${fontSyne.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className="h-full">
-        <ThemeProvider />
-        {children}
-        {/* Global UI layers — rendered above all page content */}
-        <Modal />
-        <ToastContainer />
-        <ImageLightbox />
-      </body>
-    </html>
-  );
+	return (
+		<html
+			lang="id"
+			className={`${fontOutfit.variable} ${fontBody.variable} ${fontSyne.variable} h-full antialiased`}
+			suppressHydrationWarning
+		>
+			<body className="h-full">
+				<ThemeProvider />
+				{children}
+				{/* Global UI layers — rendered above all page content */}
+				<Modal />
+				<ToastContainer />
+				<ImageLightbox />
+			</body>
+		</html>
+	);
 }

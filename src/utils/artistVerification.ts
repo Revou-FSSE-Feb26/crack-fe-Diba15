@@ -31,20 +31,27 @@ export const VERIFICATION_MIN_APPROVED = 5;
 // -------------------------------------------------------------------------
 
 export interface VerificationProgress {
-  total: number;
-  approved: number;
-  isEligible: boolean;
-  /** Berapa approved lagi yang dibutuhkan untuk lolos. */
-  neededForEligibility: number;
+	total: number;
+	approved: number;
+	isEligible: boolean;
+	/** Berapa approved lagi yang dibutuhkan untuk lolos. */
+	neededForEligibility: number;
 }
 
-export function evaluateVerification(artworks: Artwork[]): VerificationProgress {
-  const total = artworks.length;
-  const approved = artworks.filter((a) => a.curation_status === "approved").length;
-  const isEligible = approved >= VERIFICATION_MIN_APPROVED;
-  const neededForEligibility = Math.max(0, VERIFICATION_MIN_APPROVED - approved);
+export function evaluateVerification(
+	artworks: Artwork[],
+): VerificationProgress {
+	const total = artworks.length;
+	const approved = artworks.filter(
+		(a) => a.curation_status === "approved",
+	).length;
+	const isEligible = approved >= VERIFICATION_MIN_APPROVED;
+	const neededForEligibility = Math.max(
+		0,
+		VERIFICATION_MIN_APPROVED - approved,
+	);
 
-  return { total, approved, isEligible, neededForEligibility };
+	return { total, approved, isEligible, neededForEligibility };
 }
 
 // TODO(backend): Fungsi di bawah ini adalah shim sementara pengganti peran
@@ -59,12 +66,17 @@ export function evaluateVerification(artworks: Artwork[]): VerificationProgress 
 // useArtworkStore di sini) supaya tidak ada circular import ArtworkStore <->
 // artistVerification — pemanggil (ArtworkStore) sudah punya list ini lewat
 // get().artworks.
-export function syncVerificationAfterReview(artistId: string, allArtworks: Artwork[]) {
-  const artistArtworks = allArtworks.filter((artwork) => artwork.artists_id === artistId);
-  const { isEligible, approved } = evaluateVerification(artistArtworks);
+export function syncVerificationAfterReview(
+	artistId: string,
+	allArtworks: Artwork[],
+) {
+	const artistArtworks = allArtworks.filter(
+		(artwork) => artwork.artists_id === artistId,
+	);
+	const { isEligible, approved } = evaluateVerification(artistArtworks);
 
-  useProfileStore.getState().updateProfile(artistId, {
-    is_verified: isEligible,
-    approved_portfolio_count: approved,
-  });
+	useProfileStore.getState().updateProfile(artistId, {
+		is_verified: isEligible,
+		approved_portfolio_count: approved,
+	});
 }

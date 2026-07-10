@@ -67,7 +67,7 @@ Requirements:
 7. Setelah art yang sudah diverifikasi berjumlah 3/5 dari total art yang diunggah oleh artis, artis akan dinyatakan sebagai "verified" dan dapat menerima commission dari client.
 
 (LOW)
-TODO 11 = Membuat auto complete pada pencarian di navbar, mungkin menampilkan daftar seperti
+TODO 11 = Membuat auto complete pada pencarian di navbar, mungkin menampilkan daftar seperti (Clear)
 Contoh:
 User Input : Fate
 Suggestions:
