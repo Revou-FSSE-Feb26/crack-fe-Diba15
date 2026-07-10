@@ -117,7 +117,7 @@ export default function PostArtPage() {
       images_url: images,
       wip_proof_url: data.wipProofUrl.trim() || undefined,
       upload_type: data.uploadType,
-      curation_status: shouldReview ? "pending" : "approved",
+      curation_status: shouldReview ? "pending" : "unapproved",
       is_visible_on_feed: !shouldReview,
       tag_names: splitTags(data.tags),
     });

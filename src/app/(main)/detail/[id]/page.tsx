@@ -4,7 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { Share2, BadgeCheck, ArrowLeft, ImageIcon, Check } from "lucide-react";
+import { useState } from "react";
+import {
+  Share2,
+  BadgeCheck,
+  ArrowLeft,
+  ImageIcon,
+  Check,
+  ShieldCheck,
+  ChevronDown,
+  PenTool,
+} from "lucide-react";
 
 import AvatarInitials from "@/components/home/AvatarInitials";
 import CommissionButton from "@/components/detail/CommissionButton";
@@ -20,6 +30,7 @@ export default function Detail() {
   const router = useRouter();
   const id = params.id as string;
   const { artworks, artworkTags, tags } = useArtworkStore();
+  const [showWip, setShowWip] = useState(false);
   const { users } = useUserManagementStore();
   const { profiles } = useProfileStore();
   const { copied, copyPath } = useCopyLink({
@@ -29,7 +40,7 @@ export default function Detail() {
     artworks,
     artworkTags,
     tags,
-    users
+    users,
   ).find((item) => item.id === id);
 
   if (!artwork) {
@@ -108,6 +119,40 @@ export default function Detail() {
                 <p className="text-content-muted">Tidak ada gambar tersedia.</p>
               </div>
             )}
+
+            {artwork.wip_proof_url && (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-surface">
+                <button
+                  onClick={() => setShowWip((prev: boolean) => !prev)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left"
+                >
+                  <span className="flex items-center gap-2 text-sm font-medium text-content">
+                    <PenTool className="w-4 h-4 text-primary" />
+                    Bukti Proses (WIP Proof)
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-content-muted transition-transform duration-200 ${showWip ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {showWip && (
+                  <div className="px-4 pb-4">
+                    <p className="text-xs text-content-muted mb-3">
+                      Bukti proses manual yang diverifikasi tim kurator TruBrush
+                      sebelum karya ini disetujui tampil.
+                    </p>
+                    <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-content/5">
+                      <Image
+                        src={artwork.wip_proof_url}
+                        alt={`WIP proof ${artwork.title}`}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 700px"
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
@@ -130,6 +175,15 @@ export default function Detail() {
                   <p className="text-sm text-content-muted">Artist</p>
                 </div>
               </Link>
+
+              {artwork.curation_status === "approved" && (
+                <div className="flex items-center gap-2 mb-4 rounded-lg bg-verified/10 px-3 py-2">
+                  <ShieldCheck className="w-4 h-4 text-verified shrink-0" />
+                  <p className="text-xs text-verified font-medium">
+                    Karya ini telah lolos kurasi TruBrush.
+                  </p>
+                </div>
+              )}
 
               {artwork.artist_profile.is_open_for_commission && (
                 <CommissionButton

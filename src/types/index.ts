@@ -27,6 +27,7 @@ export type PaymentStatus =
   | "released";    // Dana dilepas ke artist setelah selesai
 
 export type CurationStatus =
+  | "unapproved"   // Jika user tidak check periksa oleh kurator
   | "pending"      // Menunggu review kurator
   | "approved"     // Lolos kurasi, tampil di feed
   | "rejected"     // Ditolak (misal: terdeteksi AI)

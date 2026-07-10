@@ -10,6 +10,7 @@ import {
   Flag,
   Link as LinkIcon,
   BadgeCheck,
+  ShieldCheck,
 } from "lucide-react";
 import AvatarInitials from "./AvatarInitials";
 import Button from "@/components/ui/Button";
@@ -159,6 +160,13 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
         href={`/detail/${artwork.id}`}
         className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer"
       >
+        {artwork.curation_status === "approved" && (
+          <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full">
+            <ShieldCheck className="w-3 h-3" />
+            Terkurasi
+          </div>
+        )}
+
         {imageCount > 0 && (
           <div
             className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? "col-span-2 row-span-2" : "col-span-1 row-span-2"}`}
