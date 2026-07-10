@@ -56,7 +56,7 @@ Requirements:
 10. Tampilan laporan art pada halaman kurator berbentuk tabel untuk melihat art, alasan laporan, status laporan, dan tombol aksi.
 
 (HIGH)
-TODO 10 = Menerapkan alur verifikasi user dengan verifikasi art oleh kurator sebanyak 3/5 dari total art yang diunggah oleh artis.
+TODO 10 = Menerapkan alur verifikasi user dengan verifikasi art oleh kurator sebanyak 3/5 dari total art yang diunggah oleh artis. (Clear)
 Requirements:
 1. Setelah diunggah, artis harus melakukan verifikasi sebanyak 3/5 dari total art yang diunggah.
 2. Kurator harus dapat melihat dan memverifikasi art yang diunggah oleh artis.
