@@ -31,7 +31,7 @@ export default function Navbar() {
 		}
 		return () =>
 			document.removeEventListener("mousedown", handleClickDropdownOutside);
-	});
+	}, [isDropdownOpen]);
 
 	const handleLogout = () => {
 		logout();
@@ -56,7 +56,7 @@ export default function Navbar() {
 				<div className="flex justify-end items-center gap-3">
 					{mounted && (isAdmin() || isCurator()) ? (
 						<div className="flex">
-							<div className="relative">
+							<div className="relative" ref={dropdownRef}>
 								<button
 									type="button"
 									onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -74,7 +74,6 @@ export default function Navbar() {
 
 								{isDropdownOpen && (
 									<div
-										ref={dropdownRef}
 										className="absolute right-0 mt-2 w-40 rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50"
 									>
 										<button
