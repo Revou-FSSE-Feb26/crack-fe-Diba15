@@ -237,17 +237,19 @@ export default function HelpPage() {
 
 							{/* FAQ items */}
 							<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface divide-y divide-slate-200 dark:divide-slate-700 overflow-hidden">
-								{category.faqs.map((faq, idx) => (
-									<details key={idx} className="group px-5">
-										<summary className="flex items-center justify-between gap-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-medium text-content hover:text-primary transition-colors">
-											<span className="text-sm">{faq.q}</span>
-											<ChevronDown className="w-4 h-4 shrink-0 text-content-muted transition-transform duration-200 group-open:rotate-180" />
-										</summary>
-										<div className="pb-5 pr-8 text-sm text-content-muted leading-relaxed">
-											{faq.a}
-										</div>
-									</details>
-								))}
+								{category.faqs.map((faq) => {
+									return (
+										<details key={faq.q} className="group px-5">
+											<summary className="flex items-center justify-between gap-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-medium text-content hover:text-primary transition-colors">
+												<span className="text-sm">{faq.q}</span>
+												<ChevronDown className="w-4 h-4 shrink-0 text-content-muted transition-transform duration-200 group-open:rotate-180" />
+											</summary>
+											<div className="pb-5 pr-8 text-sm text-content-muted leading-relaxed">
+												{faq.a}
+											</div>
+										</details>
+									);
+								})}
 							</div>
 						</section>
 					);

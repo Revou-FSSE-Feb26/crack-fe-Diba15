@@ -19,7 +19,6 @@ export const useUserStore = create<UserState>()(
 				}
 
 				// Jangan simpan password ke store / localStorage
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { password: _, ...safeUser } = found;
 				set({ user: safeUser, isAuthenticated: true });
 				return { success: true, message: "Login berhasil." };

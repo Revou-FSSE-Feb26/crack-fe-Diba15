@@ -23,3 +23,10 @@ export function formatDate(date: string) {
 		day: "numeric",
 	});
 }
+
+export function randomKey(): string {
+	const key =
+		Math.random().toString(36).substring(2, 15) +
+		Math.random().toString(36).substring(2, 15);
+	return key;
+}

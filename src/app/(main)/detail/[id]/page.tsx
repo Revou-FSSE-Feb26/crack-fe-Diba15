@@ -22,6 +22,7 @@ import { useArtworkStore } from "@/store/ArtworkStore";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
+import { randomKey } from "@/utils/index";
 import { buildArtworkWithRelations } from "@/utils/search";
 
 export default function Detail() {
@@ -99,30 +100,32 @@ export default function Detail() {
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 					<div className="lg:col-span-2 space-y-4">
 						{artwork.images_url.length > 0 ? (
-							artwork.images_url.map((imgUrl, index) => (
-								<div
-									key={`${imgUrl}-${index}`}
-									className="relative w-full rounded-xl overflow-hidden shadow-sm"
-								>
-									<button
-										type="button"
-										onClick={() =>
-											openLightbox(artwork.images_url, index, artwork.title)
-										}
-										className="w-full h-auto bg-transparent cursor-pointer"
+							artwork.images_url.map((imgUrl, index) => {
+								return (
+									<div
+										key={`${imgUrl}-${randomKey()}`}
+										className="relative w-full rounded-xl overflow-hidden shadow-sm"
 									>
-										<Image
-											src={imgUrl}
-											alt={`${artwork.title} - Image ${index + 1}`}
-											width={0}
-											height={0}
-											sizes="100vw"
-											className="w-full h-auto"
-											loading={index === 0 ? "eager" : "lazy"}
-										/>
-									</button>
-								</div>
-							))
+										<button
+											type="button"
+											onClick={() =>
+												openLightbox(artwork.images_url, index, artwork.title)
+											}
+											className="w-full h-auto bg-transparent cursor-pointer"
+										>
+											<Image
+												src={imgUrl}
+												alt={`${artwork.title} - Image ${index + 1}`}
+												width={0}
+												height={0}
+												sizes="100vw"
+												className="w-full h-auto"
+												loading={index === 0 ? "eager" : "lazy"}
+											/>
+										</button>
+									</div>
+								);
+							})
 						) : (
 							<div className="w-full aspect-video bg-content/5 rounded-xl flex items-center justify-center">
 								<p className="text-content-muted">Tidak ada gambar tersedia.</p>

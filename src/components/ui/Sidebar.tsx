@@ -143,6 +143,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
 				{mounted && (
 					<button
+						type="button"
 						onClick={toggleTheme}
 						className="group mb-4 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
 					>

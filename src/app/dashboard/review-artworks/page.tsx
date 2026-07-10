@@ -78,8 +78,8 @@ export default function ReviewArtworksPage() {
 				.filter((item) => item.reviewed_at)
 				.sort(
 					(a, b) =>
-						new Date(b.reviewed_at!).getTime() -
-						new Date(a.reviewed_at!).getTime(),
+						new Date(b.reviewed_at || "").getTime() -
+						new Date(a.reviewed_at || "").getTime(),
 				)
 				.slice(0, 5),
 		[artworksWithRelations],
@@ -286,8 +286,9 @@ export default function ReviewArtworksPage() {
 											</span>
 										</div>
 										<p className="mt-0.5 text-xs text-content-muted">
-											{artwork.artist.name} · {formatDate(artwork.reviewed_at!)}{" "}
-											· {getReviewerName(artwork.reviewed_by)}
+											{artwork.artist.name} ·{" "}
+											{formatDate(artwork.reviewed_at ?? "")} ·{" "}
+											{getReviewerName(artwork.reviewed_by)}
 										</p>
 										{artwork.curation_status === "rejected" &&
 											artwork.rejection_reason && (

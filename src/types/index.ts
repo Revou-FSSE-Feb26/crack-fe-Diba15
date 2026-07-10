@@ -429,7 +429,7 @@ export interface ModalConfig {
 	 * Dipakai saat type === "form". Setelah callback jalan, modal otomatis ditutup.
 	 * Jika ingin menahan modal tetap terbuka (mis. validasi gagal), return false.
 	 */
-	onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void | boolean;
+	onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => undefined | boolean;
 	confirmLabel?: string;
 	cancelLabel?: string;
 	onConfirm?: () => void;

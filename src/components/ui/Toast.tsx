@@ -2,7 +2,8 @@
 
 import { AlertTriangle, CheckCircle, Info, X, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { type Toast, type ToastType, useToastStore } from "@/store/ToastStore";
+import { useToastStore } from "@/store/ToastStore";
+import type { Toast, ToastType } from "@/types";
 
 // ── Per-type visual config ────────────────────────────────────────────────────
 
@@ -79,7 +80,7 @@ function ToastItem({ toast }: { toast: Toast }) {
 			].join(" ")}
 		>
 			<Icon size={17} className={`${iconClass} shrink-0 mt-0.5`} />
-			<p className="flex-1 text-sm text-content leading-snug break-words">
+			<p className="flex-1 text-sm text-content leading-snug wrap-break-word">
 				{toast.message}
 			</p>
 			<button
@@ -100,10 +101,7 @@ export default function ToastContainer() {
 	const { toasts } = useToastStore();
 
 	return (
-		<div
-			aria-label="Notifikasi"
-			className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none"
-		>
+		<div className="fixed bottom-6 right-6 z-9999 flex flex-col gap-2 pointer-events-none">
 			{toasts.map((toast) => (
 				<div key={toast.id} className="pointer-events-auto">
 					<ToastItem toast={toast} />

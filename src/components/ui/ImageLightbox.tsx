@@ -9,9 +9,10 @@ import {
 	ZoomOut,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useLightboxStore } from "@/store/LightboxStore";
+import { randomKey } from "@/utils/index";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -38,34 +39,39 @@ function LightboxContent() {
 		return () => cancelAnimationFrame(id);
 	}, []);
 
-	const resetZoom = () => {
+	const resetZoom = useCallback(() => {
 		setScale(1);
 		setPosition({ x: 0, y: 0 });
-	};
+	}, []);
 
 	// Reset zoom whenever the active image changes
 	useEffect(() => {
 		setTimeout(() => {
 			resetZoom();
 		}, 0);
-	}, [index]);
+	}, [resetZoom]);
 
-	const goPrev = () => {
+	const goPrev = useCallback(() => {
 		setIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-	};
+	}, [images.length]);
 
-	const goNext = () => {
+	const goNext = useCallback(() => {
 		setIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-	};
+	}, [images.length]);
 
-	const zoomIn = () =>
-		setScale((prev) => Math.min(MAX_SCALE, prev + ZOOM_STEP));
-	const zoomOut = () =>
-		setScale((prev) => {
-			const next = Math.max(MIN_SCALE, prev - ZOOM_STEP);
-			if (next === MIN_SCALE) setPosition({ x: 0, y: 0 });
-			return next;
-		});
+	const zoomIn = useCallback(
+		() => setScale((prev) => Math.min(MAX_SCALE, prev + ZOOM_STEP)),
+		[],
+	);
+	const zoomOut = useCallback(
+		() =>
+			setScale((prev) => {
+				const next = Math.max(MIN_SCALE, prev - ZOOM_STEP);
+				if (next === MIN_SCALE) setPosition({ x: 0, y: 0 });
+				return next;
+			}),
+		[],
+	);
 
 	// Keyboard controls
 	useEffect(() => {
@@ -78,8 +84,7 @@ function LightboxContent() {
 		};
 		document.addEventListener("keydown", onKeyDown);
 		return () => document.removeEventListener("keydown", onKeyDown);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [hasMultiple]);
+	}, [hasMultiple, zoomIn, goNext, zoomOut, goPrev, closeLightbox]);
 
 	// Wheel to zoom
 	const handleWheel = (e: React.WheelEvent) => {
@@ -187,6 +192,7 @@ function LightboxContent() {
 			</div>
 
 			{/* Image stage */}
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: image stage handles drag and zoom gestures */}
 			<div
 				className="relative z-10 flex flex-1 items-center justify-center overflow-hidden px-4 pb-4 sm:px-10"
 				onWheel={handleWheel}
@@ -249,27 +255,29 @@ function LightboxContent() {
 			{/* Thumbnail strip */}
 			{hasMultiple && (
 				<div className="relative z-10 flex items-center justify-center gap-2 px-4 pb-4 overflow-x-auto">
-					{images.map((img, i) => (
-						<button
-							key={`${img}-${i}`}
-							type="button"
-							onClick={() => setIndex(i)}
-							className={[
-								"relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors",
-								i === index
-									? "border-white"
-									: "border-transparent opacity-60 hover:opacity-100",
-							].join(" ")}
-						>
-							<Image
-								src={img}
-								alt={`Thumbnail ${i + 1}`}
-								fill
-								sizes="64px"
-								className="object-cover"
-							/>
-						</button>
-					))}
+					{images.map((img, i) => {
+						return (
+							<button
+								key={`${img}-${randomKey()}`}
+								type="button"
+								onClick={() => setIndex(i)}
+								className={[
+									"relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors",
+									i === index
+										? "border-white"
+										: "border-transparent opacity-60 hover:opacity-100",
+								].join(" ")}
+							>
+								<Image
+									src={img}
+									alt={`Thumbnail ${i + 1}`}
+									fill
+									sizes="64px"
+									className="object-cover"
+								/>
+							</button>
+						);
+					})}
 				</div>
 			)}
 		</div>

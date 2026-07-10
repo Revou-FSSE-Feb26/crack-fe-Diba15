@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { PaginatedResponse } from "@/types";
 import { type PageSize, paginateItems } from "@/utils/pagination";
@@ -44,8 +44,16 @@ export function usePagination(options: UsePaginationOptions = {}) {
 
 /** Reset halaman saat filter/search berubah. */
 export function useResetPageOnChange(resetPage: () => void, deps: unknown[]) {
+	const prevDeps = useRef<unknown[]>(deps);
+
 	useEffect(() => {
-		resetPage();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, deps);
+		const hasChanged =
+			deps.length !== prevDeps.current.length ||
+			deps.some((dep, i) => dep !== prevDeps.current[i]);
+
+		if (hasChanged) {
+			resetPage();
+			prevDeps.current = deps;
+		}
+	});
 }
