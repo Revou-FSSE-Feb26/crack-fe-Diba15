@@ -1,32 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { User, UserRole } from "@/types";
+import { UserState } from "@/types";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-
-// User yang disimpan di store tidak mengandung password
-type SafeUser = Omit<User, "password">;
-
-interface LoginResult {
-  success: boolean;
-  message: string;
-}
-
-interface UserState {
-  user: SafeUser | null;
-  isAuthenticated: boolean;
-
-  // Actions
-  login: (email: string, password: string) => LoginResult;
-  logout: () => void;
-  updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
-
-  // Role helpers — berguna untuk guard di page/layout
-  hasRole: (role: UserRole) => boolean;
-  isArtist: () => boolean;
-  isClient: () => boolean;
-  isCurator: () => boolean;
-  isAdmin: () => boolean;
-}
 
 export const useUserStore = create<UserState>()(
   persist(

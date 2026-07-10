@@ -257,3 +257,202 @@ export interface DataTableProps<T> {
   onPerPageChange: (perPage: 5 | 10) => void;
   itemLabel?: string;
 }
+
+// -----------------------------------------------------------
+// Artwork Store
+// -----------------------------------------------------------
+
+// Digunakan untuk return result dari operasi yang berhasil atau gagal
+export interface ActionResult {
+  success: boolean;
+  message: string;
+}
+
+export interface CreateArtworkPayload {
+  artists_id: string;
+  title: string;
+  description: string | null;
+  images_url: string[];
+  wip_proof_url?: string;
+  upload_type: UploadType;
+  curation_status: CurationStatus;
+  is_visible_on_feed: boolean;
+  tag_names: string[];
+}
+
+export interface ArtworkState {
+  artworks: Artwork[];
+  artworkTags: ArtworkTag[];
+  tags: Tag[];
+  createArtwork: (payload: CreateArtworkPayload) => Artwork;
+  approveArtwork: (id: string, curatorId: string) => ActionResult;
+  rejectArtwork: (id: string, curatorId: string, reason: string) => ActionResult;
+}
+
+// -----------------------------------------------------------
+// Profile Store
+// -----------------------------------------------------------
+
+export interface UpdateProfilePayload {
+  bio?: string | null;
+  is_open_for_commission?: boolean;
+  base_price_idr?: number | null;
+  is_verified?: boolean;
+  approved_portfolio_count?: number;
+}
+
+export interface ProfileState {
+  profiles: Profile[];
+  getProfileByUserId: (userId: string) => Profile | undefined;
+  updateProfile: (userId: string, payload: UpdateProfilePayload) => ActionResult;
+}
+
+// -----------------------------------------------------------
+// Commission Store
+// -----------------------------------------------------------
+
+export interface CreateCommissionPayload {
+  artists_id: string;
+  client_id: string;
+  commission_title: string;
+  description: string | null;
+  price: number;
+}
+
+export interface CommissionState {
+  commissions: Commission[];
+  progress: CommissionProgress[];
+  revisions: Revision[];
+  createCommission: (payload: CreateCommissionPayload) => Commission;
+  setCommissionStatus: (id: string, status: CommissionStatus) => void;
+  setPaymentStatus: (id: string, payment_status: PaymentStatus) => void;
+  uploadDummyResult: (id: string) => void;
+  approveResult: (id: string) => void;
+  addRevision: (commission_id: string, user_id: string, comment: string) => void;
+}
+
+// -----------------------------------------------------------
+// Favorite Store
+// -----------------------------------------------------------
+
+export type FavoriteByUser = Record<string, string[]>;
+
+export interface FavoriteState {
+  favoritesByUser: FavoriteByUser;
+  getFavoriteIds: (userId: string) => string[];
+  isFavorite: (userId: string, artworkId: string) => boolean;
+  addFavorite: (userId: string, artworkId: string) => void;
+  removeFavorite: (userId: string, artworkId: string) => void;
+  toggleFavorite: (userId: string, artworkId: string) => boolean;
+  clearFavorites: (userId: string) => void;
+}
+
+// -----------------------------------------------------------
+// User Management Store
+// -----------------------------------------------------------
+
+export interface UserPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+}
+
+export interface UserManagementState {
+  users: User[];
+  createUser: (payload: UserPayload) => ActionResult;
+  createCurator: (payload: Omit<UserPayload, "role">) => ActionResult;
+  updateUser: (id: string, payload: Partial<UserPayload>) => ActionResult;
+  deleteUser: (id: string) => ActionResult;
+}
+
+// -----------------------------------------------------------
+// User Store
+// -----------------------------------------------------------
+
+// User yang disimpan di store tidak mengandung password
+export type SafeUser = Omit<User, "password">;
+
+export interface UserState {
+  user: SafeUser | null;
+  isAuthenticated: boolean;
+
+  // Actions
+  login: (email: string, password: string) => ActionResult;
+  logout: () => void;
+  updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
+
+  // Role helpers — berguna untuk guard di page/layout
+  hasRole: (role: UserRole) => boolean;
+  isArtist: () => boolean;
+  isClient: () => boolean;
+  isCurator: () => boolean;
+  isAdmin: () => boolean;
+}
+
+// -----------------------------------------------------------
+// Toast & Modal Store
+// -----------------------------------------------------------
+
+export type ModalType = "alert" | "confirm" | "form";
+export type ModalVariant = "default" | "danger";
+
+export interface ModalConfig {
+  /** Optional identifier for ownership checks. */
+  id?: string;
+  /** Title displayed at the top of the modal. */
+  title: string;
+  /** Simple text description. Ignored if `content` is provided. */
+  description?: string;
+  /** Custom React content rendered in the modal body — overrides `description`. */
+  content?: ReactNode;
+  /**
+   * "alert" = single OK button
+   * "confirm" = Cancel + Confirm buttons
+   * "form" = body dibungkus <form> dengan tombol submit + cancel
+   */
+  type?: ModalType;
+  /** Styles the confirm button red. Defaults to "default". */
+  variant?: ModalVariant;
+  /** Optional width utility classes, e.g. "max-w-2xl". */
+  maxWidthClassName?: string;
+  /** Extra classes for form body when type is "form". */
+  formClassName?: string;
+  /**
+   * Dipakai saat type === "form". Setelah callback jalan, modal otomatis ditutup.
+   * Jika ingin menahan modal tetap terbuka (mis. validasi gagal), return false.
+   */
+  onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => void | boolean;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
+
+export interface ModalState {
+  isOpen: boolean;
+  config: ModalConfig | null;
+  openModal: (config: ModalConfig) => void;
+  closeModal: () => void;
+}
+
+export type ToastType = "success" | "error" | "warning" | "info";
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+  duration: number;
+}
+
+export interface AddToastOptions {
+  message: string;
+  type?: ToastType;
+  duration?: number;
+}
+
+export interface ToastState {
+  toasts: Toast[];
+  addToast: (options: AddToastOptions) => void;
+  removeToast: (id: string) => void;
+}

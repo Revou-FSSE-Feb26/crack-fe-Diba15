@@ -7,30 +7,9 @@ import initialCommissions from "@/data/commissions";
 import type {
   Commission,
   CommissionProgress,
-  CommissionStatus,
-  PaymentStatus,
   Revision,
+  CommissionState,
 } from "@/types";
-
-interface CreateCommissionPayload {
-  artists_id: string;
-  client_id: string;
-  commission_title: string;
-  description: string | null;
-  price: number;
-}
-
-interface CommissionState {
-  commissions: Commission[];
-  progress: CommissionProgress[];
-  revisions: Revision[];
-  createCommission: (payload: CreateCommissionPayload) => Commission;
-  setCommissionStatus: (id: string, status: CommissionStatus) => void;
-  setPaymentStatus: (id: string, payment_status: PaymentStatus) => void;
-  uploadDummyResult: (id: string) => void;
-  approveResult: (id: string) => void;
-  addRevision: (commission_id: string, user_id: string, comment: string) => void;
-}
 
 const now = () => new Date().toISOString();
 

@@ -1,25 +1,5 @@
 import { create } from "zustand";
-
-export type ToastType = "success" | "error" | "warning" | "info";
-
-export interface Toast {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration: number;
-}
-
-export interface AddToastOptions {
-  message: string;
-  type?: ToastType;
-  duration?: number;
-}
-
-interface ToastState {
-  toasts: Toast[];
-  addToast: (options: AddToastOptions) => void;
-  removeToast: (id: string) => void;
-}
+import { ToastState } from "@/types";
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],

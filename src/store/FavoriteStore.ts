@@ -1,17 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-type FavoriteByUser = Record<string, string[]>;
-
-interface FavoriteState {
-  favoritesByUser: FavoriteByUser;
-  getFavoriteIds: (userId: string) => string[];
-  isFavorite: (userId: string, artworkId: string) => boolean;
-  addFavorite: (userId: string, artworkId: string) => void;
-  removeFavorite: (userId: string, artworkId: string) => void;
-  toggleFavorite: (userId: string, artworkId: string) => boolean;
-  clearFavorites: (userId: string) => void;
-}
+import type { FavoriteState } from "@/types";
 
 export const useFavoriteStore = create<FavoriteState>()(
   persist(
