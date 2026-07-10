@@ -6,33 +6,8 @@ import { persist } from "zustand/middleware";
 import initialArtworks from "@/data/artworks";
 import initialArtworkTags from "@/data/artworkTags";
 import initialTags from "@/data/tags";
-import type { Artwork, ArtworkTag, CurationStatus, Tag, UploadType } from "@/types";
-
-interface CreateArtworkPayload {
-  artists_id: string;
-  title: string;
-  description: string | null;
-  images_url: string[];
-  wip_proof_url?: string;
-  upload_type: UploadType;
-  curation_status: CurationStatus;
-  is_visible_on_feed: boolean;
-  tag_names: string[];
-}
-
-interface ActionResult {
-  success: boolean;
-  message: string;
-}
-
-interface ArtworkState {
-  artworks: Artwork[];
-  artworkTags: ArtworkTag[];
-  tags: Tag[];
-  createArtwork: (payload: CreateArtworkPayload) => Artwork;
-  approveArtwork: (id: string, curatorId: string) => ActionResult;
-  rejectArtwork: (id: string, curatorId: string, reason: string) => ActionResult;
-}
+import { syncVerificationAfterReview } from "@/utils/artistVerification";
+import type { Artwork, ArtworkTag, Tag, ArtworkState } from "@/types";
 
 const now = () => new Date().toISOString();
 const normalizeTag = (value: string) => value.trim().toLowerCase();
@@ -117,6 +92,8 @@ export const useArtworkStore = create<ArtworkState>()(
           ),
         }));
 
+        syncVerificationAfterReview(target.artists_id, get().artworks);
+
         return { success: true, message: `"${target.title}" berhasil disetujui dan tampil di feed.` };
       },
 
@@ -150,6 +127,8 @@ export const useArtworkStore = create<ArtworkState>()(
               : artwork,
           ),
         }));
+
+        syncVerificationAfterReview(target.artists_id, get().artworks);
 
         return { success: true, message: `"${target.title}" ditolak. Artist akan menerima alasan penolakan.` };
       },

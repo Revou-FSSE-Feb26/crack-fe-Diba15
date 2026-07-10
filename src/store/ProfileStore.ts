@@ -4,24 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import initialProfiles from "@/data/profiles";
-import type { Profile } from "@/types";
-
-interface UpdateProfilePayload {
-  bio?: string | null;
-  is_open_for_commission?: boolean;
-  base_price_idr?: number | null;
-}
-
-interface ActionResult {
-  success: boolean;
-  message: string;
-}
-
-interface ProfileState {
-  profiles: Profile[];
-  getProfileByUserId: (userId: string) => Profile | undefined;
-  updateProfile: (userId: string, payload: UpdateProfilePayload) => ActionResult;
-}
+import type { ProfileState } from "@/types";
 
 const now = () => new Date().toISOString();
 

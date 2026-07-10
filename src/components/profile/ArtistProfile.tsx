@@ -28,6 +28,7 @@ import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { useProfileStore } from "@/store/ProfileStore";
+import { evaluateVerification, VERIFICATION_MIN_APPROVED  } from "@/utils/artistVerification";
 
 interface ArtistProfileProps {
   user: ProfileUser;
@@ -49,6 +50,9 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
     users,
   ).filter(
     (artwork) => artwork.artists_id === user.id && artwork.is_visible_on_feed,
+  );
+  const verificationProgress = evaluateVerification(
+    artworks.filter((artwork) => artwork.artists_id === user.id),
   );
   const artistCommissions = commissions.filter(
     (commission) => commission.artists_id === user.id,
@@ -85,8 +89,10 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
     addToast({
       message: success
         ? "Profil berhasil diperbarui"
-        : (!nameResult.success ? nameResult.message : profileResult.message),
-        type: success ? "success" : "error",
+        : !nameResult.success
+          ? nameResult.message
+          : profileResult.message,
+      type: success ? "success" : "error",
     });
 
     if (success) setIsEditOpen(false);
@@ -160,6 +166,29 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
               </p>
             </div>
           </div>
+
+          {!profile?.is_verified && (
+            <div className="mt-5 rounded-xl bg-primary/5 px-3 py-3">
+              <div className="flex items-center justify-between text-xs text-content-muted">
+                <span>Progress verifikasi</span>
+                <span className="font-medium text-content">
+                  {verificationProgress.approved}/{VERIFICATION_MIN_APPROVED} karya approved
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 w-full rounded-full bg-content/10">
+                <div
+                  className="h-1.5 rounded-full bg-primary transition-all"
+                  style={{
+                    width: `${Math.min(100, (verificationProgress.approved / VERIFICATION_MIN_APPROVED) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-content-muted">
+                {verificationProgress.neededForEligibility} karya approved
+                lagi menuju verifikasi.
+              </p>
+            </div>
+          )}
         </div>
 
         <aside className="lg:w-72 shrink-0">

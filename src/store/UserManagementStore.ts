@@ -4,27 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import initialUsers from "@/data/users";
-import type { User, UserRole } from "@/types";
-
-interface UserPayload {
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-}
-
-interface ActionResult {
-  success: boolean;
-  message: string;
-}
-
-interface UserManagementState {
-  users: User[];
-  createUser: (payload: UserPayload) => ActionResult;
-  createCurator: (payload: Omit<UserPayload, "role">) => ActionResult;
-  updateUser: (id: string, payload: Partial<UserPayload>) => ActionResult;
-  deleteUser: (id: string) => ActionResult;
-}
+import type { User, UserManagementState } from "@/types";
 
 const now = () => new Date().toISOString();
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
