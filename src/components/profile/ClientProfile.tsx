@@ -4,6 +4,7 @@ import {
 	Clock3,
 	CreditCard,
 	ShieldCheck,
+	Wallet,
 } from "lucide-react";
 import { useMemo } from "react";
 
@@ -13,16 +14,45 @@ import ClientCommissionHistory from "@/components/profile/ClientCommissionHistor
 import ProfileHeading from "@/components/profile/ProfileHeading";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
+import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useCommissionStore } from "@/store/CommissionStore";
+import { useToastStore } from "@/store/ToastStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 
 interface ClientProfileProps {
 	user: ProfileUser;
 }
 
-export default function ClientProfile({ user }: ClientProfileProps) {
+export default function ClientProfile({
+	user: initialUser,
+}: ClientProfileProps) {
 	const { commissions } = useCommissionStore();
+	const { updateUser } = useUserManagementStore();
+	const { user: currentUser, updateCurrentUser } = useUserStore();
+	const { addToast } = useToastStore();
+
+	const user = useMemo(() => {
+		if (currentUser && currentUser.id === initialUser.id) {
+			return currentUser;
+		}
+		return initialUser;
+	}, [currentUser, initialUser]);
+
+	const handleTopUp = () => {
+		const amount = 500000;
+		const nextBalance = (user.balance ?? 0) + amount;
+		updateUser(user.id, { balance: nextBalance });
+		if (currentUser?.id === user.id) {
+			updateCurrentUser({ balance: nextBalance });
+		}
+		addToast({
+			message: `Berhasil Top Up ${formatPrice(amount)} ke E-Wallet.`,
+			type: "success",
+		});
+	};
 	const clientCommissions = useMemo(
 		() =>
 			commissions
@@ -132,6 +162,27 @@ export default function ClientProfile({ user }: ClientProfileProps) {
 									{formatPrice(totalSpent)}
 								</p>
 							</div>
+						</div>
+
+						<div className="flex items-center justify-between rounded-xl bg-verified/5 border border-verified/20 px-3 py-3">
+							<div className="flex items-center gap-2 min-w-0">
+								<Wallet className="w-4 h-4 text-verified shrink-0" />
+								<div className="min-w-0">
+									<p className="text-[10px] text-content-muted">
+										Saldo E-Wallet
+									</p>
+									<p className="font-display text-base font-bold text-verified truncate">
+										{formatPrice(user.balance ?? 0)}
+									</p>
+								</div>
+							</div>
+							<Button
+								variant="secondary"
+								className="text-xs py-1 px-2.5 h-auto shrink-0 bg-verified/10 text-verified border-verified hover:bg-verified/20"
+								onClick={handleTopUp}
+							>
+								Top Up
+							</Button>
 						</div>
 
 						<hr className="border-slate-200 dark:border-slate-700" />

@@ -50,6 +50,7 @@ export interface User {
 	email: string;
 	password: string;
 	role: UserRole;
+	balance: number;
 	created_at: string;
 	updated_at: string;
 }
@@ -101,6 +102,8 @@ export interface Commission {
 	price: number;
 	status: CommissionStatus;
 	payment_status: PaymentStatus;
+	payment_method?: "wallet" | "credit_card";
+	card_last_four?: string;
 	created_at: string;
 	updated_at: string;
 }
@@ -128,6 +131,7 @@ export interface DisputeLog {
 	commission_id: string;
 	is_disputed: boolean;
 	reason: string;
+	status: "pending" | "approved" | "rejected";
 	mediator_id: string | null;
 	created_at: string;
 }
@@ -299,6 +303,7 @@ export interface UpdateProfilePayload {
 	base_price_idr?: number | null;
 	is_verified?: boolean;
 	approved_portfolio_count?: number;
+	strike_count?: number;
 }
 
 export interface ProfileState {
@@ -326,9 +331,15 @@ export interface CommissionState {
 	commissions: Commission[];
 	progress: CommissionProgress[];
 	revisions: Revision[];
+	disputes: DisputeLog[];
 	createCommission: (payload: CreateCommissionPayload) => Commission;
 	setCommissionStatus: (id: string, status: CommissionStatus) => void;
-	setPaymentStatus: (id: string, payment_status: PaymentStatus) => void;
+	setPaymentStatus: (
+		id: string,
+		payment_status: PaymentStatus,
+		payment_method?: "wallet" | "credit_card",
+		card_last_four?: string,
+	) => ActionResult;
 	uploadDummyResult: (id: string) => void;
 	approveResult: (id: string) => void;
 	addRevision: (
@@ -336,6 +347,12 @@ export interface CommissionState {
 		user_id: string,
 		comment: string,
 	) => void;
+	fileDispute: (commission_id: string, reason: string) => ActionResult;
+	resolveDispute: (
+		commission_id: string,
+		approved: boolean,
+		mediator_id: string,
+	) => ActionResult;
 }
 
 // -----------------------------------------------------------
@@ -363,6 +380,7 @@ export interface UserPayload {
 	email: string;
 	password: string;
 	role: UserRole;
+	balance?: number;
 }
 
 export interface UserManagementState {

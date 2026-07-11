@@ -61,6 +61,8 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		(commission) => commission.artists_id === user.id,
 	);
 
+	const artistUser = users.find((u) => u.id === user.id) || user;
+
 	const joinedDate = new Date(user.created_at).toLocaleDateString("id-ID", {
 		year: "numeric",
 		month: "long",
@@ -218,6 +220,17 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 						<SummaryRow label="Order masuk">
 							{artistCommissions.length}
 						</SummaryRow>
+						<SummaryRow label="Strike Count">
+							<span
+								className={
+									profile?.strike_count && profile.strike_count > 0
+										? "text-danger font-bold"
+										: "text-content"
+								}
+							>
+								{profile?.strike_count ?? 0} / 5
+							</span>
+						</SummaryRow>
 
 						{formattedPrice && (
 							<div className="flex items-center gap-2 rounded-xl bg-primary/5 px-3 py-3">
@@ -230,6 +243,18 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 								</div>
 							</div>
 						)}
+
+						<div className="flex items-center gap-2 rounded-xl bg-verified/5 border border-verified/20 px-3 py-3">
+							<Wallet className="w-4 h-4 text-verified shrink-0" />
+							<div>
+								<p className="text-[10px] text-content-muted">
+									Saldo Dompet Artist
+								</p>
+								<p className="font-display text-lg font-bold text-verified">
+									{formatPrice(artistUser.balance ?? 0)}
+								</p>
+							</div>
+						</div>
 
 						<hr className="border-slate-200 dark:border-slate-700" />
 

@@ -210,9 +210,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
 								</button>
 
 								{isDropdownOpen && (
-									<div
-										className="absolute right-0 mt-2 w-40 rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50"
-									>
+									<div className="absolute right-0 mt-2 w-40 rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50">
 										<button
 											type="button"
 											onClick={handleLogout}

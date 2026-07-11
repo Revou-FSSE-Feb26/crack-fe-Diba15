@@ -119,7 +119,9 @@ export default function MainLayout({
 							<div>
 								<DashboardSidebar />
 							</div>
-							<section className="space-y-4">{children}</section>
+							<section className="space-y-4 min-w-0 w-full overflow-hidden">
+								{children}
+							</section>
 						</div>
 					</div>
 				)}
