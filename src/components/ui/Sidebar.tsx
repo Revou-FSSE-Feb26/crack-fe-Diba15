@@ -40,11 +40,11 @@ const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> =
 
 export default function Sidebar({ onClose }: SidebarProps) {
 	const { theme, toggleTheme } = useThemeStore();
-  const mounted = useMounted();
+	const mounted = useMounted();
 	const router = useRouter();
 	const { isAuthenticated, user, logout, isArtist, isAdmin, isCurator } =
 		useUserStore();
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
 	const roles = {
 		artist: "Artist",

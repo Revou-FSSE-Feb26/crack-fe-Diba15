@@ -14,6 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
+import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
@@ -23,7 +24,7 @@ import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
-import AvatarInitials from "./AvatarInitials";
+import { randomKey } from "@/utils";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
@@ -90,7 +91,9 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 
 		if (isLeftSwipe || isRightSwipe) {
 			// Prevent navigation on swipe gesture
-			e.preventDefault();
+			if (e.cancelable) {
+				e.preventDefault();
+			}
 			e.stopPropagation();
 
 			if (isLeftSwipe && currentImageIndex < imageCount - 1) {
@@ -282,7 +285,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 						<div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center">
 							{images.map((_, index) => (
 								<button
-									key={index}
+									key={randomKey()}
 									type="button"
 									onClick={(e) => handleDotClick(e, index)}
 									className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
