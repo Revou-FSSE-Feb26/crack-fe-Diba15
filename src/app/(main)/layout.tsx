@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import BottomNav from "@/components/ui/BottomNav";
 import ModalSearch from "@/components/ui/ModalSearch";
 import Navbar from "@/components/ui/Navbar";
 import Sidebar from "@/components/ui/Sidebar";
@@ -68,6 +69,11 @@ export default function MainLayout({
 			<main className="flex flex-col flex-1 pb-16 md:pb-0">{children}</main>
 
 			<footer></footer>
+
+			<BottomNav
+				onSearchOpen={() => setIsSearchOpen(true)}
+				onMenuToggle={handleToggleSidebar}
+			/>
 
 			{isSearchOpen && <ModalSearch onClose={() => setIsSearchOpen(false)} />}
 		</div>

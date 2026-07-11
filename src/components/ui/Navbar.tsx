@@ -73,7 +73,7 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 					onClick={onMenuToggle}
 					title="Open sidebar"
 					aria-label="Toggle sidebar"
-					className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer shrink-0"
+					className="hidden md:inline-flex rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer shrink-0"
 				>
 					<PanelLeftOpen className="w-6 h-6 text-primary" />
 				</button>
@@ -106,7 +106,7 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 
 			{/* Right: Search + Login dropdown */}
 			<div className="flex justify-end items-center gap-3">
-				<div className="flex items-center">
+				<div className="hidden md:flex items-center">
 					<button
 						type="button"
 						onClick={onSearchOpen}

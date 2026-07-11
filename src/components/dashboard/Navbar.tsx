@@ -50,7 +50,7 @@ export default function Navbar() {
 	};
 
 	return (
-		<nav className="grid grid-cols-3 items-center py-4 px-8">
+		<nav className="grid grid-cols-1 md:grid-cols-3 items-center py-4 px-8">
 			{/* Left: Clock */}
 			<div className="hidden md:flex justify-start text-center">
 				<Clock />
