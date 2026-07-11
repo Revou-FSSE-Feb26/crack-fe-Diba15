@@ -16,6 +16,7 @@ import {
 	User,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Brand from "@/components/ui/brand/Brand";
@@ -39,10 +40,11 @@ const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> =
 
 export default function Sidebar({ onClose }: SidebarProps) {
 	const { theme, toggleTheme } = useThemeStore();
-	const mounted = useMounted();
+  const mounted = useMounted();
+	const router = useRouter();
 	const { isAuthenticated, user, logout, isArtist, isAdmin, isCurator } =
 		useUserStore();
-	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
 	const roles = {
 		artist: "Artist",
@@ -64,6 +66,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
 	const menu = isAuthenticated
 		? [...menuItems, ...postArtMenu, ...dashboardMenu, ...userMenuItems]
 		: menuItems;
+
+	const handleLogout = () => {
+		logout();
+		router.push("/login");
+	};
 
 	return (
 		<aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">
@@ -156,7 +163,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 									<button
 										type="button"
 										onClick={() => {
-											logout();
+											handleLogout();
 											onClose();
 										}}
 										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"

@@ -2,6 +2,8 @@
 
 import {
 	BadgeCheck,
+	ChevronLeft,
+	ChevronRight,
 	Flag,
 	Heart,
 	Link as LinkIcon,
@@ -41,8 +43,63 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	];
 	const imageCount = images.length;
 
+	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const [touchStartX, setTouchStartX] = useState<number | null>(null);
+	const [touchEndX, setTouchEndX] = useState<number | null>(null);
+
+	const minSwipeDistance = 50;
+
+	const handlePrev = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (currentImageIndex > 0) {
+			setCurrentImageIndex((prev) => prev - 1);
+		}
+	};
+
+	const handleNext = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (currentImageIndex < imageCount - 1) {
+			setCurrentImageIndex((prev) => prev + 1);
+		}
+	};
+
+	const handleDotClick = (e: React.MouseEvent, index: number) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setCurrentImageIndex(index);
+	};
+
+	const handleTouchStart = (e: React.TouchEvent) => {
+		setTouchEndX(null);
+		setTouchStartX(e.targetTouches[0].clientX);
+	};
+
+	const handleTouchMove = (e: React.TouchEvent) => {
+		setTouchEndX(e.targetTouches[0].clientX);
+	};
+
+	const handleTouchEnd = (e: React.TouchEvent) => {
+		if (!touchStartX || !touchEndX) return;
+		const distance = touchStartX - touchEndX;
+		const isLeftSwipe = distance > minSwipeDistance;
+		const isRightSwipe = distance < -minSwipeDistance;
+
+		if (isLeftSwipe || isRightSwipe) {
+			// Prevent navigation on swipe gesture
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (isLeftSwipe && currentImageIndex < imageCount - 1) {
+				setCurrentImageIndex((prev) => prev + 1);
+			} else if (isRightSwipe && currentImageIndex > 0) {
+				setCurrentImageIndex((prev) => prev - 1);
+			}
+		}
+	};
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -158,72 +215,88 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 				</div>
 			</div>
 
-			{/* Image Grid */}
-			<Link
-				href={`/detail/${artwork.id}`}
-				className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer"
+			{/* Image Carousel */}
+			<div
+				className="relative w-full bg-content/5 overflow-hidden aspect-4/3 group/carousel"
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={handleTouchEnd}
 			>
+				<Link
+					href={`/detail/${artwork.id}`}
+					className="block w-full h-full cursor-pointer relative"
+				>
+					{imageCount > 0 ? (
+						<Image
+							src={images[currentImageIndex]}
+							alt={`${artwork.title} - Image ${currentImageIndex + 1}`}
+							fill
+							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+							className="object-cover transition-opacity duration-300"
+							loading="eager"
+						/>
+					) : (
+						<div className="w-full h-full flex items-center justify-center text-content-muted">
+							Tidak ada gambar
+						</div>
+					)}
+				</Link>
+
 				{artwork.curation_status === "approved" && (
-					<div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full">
+					<div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full pointer-events-none">
 						<ShieldCheck className="w-3 h-3" />
 						Terkurasi
 					</div>
 				)}
 
-				{imageCount > 0 && (
-					<div
-						className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? "col-span-2 row-span-2" : "col-span-1 row-span-2"}`}
-					>
-						<Image
-							src={images[0]}
-							alt={`${artwork.title} - Image 1`}
-							fill
-							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-							className="object-cover transition-transform duration-300"
-							loading="eager"
-						/>
+				{imageCount > 1 && (
+					<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1 rounded-full pointer-events-none select-none">
+						{currentImageIndex + 1} / {imageCount}
 					</div>
 				)}
 
 				{imageCount > 1 && (
-					<div
-						className={`relative w-full h-full overflow-hidden ${imageCount === 2 ? "col-span-1 row-span-2" : "col-span-1 row-span-1"}`}
-					>
-						<Image
-							src={images[1]}
-							alt={`${artwork.title} - Image 2`}
-							fill
-							sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-							className="object-cover transition-transform duration-300"
-							loading="eager"
-						/>
-					</div>
-				)}
-
-				{imageCount > 2 && (
-					<div className="relative w-full h-full overflow-hidden col-span-1 row-span-1">
-						<Image
-							src={images[2]}
-							alt={`${artwork.title} - Image 3`}
-							fill
-							sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-							className="object-cover transition-transform duration-300"
-							loading="eager"
-						/>
-
-						{imageCount > 3 && (
-							<div className="absolute inset-0 bg-black/40 backdrop-blur-[3px] flex flex-col items-center justify-center gap-1 hover:bg-black/50 transition-colors duration-200 z-10">
-								<span className="text-white text-xl font-bold tracking-wider">
-									+{imageCount - 3}
-								</span>
-								<span className="text-white text-xs font-medium px-2">
-									Tampilkan Semua
-								</span>
-							</div>
+					<>
+						{currentImageIndex > 0 && (
+							<button
+								type="button"
+								onClick={handlePrev}
+								className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white transition-all duration-200 cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
+								aria-label="Previous image"
+							>
+								<ChevronLeft size={16} />
+							</button>
 						)}
-					</div>
+
+						{currentImageIndex < imageCount - 1 && (
+							<button
+								type="button"
+								onClick={handleNext}
+								className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white transition-all duration-200 cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
+								aria-label="Next image"
+							>
+								<ChevronRight size={16} />
+							</button>
+						)}
+
+						<div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center">
+							{images.map((_, index) => (
+								<button
+									key={index}
+									type="button"
+									onClick={(e) => handleDotClick(e, index)}
+									className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+										currentImageIndex === index
+											? "bg-white scale-125 shadow-sm"
+											: "bg-white/40 hover:bg-white/70"
+									}`}
+									aria-label={`Go to image ${index + 1}`}
+								/>
+							))}
+						</div>
+					</>
 				)}
-			</Link>
+			</div>
 
 			{/* Action Bar */}
 			<div className="flex flex-col px-4 py-3 border-b border-content/5">
