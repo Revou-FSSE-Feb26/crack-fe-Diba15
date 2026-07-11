@@ -19,15 +19,12 @@ export default function Navbar() {
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	const roles = {
-		artist: { name: "Artist", color: "text-warm" },
-		client: { name: "Client", color: "text-mint" },
-		admin: { name: "Admin", color: "text-premium" },
-		curator: { name: "Curator", color: "text-warm" },
+		artist: "Artist",
+		client: "Client",
+		admin: "Admin",
+		curator: "Curator",
 	};
-	const userRole = roles[user?.role as keyof typeof roles] || {
-		name: "",
-		color: "",
-	};
+	const userRole = roles[user?.role as keyof typeof roles];
 
 	// Close Dropdown when click outside
 	useEffect(() => {
@@ -80,8 +77,8 @@ export default function Navbar() {
 										<span className="text-sm font-medium text-primary">
 											{user?.name}
 										</span>
-										<span className={`text-xs font-medium ${userRole.color}`}>
-											{userRole.name}
+										<span className="text-xs font-medium text-warm">
+											{userRole}
 										</span>
 									</div>
 									<span className="text-sm font-medium text-primary">

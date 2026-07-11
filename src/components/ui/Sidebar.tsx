@@ -45,15 +45,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
 	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
 	const roles = {
-		artist: { name: "Artist", color: "text-warm" },
-		client: { name: "Client", color: "text-mint" },
-		admin: { name: "Admin", color: "text-premium" },
-		curator: { name: "Curator", color: "text-warm" },
+		artist: "Artist",
+		client: "Client",
+		admin: "Admin",
+		curator: "Curator",
 	};
-	const userRole = roles[user?.role as keyof typeof roles] || {
-		name: "",
-		color: "",
-	};
+	const userRole = roles[user?.role as keyof typeof roles];
 
 	// Jika isAuth maka satukan menu user dengan menu default
 	const postArtMenu =
@@ -133,9 +130,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
 											{user?.name}
 										</span>
 										<span
-											className={`text-[10px] font-medium ${userRole.color}`}
+											className={`text-[10px] font-medium text-warm`}
 										>
-											{userRole.name}
+											{userRole}
 										</span>
 									</div>
 								</div>
