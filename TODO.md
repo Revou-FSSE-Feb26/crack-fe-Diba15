@@ -27,7 +27,7 @@ Artists POV:
 7. Jika user sudah approve, maka uang muka yang sudah dibayar oleh user akan di kirim ke dalam wallet artis.
 
 (HIGH)
-TODO 8 = Menerapkan alur dispute commission, dimana user dapat mengajukan dispute jika commission tidak sesuai dengan yang diharapkan.
+TODO 8 = Menerapkan alur dispute commission, dimana user dapat mengajukan dispute jika commission tidak sesuai dengan yang diharapkan. (Clear)
 Requirements:
 1. User dapat mengajukan dispute ketika artist sudah upload hasil commission.
 2. Alasan dispute harus diisi oleh user sebelum diajukan.
