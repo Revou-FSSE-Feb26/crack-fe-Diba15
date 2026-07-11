@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	AlertCircle,
-	CheckCircle,
-	Search,
-	XCircle,
-} from "lucide-react";
+import { AlertCircle, CheckCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
@@ -27,14 +22,14 @@ export default function ReviewDisputesPage() {
 		useCommissionStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
-  const { openLightbox } = useLightboxStore();
+	const { openLightbox } = useLightboxStore();
 
-  const {pending, disputed, rejected} = useMemo(() => {
-    const pending = disputes.filter((d) => d.status === "pending");
-    const disputed = disputes.filter((d) => d.status === "approved");
-    const rejected = disputes.filter((d) => d.status === "rejected");
-    return { pending, disputed, rejected };
-  }, [disputes]);
+	const { pending, disputed, rejected } = useMemo(() => {
+		const pending = disputes.filter((d) => d.status === "pending");
+		const disputed = disputes.filter((d) => d.status === "approved");
+		const rejected = disputes.filter((d) => d.status === "rejected");
+		return { pending, disputed, rejected };
+	}, [disputes]);
 
 	const { setPage, setPerPage, paginate } = usePagination({
 		initialPerPage: 5,

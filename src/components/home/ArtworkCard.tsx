@@ -180,6 +180,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							fill
 							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
 							className="object-cover transition-transform duration-300"
+							loading="eager"
 						/>
 					</div>
 				)}
@@ -194,6 +195,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							fill
 							sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
 							className="object-cover transition-transform duration-300"
+							loading="eager"
 						/>
 					</div>
 				)}
@@ -206,6 +208,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							fill
 							sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
 							className="object-cover transition-transform duration-300"
+							loading="eager"
 						/>
 
 						{imageCount > 3 && (

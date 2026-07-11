@@ -116,7 +116,7 @@ export default function MainLayout({
 						)}
 
 						<div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-							<div>
+							<div className="w-full overflow-hidden">
 								<DashboardSidebar />
 							</div>
 							<section className="space-y-4 min-w-0 w-full overflow-hidden">

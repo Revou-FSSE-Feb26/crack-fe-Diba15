@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import ModalSearch from "@/components/ui/ModalSearch";
 import Navbar from "@/components/ui/Navbar";
 import Sidebar from "@/components/ui/Sidebar";
 
@@ -10,7 +12,7 @@ export default function MainLayout({
 	children: React.ReactNode;
 }) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-	// const pathname = usePathname();
+	const [isSearchOpen, setIsSearchOpen] = useState(false);
 
 	// Close sidebar automatically when the pathname/route changes
 	useEffect(() => {
@@ -21,10 +23,31 @@ export default function MainLayout({
 		setIsSidebarOpen((prev) => !prev);
 	};
 
+	// Lock body scroll when sidebar is open
+	useEffect(() => {
+		if (isSidebarOpen) {
+			document.body.style.overflow = "hidden";
+		} else {
+			const activeOverlays = document.querySelectorAll(".fixed.inset-0");
+			if (activeOverlays.length <= 1) {
+				document.body.style.overflow = "";
+			}
+		}
+		return () => {
+			const activeOverlays = document.querySelectorAll(".fixed.inset-0");
+			if (activeOverlays.length <= 1) {
+				document.body.style.overflow = "";
+			}
+		};
+	}, [isSidebarOpen]);
+
 	return (
 		<div className="min-h-full relative">
 			<header className="sticky top-0 bg-surface backdrop-blur-md z-40">
-				<Navbar onMenuToggle={handleToggleSidebar} />
+				<Navbar
+					onMenuToggle={handleToggleSidebar}
+					onSearchOpen={() => setIsSearchOpen(true)}
+				/>
 			</header>
 
 			<div
@@ -42,9 +65,11 @@ export default function MainLayout({
 				</div>
 			</div>
 
-			<main className="flex flex-col flex-1">{children}</main>
+			<main className="flex flex-col flex-1 pb-16 md:pb-0">{children}</main>
 
 			<footer></footer>
+
+			{isSearchOpen && <ModalSearch onClose={() => setIsSearchOpen(false)} />}
 		</div>
 	);
 }
