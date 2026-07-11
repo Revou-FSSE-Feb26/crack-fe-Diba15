@@ -129,9 +129,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 										<span className="text-sm font-medium text-primary">
 											{user?.name}
 										</span>
-										<span
-											className={`text-[10px] font-medium text-warm`}
-										>
+										<span className={`text-[10px] font-medium text-warm`}>
 											{userRole}
 										</span>
 									</div>
