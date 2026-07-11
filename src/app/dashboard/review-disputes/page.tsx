@@ -1,9 +1,14 @@
 "use client";
 
-import { CheckCircle } from "lucide-react";
-import { useCallback, useMemo } from "react";
-
+import {
+	AlertCircle,
+	CheckCircle,
+	Search,
+	XCircle,
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
+import Stat from "@/components/ui/Stat";
 import { usePagination } from "@/hooks/usePagination";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useLightboxStore } from "@/store/LightboxStore";
@@ -22,7 +27,14 @@ export default function ReviewDisputesPage() {
 		useCommissionStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
-	const { openLightbox } = useLightboxStore();
+  const { openLightbox } = useLightboxStore();
+
+  const {pending, disputed, rejected} = useMemo(() => {
+    const pending = disputes.filter((d) => d.status === "pending");
+    const disputed = disputes.filter((d) => d.status === "approved");
+    const rejected = disputes.filter((d) => d.status === "rejected");
+    return { pending, disputed, rejected };
+  }, [disputes]);
 
 	const { setPage, setPerPage, paginate } = usePagination({
 		initialPerPage: 5,
@@ -55,9 +67,24 @@ export default function ReviewDisputesPage() {
 			);
 	}, [disputes, commissions, progress, users]);
 
+	const [search, setSearch] = useState("");
+
+	const filteredDisputes = useMemo(() => {
+		const query = search.trim().toLowerCase();
+		if (!query) return joinedDisputes;
+		return joinedDisputes.filter((item) => {
+			return (
+				item.commission?.commission_title?.toLowerCase().includes(query) ||
+				item.client?.name?.toLowerCase().includes(query) ||
+				item.artist?.name?.toLowerCase().includes(query) ||
+				item.reason?.toLowerCase().includes(query)
+			);
+		});
+	}, [joinedDisputes, search]);
+
 	const paginatedDisputes = useMemo(
-		() => paginate(joinedDisputes),
-		[joinedDisputes, paginate],
+		() => paginate(filteredDisputes),
+		[filteredDisputes, paginate],
 	);
 
 	const handleResolve = useCallback(
@@ -101,26 +128,70 @@ export default function ReviewDisputesPage() {
 
 	return (
 		<div className="space-y-6">
-			<DataTable
-				columns={columns}
-				pagination={paginatedDisputes}
-				getRowKey={(row) => row.id}
-				onPageChange={setPage}
-				onPerPageChange={setPerPage}
-				itemLabel="sengketa"
-				emptyState={
-					<div className="py-12 text-center">
-						<CheckCircle className="mx-auto mb-3 h-10 w-10 text-verified" />
-						<p className="font-semibold text-content text-base">
-							Semua Sengketa Bersih
-						</p>
-						<p className="text-sm text-content-muted mt-1">
-							Tidak ada komisi yang saat ini berada dalam tahap sengketa
-							(dispute) pending.
+			<div className="grid gap-4 sm:grid-cols-3">
+				<Stat
+					variant="card"
+					label="Dispute Pending"
+					value={pending.length}
+					icon={AlertCircle}
+				/>
+				<Stat
+					variant="card"
+					label="Disetujui (total)"
+					value={disputed.length}
+					icon={CheckCircle}
+				/>
+				<Stat
+					variant="card"
+					label="Ditolak (total)"
+					value={rejected.length}
+					icon={XCircle}
+				/>
+			</div>
+
+			<div className="rounded-2xl border border-content/10 bg-surface">
+				<div className="flex flex-col gap-3 border-b border-content/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+					<div>
+						<h2 className="font-heading text-lg font-semibold text-content">
+							Daftar Sengketa
+						</h2>
+						<p className="text-sm text-content-muted">
+							Tinjau sengketa aktif atau riwayat sengketa transaksi komisi.
 						</p>
 					</div>
-				}
-			/>
+					<div className="relative w-full sm:max-w-sm">
+						<Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-content-muted" />
+						<input
+							type="search"
+							value={search}
+							onChange={(event) => setSearch(event.target.value)}
+							placeholder="Cari komisi, klien, artis, atau alasan..."
+							className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+						/>
+					</div>
+				</div>
+
+				<DataTable
+					columns={columns}
+					pagination={paginatedDisputes}
+					getRowKey={(row) => row.id}
+					onPageChange={setPage}
+					onPerPageChange={setPerPage}
+					itemLabel="sengketa"
+					emptyState={
+						<div className="py-12 text-center">
+							<CheckCircle className="mx-auto mb-3 h-10 w-10 text-verified" />
+							<p className="font-semibold text-content text-base">
+								Semua Sengketa Bersih
+							</p>
+							<p className="text-sm text-content-muted mt-1">
+								Tidak ada komisi yang saat ini berada dalam tahap sengketa
+								(dispute) pending.
+							</p>
+						</div>
+					}
+				/>
+			</div>
 		</div>
 	);
 }
