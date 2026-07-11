@@ -19,15 +19,8 @@ import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
+import { formatShortDate } from "@/utils";
 import { buildArtworkWithRelations } from "@/utils/search";
-
-function formatDate(value: string) {
-	return new Intl.DateTimeFormat("id-ID", {
-		day: "numeric",
-		month: "short",
-		year: "numeric",
-	}).format(new Date(value));
-}
 
 export default function ReviewArtworksPage() {
 	const { user, isCurator } = useUserStore();
@@ -287,7 +280,7 @@ export default function ReviewArtworksPage() {
 										</div>
 										<p className="mt-0.5 text-xs text-content-muted">
 											{artwork.artist.name} ·{" "}
-											{formatDate(artwork.reviewed_at ?? "")} ·{" "}
+											{formatShortDate(artwork.reviewed_at ?? "")} ·{" "}
 											{getReviewerName(artwork.reviewed_by)}
 										</p>
 										{artwork.curation_status === "rejected" &&

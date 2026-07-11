@@ -24,6 +24,24 @@ export function formatDate(date: string) {
 	});
 }
 
+export function formatShortDate(value: string): string {
+	return new Intl.DateTimeFormat("id-ID", {
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+	}).format(new Date(value));
+}
+
+export function formatDateTime(value: string): string {
+	return new Intl.DateTimeFormat("id-ID", {
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	}).format(new Date(value));
+}
+
 export function randomKey(): string {
 	const key =
 		Math.random().toString(36).substring(2, 15) +

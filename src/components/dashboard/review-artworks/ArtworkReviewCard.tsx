@@ -30,15 +30,7 @@ const uploadTypeLabel = {
 	commission: "Komisi",
 } as const;
 
-function formatDate(value: string) {
-	return new Intl.DateTimeFormat("id-ID", {
-		day: "numeric",
-		month: "short",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	}).format(new Date(value));
-}
+import { formatDateTime } from "@/utils";
 
 function getReviewLabel(artwork: ArtworkWithRelations) {
 	if (!artwork.wip_proof_url) {
@@ -160,7 +152,7 @@ export default function ArtworkReviewCard({
 					<div className="text-content-muted">
 						Diunggah:{" "}
 						<span className="font-medium text-content">
-							{formatDate(artwork.created_at)}
+							{formatDateTime(artwork.created_at)}
 						</span>
 					</div>
 					<div className="text-content-muted">
@@ -200,7 +192,7 @@ export default function ArtworkReviewCard({
 				<div className="flex flex-col gap-2 border-t border-content/10 pt-4 sm:flex-row sm:justify-end">
 					<Button
 						variant="danger"
-						className="flex gap-1 items-center justify-center sm:min-w-[140px]"
+						className="flex gap-1 items-center justify-center sm:min-w-35"
 						onClick={onReject}
 						disabled={isProcessing}
 					>
@@ -208,7 +200,7 @@ export default function ArtworkReviewCard({
 						Tolak
 					</Button>
 					<Button
-						className="flex gap-1 items-center justify-center sm:min-w-[140px]"
+						className="flex gap-1 items-center justify-center sm:min-w-35"
 						onClick={onApprove}
 						disabled={isProcessing}
 					>

@@ -21,15 +21,15 @@ export default function MainLayout({
 	const mounted = useMounted();
 	const [showWarn, setShowWarn] = useState(false);
 
+	const isStaff = user?.role === "admin" || user?.role === "curator";
+
 	useEffect(() => {
-		if (!isAuthenticated) {
+		if (isAuthenticated && isStaff) {
 			setTimeout(() => {
 				setShowWarn(true);
 			}, 0);
 		}
-	}, [isAuthenticated]);
-
-	const isStaff = user?.role === "admin" || user?.role === "curator";
+	}, [isAuthenticated, isStaff]);
 
 	const handleWarn = () => {
 		setShowWarn(false);

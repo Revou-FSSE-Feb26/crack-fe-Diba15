@@ -1,13 +1,15 @@
-// ============================================================
-// TruBrush — Database Types
-// untuk Prisma schema, API response, maupun komponen Next.js.
-// ============================================================
+// =============================================================================
+// TruBrush — TypeScript Type Definitions
+// Terpusat untuk Entitas Database, API Transport, Global State, dan UI.
+// =============================================================================
 
 import type { ReactNode } from "react";
 
-// -----------------------------------------------------------
-// Enums
-// -----------------------------------------------------------
+// =============================================================================
+// BAGIAN 1: ENTITAS & MODEL DATABASE (CORE & RELATIONAL)
+// =============================================================================
+
+// ── Enums & Literal Types ───────────────────────────────────────────────────
 
 export type UserRole = "artist" | "client" | "admin" | "curator";
 
@@ -20,7 +22,7 @@ export type CommissionStatus =
 	| "cancelled" // Dibatalkan salah satu pihak
 	| "disputed"; // Dalam sengketa
 
-export type PaymentStatus = "unpaid" | "paid" | "refunded" | "released"; // Dana dilepas ke artist setelah selesai
+export type PaymentStatus = "unpaid" | "paid" | "refunded" | "released";
 
 export type CurationStatus =
 	| "unapproved" // Jika user tidak check periksa oleh kurator
@@ -40,9 +42,7 @@ export type ReportStatus = "pending" | "resolved" | "dismissed";
 
 export type Theme = "light" | "dark";
 
-// -----------------------------------------------------------
-// Core Tables
-// -----------------------------------------------------------
+// ── Core Entities (Prisma-like Models) ───────────────────────────────────────
 
 export interface User {
 	id: string;
@@ -146,10 +146,7 @@ export interface Report {
 	created_at: string;
 }
 
-// -----------------------------------------------------------
-// Relational / Joined Types
-// Digunakan untuk data yang sudah di-JOIN dari API / Prisma include
-// -----------------------------------------------------------
+// ── Relational / Joined Entities ─────────────────────────────────────────────
 
 /** Artwork lengkap dengan data artist dan tags-nya — untuk feed & detail page */
 export interface ArtworkWithRelations extends Artwork {
@@ -172,10 +169,17 @@ export interface CommissionWithRelations extends Commission {
 	dispute: DisputeLog | null;
 }
 
-// -----------------------------------------------------------
-// API Response Wrappers
-// Gunakan sebagai tipe return dari API route / Server Action
-// -----------------------------------------------------------
+/** Sengketa lengkap dengan komisi, progress, client, dan artist — untuk tabel sengketa */
+export interface JoinedDispute extends DisputeLog {
+	commission?: Commission;
+	progress?: CommissionProgress;
+	client?: User;
+	artist?: User;
+}
+
+// =============================================================================
+// BAGIAN 2: API, DATA TRANSPORT & PAGINATION
+// =============================================================================
 
 export interface ApiSuccess<T> {
 	success: true;
@@ -188,12 +192,7 @@ export interface ApiError {
 	code?: string;
 }
 
-// Digunakan sebagai tipe return dari API route / Server Action
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;
-
-// -----------------------------------------------------------
-// Pagination
-// -----------------------------------------------------------
 
 export interface PaginatedResponse<T> {
 	data: T[];
@@ -202,10 +201,6 @@ export interface PaginatedResponse<T> {
 	per_page: number;
 	total_pages: number;
 }
-
-// -----------------------------------------------------------
-// Feed & Filter
-// -----------------------------------------------------------
 
 export interface FeedFilter {
 	tag_id?: string;
@@ -224,9 +219,18 @@ export interface ParsedQuery {
 	raw: string;
 }
 
-// -----------------------------------------------------------
-// Theme
-// -----------------------------------------------------------
+// =============================================================================
+// BAGIAN 3: STATE MANAGEMENT (ZUSTAND STORES)
+// =============================================================================
+
+// ── General Results ──────────────────────────────────────────────────────────
+
+export interface ActionResult {
+	success: boolean;
+	message: string;
+}
+
+// ── Theme Store ──────────────────────────────────────────────────────────────
 
 export interface ThemeState {
 	theme: Theme;
@@ -234,39 +238,7 @@ export interface ThemeState {
 	setTheme: (theme: Theme) => void;
 }
 
-// -----------------------------------------------------------
-// Data Table
-// -----------------------------------------------------------
-
-export interface DataTableColumn<T> {
-	key: string;
-	header: ReactNode;
-	headerClassName?: string;
-	cellClassName?: string;
-	cell: (row: T) => ReactNode;
-}
-
-export interface DataTableProps<T> {
-	columns: DataTableColumn<T>[];
-	pagination: PaginatedResponse<T>;
-	getRowKey: (row: T) => string;
-	emptyState?: ReactNode;
-	isLoading?: boolean;
-	toolbar?: ReactNode;
-	onPageChange: (page: number) => void;
-	onPerPageChange: (perPage: 5 | 10) => void;
-	itemLabel?: string;
-}
-
-// -----------------------------------------------------------
-// Artwork Store
-// -----------------------------------------------------------
-
-// Digunakan untuk return result dari operasi yang berhasil atau gagal
-export interface ActionResult {
-	success: boolean;
-	message: string;
-}
+// ── Artwork Store ────────────────────────────────────────────────────────────
 
 export interface CreateArtworkPayload {
 	artists_id: string;
@@ -293,9 +265,7 @@ export interface ArtworkState {
 	) => ActionResult;
 }
 
-// -----------------------------------------------------------
-// Profile Store
-// -----------------------------------------------------------
+// ── Profile Store ────────────────────────────────────────────────────────────
 
 export interface UpdateProfilePayload {
 	bio?: string | null;
@@ -315,9 +285,7 @@ export interface ProfileState {
 	) => ActionResult;
 }
 
-// -----------------------------------------------------------
-// Commission Store
-// -----------------------------------------------------------
+// ── Commission Store ─────────────────────────────────────────────────────────
 
 export interface CreateCommissionPayload {
 	artists_id: string;
@@ -355,9 +323,7 @@ export interface CommissionState {
 	) => ActionResult;
 }
 
-// -----------------------------------------------------------
-// Favorite Store
-// -----------------------------------------------------------
+// ── Favorite Store ───────────────────────────────────────────────────────────
 
 export type FavoriteByUser = Record<string, string[]>;
 
@@ -371,9 +337,7 @@ export interface FavoriteState {
 	clearFavorites: (userId: string) => void;
 }
 
-// -----------------------------------------------------------
-// User Management Store
-// -----------------------------------------------------------
+// ── User Management Store ────────────────────────────────────────────────────
 
 export interface UserPayload {
 	name: string;
@@ -391,23 +355,16 @@ export interface UserManagementState {
 	deleteUser: (id: string) => ActionResult;
 }
 
-// -----------------------------------------------------------
-// User Store
-// -----------------------------------------------------------
+// ── User Store (Auth) ────────────────────────────────────────────────────────
 
-// User yang disimpan di store tidak mengandung password
 export type SafeUser = Omit<User, "password">;
 
 export interface UserState {
 	user: SafeUser | null;
 	isAuthenticated: boolean;
-
-	// Actions
 	login: (email: string, password: string) => ActionResult;
 	logout: () => void;
 	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
-
-	// Role helpers — berguna untuk guard di page/layout
 	hasRole: (role: UserRole) => boolean;
 	isArtist: () => boolean;
 	isClient: () => boolean;
@@ -415,38 +372,35 @@ export interface UserState {
 	isAdmin: () => boolean;
 }
 
-// -----------------------------------------------------------
-// Toast & Modal Store
-// -----------------------------------------------------------
+// ── Lightbox Store ───────────────────────────────────────────────────────────
+
+export interface LightboxState {
+	isOpen: boolean;
+	images: string[];
+	initialIndex: number;
+	title?: string;
+	openLightbox: (
+		images: string[],
+		initialIndex?: number,
+		title?: string,
+	) => void;
+	closeLightbox: () => void;
+}
+
+// ── Modal Store ──────────────────────────────────────────────────────────────
 
 export type ModalType = "alert" | "confirm" | "form";
 export type ModalVariant = "default" | "danger";
 
 export interface ModalConfig {
-	/** Optional identifier for ownership checks. */
 	id?: string;
-	/** Title displayed at the top of the modal. */
 	title: string;
-	/** Simple text description. Ignored if `content` is provided. */
 	description?: string;
-	/** Custom React content rendered in the modal body — overrides `description`. */
 	content?: ReactNode;
-	/**
-	 * "alert" = single OK button
-	 * "confirm" = Cancel + Confirm buttons
-	 * "form" = body dibungkus <form> dengan tombol submit + cancel
-	 */
 	type?: ModalType;
-	/** Styles the confirm button red. Defaults to "default". */
 	variant?: ModalVariant;
-	/** Optional width utility classes, e.g. "max-w-2xl". */
 	maxWidthClassName?: string;
-	/** Extra classes for form body when type is "form". */
 	formClassName?: string;
-	/**
-	 * Dipakai saat type === "form". Setelah callback jalan, modal otomatis ditutup.
-	 * Jika ingin menahan modal tetap terbuka (mis. validasi gagal), return false.
-	 */
 	onSubmit?: (event: React.SubmitEvent<HTMLFormElement>) => undefined | boolean;
 	confirmLabel?: string;
 	cancelLabel?: string;
@@ -460,6 +414,8 @@ export interface ModalState {
 	openModal: (config: ModalConfig) => void;
 	closeModal: () => void;
 }
+
+// ── Toast Store ──────────────────────────────────────────────────────────────
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -480,4 +436,28 @@ export interface ToastState {
 	toasts: Toast[];
 	addToast: (options: AddToastOptions) => void;
 	removeToast: (id: string) => void;
+}
+
+// =============================================================================
+// BAGIAN 4: ELEMEN UI GLOBAL (COMPONENTS & PROPS)
+// =============================================================================
+
+export interface DataTableColumn<T> {
+	key: string;
+	header: ReactNode;
+	headerClassName?: string;
+	cellClassName?: string;
+	cell: (row: T) => ReactNode;
+}
+
+export interface DataTableProps<T> {
+	columns: DataTableColumn<T>[];
+	pagination: PaginatedResponse<T>;
+	getRowKey: (row: T) => string;
+	emptyState?: ReactNode;
+	isLoading?: boolean;
+	toolbar?: ReactNode;
+	onPageChange: (page: number) => void;
+	onPerPageChange: (perPage: 5 | 10) => void;
+	itemLabel?: string;
 }
