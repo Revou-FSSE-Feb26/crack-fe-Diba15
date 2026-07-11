@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, FileWarning } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { useCallback, useMemo } from "react";
 
 import DataTable from "@/components/ui/data-table/DataTable";
@@ -11,8 +11,8 @@ import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
-import { formatPrice } from "@/utils";
 import type { JoinedDispute } from "@/types";
+import { formatPrice } from "@/utils";
 import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/disputesTableColumns";
 
 export default function ReviewDisputesPage() {
@@ -101,17 +101,6 @@ export default function ReviewDisputesPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex flex-col gap-1">
-				<h1 className="font-heading text-2xl font-bold text-content flex items-center gap-2">
-					<FileWarning className="w-6 h-6 text-danger" />
-					Review Disputes
-				</h1>
-				<p className="text-sm text-content-muted">
-					Tinjau perselisihan transaksi komisi aktif antara klien dan artis di
-					platform TruBrush.
-				</p>
-			</div>
-
 			<DataTable
 				columns={columns}
 				pagination={paginatedDisputes}
