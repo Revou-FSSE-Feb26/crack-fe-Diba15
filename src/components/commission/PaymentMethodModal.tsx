@@ -1,14 +1,21 @@
 "use client";
 
 import { AlertCircle, CheckCircle, CreditCard, Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import Button from "@/components/ui/Button";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import TopUpModal from "@/components/profile/TopUpModal";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
+import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
+import {
+	formatCardNumber,
+	formatCvv,
+	formatExpiry,
+	getLastFourDigits,
+} from "@/utils/payments";
 
 interface PaymentFormValues {
 	cardName: string;
@@ -43,15 +50,23 @@ export default function PaymentMethodModal({
 	const { updateUser } = useUserManagementStore();
 	const { addToast } = useToastStore();
 
+	const onCloseRef = useRef(onClose);
+	const onSubmitSuccessRef = useRef(onSubmitSuccess);
+
+	useEffect(() => {
+		onCloseRef.current = onClose;
+		onSubmitSuccessRef.current = onSubmitSuccess;
+	}, [onClose, onSubmitSuccess]);
+
 	const [activeTab, setActiveTab] = useState<"wallet" | "credit_card">(
 		"wallet",
 	);
+	const [isTopUpOpen, setIsTopUpOpen] = useState(false);
 
 	const {
 		register,
 		handleSubmit,
 		setValue,
-		control,
 		formState: { errors },
 		reset,
 	} = useForm<PaymentFormValues>({
@@ -64,14 +79,6 @@ export default function PaymentMethodModal({
 		mode: "onChange",
 	});
 
-	// Watch values for CC preview
-	const ccName =
-		useWatch({ control, name: "cardName" }) || "NAMA PEMEGANG KARTU";
-	const ccNumber =
-		useWatch({ control, name: "cardNumber" }) || "•••• •••• •••• ••••";
-	const ccExpiry = useWatch({ control, name: "cardExpiry" }) || "MM/YY";
-	const ccCvv = useWatch({ control, name: "cardCvv" }) || "•••";
-
 	useEffect(() => {
 		if (!isOpen) return;
 		reset();
@@ -81,19 +88,31 @@ export default function PaymentMethodModal({
 	const balance = user?.balance ?? 0;
 	const isBalanceSufficient = balance >= price;
 
-	const handleTopUp = () => {
-		if (!user) return;
-		const amount = 500000;
-		const nextBalance = balance + amount;
-		updateUser(user.id, { balance: nextBalance });
-		updateCurrentUser({ balance: nextBalance });
-		addToast({
-			message: `Berhasil Top Up ${formatPrice(amount)}. Saldo Anda sekarang ${formatPrice(nextBalance)}.`,
-			type: "success",
-		});
-	};
+	const handleTopUpSuccess = useCallback(
+		(amount: number) => {
+			if (!user) return;
+			const nextBalance = balance + amount;
+			updateUser(user.id, { balance: nextBalance });
+			updateCurrentUser({ balance: nextBalance });
 
-	const onWalletPay = () => {
+			// Log transaction
+			useTransactionStore.getState().addTransaction({
+				user_id: user.id,
+				type: "topup",
+				amount: amount,
+				title: "Top Up E-Wallet via Credit Card",
+			});
+
+			addToast({
+				message: `Berhasil Top Up ${formatPrice(amount)}. Saldo Anda sekarang ${formatPrice(nextBalance)}.`,
+				type: "success",
+			});
+			setIsTopUpOpen(false);
+		},
+		[user, balance, updateUser, updateCurrentUser, addToast],
+	);
+
+	const onWalletPay = useCallback(() => {
 		if (!isBalanceSufficient) {
 			addToast({
 				message:
@@ -102,44 +121,49 @@ export default function PaymentMethodModal({
 			});
 			return;
 		}
-		onSubmitSuccess("wallet");
+		onSubmitSuccessRef.current("wallet");
 		closeModal();
-	};
+	}, [isBalanceSufficient, addToast, closeModal]);
 
-	const onCcPay = (values: PaymentFormValues) => {
-		const cleanCardNum = values.cardNumber.replace(/\s+/g, "");
-		const lastFour = cleanCardNum.slice(-4);
-		onSubmitSuccess("credit_card", lastFour);
-		closeModal();
-	};
+	const onCcPay = useCallback(
+		(values: PaymentFormValues) => {
+			const lastFour = getLastFourDigits(values.cardNumber);
+			onSubmitSuccessRef.current("credit_card", lastFour);
+			closeModal();
+		},
+		[closeModal],
+	);
 
 	// Formats CC Number: XXXX XXXX XXXX XXXX
-	const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		let value = e.target.value.replace(/\D/g, "");
-		value = value.slice(0, 16);
-		const formattedValue = value.replace(/(\d{4})(?=\d)/g, "$1 ");
-		setValue("cardNumber", formattedValue, { shouldValidate: true });
-	};
+	const handleCardNumberChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const formattedValue = formatCardNumber(e.target.value);
+			setValue("cardNumber", formattedValue, { shouldValidate: true });
+		},
+		[setValue],
+	);
 
 	// Formats Expiry: MM/YY
-	const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		let value = e.target.value.replace(/\D/g, "");
-		value = value.slice(0, 4);
-		if (value.length >= 2) {
-			value = `${value.slice(0, 2)}/${value.slice(2)}`;
-		}
-		setValue("cardExpiry", value, { shouldValidate: true });
-	};
+	const handleExpiryChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const formattedValue = formatExpiry(e.target.value);
+			setValue("cardExpiry", formattedValue, { shouldValidate: true });
+		},
+		[setValue],
+	);
 
 	// Formats CVV: 3 digits
-	const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value.replace(/\D/g, "").slice(0, 3);
-		setValue("cardCvv", value, { shouldValidate: true });
-	};
+	const handleCvvChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const value = formatCvv(e.target.value);
+			setValue("cardCvv", value, { shouldValidate: true });
+		},
+		[setValue],
+	);
 
-	// We render the CC and Wallet options dynamically inside the modal content
-	// biome-ignore lint/correctness/useExhaustiveDependencies: dynamic render requires form states and functions
+	// render the CC and Wallet options dynamically inside the modal content
 	useEffect(() => {
+		// If the modal is not open, close it if the global open state matches
 		if (!isOpen) {
 			if (globalOpen && config?.id === modalId) {
 				closeModal();
@@ -147,6 +171,15 @@ export default function PaymentMethodModal({
 			return;
 		}
 
+		// If top-up is open, close the modal if it's open and matches the modal ID
+		if (isTopUpOpen) {
+			if (globalOpen && config?.id === modalId) {
+				closeModal();
+			}
+			return;
+		}
+
+		// Render the modal content
 		const renderContent = () => {
 			return (
 				<div className="space-y-5">
@@ -216,10 +249,10 @@ export default function PaymentMethodModal({
 								</div>
 								<button
 									type="button"
-									onClick={handleTopUp}
+									onClick={() => setIsTopUpOpen(true)}
 									className="px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors cursor-pointer"
 								>
-									Top Up Rp 500k
+									Top Up Saldo
 								</button>
 							</div>
 
@@ -244,68 +277,9 @@ export default function PaymentMethodModal({
 									</div>
 								</div>
 							)}
-
-							<div className="flex gap-3 justify-end pt-3">
-								<Button
-									type="button"
-									variant="secondary"
-									onClick={onClose}
-									className="text-sm"
-								>
-									Batal
-								</Button>
-								<Button
-									type="button"
-									disabled={!isBalanceSufficient}
-									onClick={onWalletPay}
-									className="text-sm justify-center flex-1 sm:flex-initial"
-								>
-									Bayar dengan E-Wallet
-								</Button>
-							</div>
 						</div>
 					) : (
 						<div className="space-y-4">
-							{/* Premium Credit Card Live Preview */}
-							<div className="relative aspect-[1.586/1] w-full rounded-2xl p-6 text-white font-mono flex flex-col justify-between overflow-hidden shadow-lg select-none bg-gradient-to-tr from-slate-900 via-slate-800 to-indigo-900 border border-white/10">
-								<div className="flex justify-between items-start">
-									<div>
-										<p className="text-[10px] text-white/50 tracking-wider">
-											PREMIUM SECURE PAYMENT
-										</p>
-										<div className="mt-1.5 h-6 w-9 rounded bg-amber-400/80 border border-amber-300/40 shadow-inner opacity-90" />
-									</div>
-									<span className="text-lg font-bold italic tracking-widest text-white/90">
-										TRUBRUSH
-									</span>
-								</div>
-
-								<div className="mt-6">
-									<p className="text-lg tracking-widest text-center">
-										{ccNumber}
-									</p>
-								</div>
-
-								<div className="flex justify-between items-end mt-4">
-									<div className="min-w-0">
-										<p className="text-[8px] text-white/50">CARDHOLDER</p>
-										<p className="text-xs tracking-wider uppercase truncate max-w-[180px]">
-											{ccName}
-										</p>
-									</div>
-									<div className="flex gap-4 text-center shrink-0">
-										<div>
-											<p className="text-[8px] text-white/50">EXPIRES</p>
-											<p className="text-xs">{ccExpiry}</p>
-										</div>
-										<div>
-											<p className="text-[8px] text-white/50">CVV</p>
-											<p className="text-xs">{ccCvv}</p>
-										</div>
-									</div>
-								</div>
-							</div>
-
 							{/* Inputs */}
 							<div className="grid gap-3 sm:grid-cols-2">
 								<div className="sm:col-span-2">
@@ -411,61 +385,73 @@ export default function PaymentMethodModal({
 									)}
 								</div>
 							</div>
-
-							<div className="flex gap-3 justify-end pt-3">
-								<Button
-									type="button"
-									variant="secondary"
-									onClick={onClose}
-									className="text-sm"
-								>
-									Batal
-								</Button>
-								<Button
-									type="submit"
-									className="text-sm justify-center flex-1 sm:flex-initial"
-								>
-									Bayar dengan Kartu Kredit
-								</Button>
-							</div>
 						</div>
 					)}
 				</div>
 			);
 		};
 
-		if (!globalOpen || config?.id !== modalId) {
-			openModal({
-				id: modalId,
-				type: "form",
-				title: "Metode Pembayaran",
-				maxWidthClassName: "max-w-md",
-				content: renderContent(),
-				onCancel: onClose,
-				onSubmit: (e) => {
-					e.preventDefault();
-					if (activeTab === "wallet") {
-						onWalletPay();
-					} else {
-						handleSubmit(onCcPay)(e);
-					}
-					return false; // prevent closing immediately without state updates
-				},
-			});
+		// close the modal if it's not open and the global open state matches
+		if (!isOpen) {
+			if (globalOpen && config?.id === modalId) {
+				closeModal();
+			}
+			return;
 		}
+
+		openModal({
+			id: modalId,
+			type: "form",
+			title: "Metode Pembayaran",
+			maxWidthClassName: "max-w-md",
+			content: renderContent(),
+			confirmLabel:
+				activeTab === "wallet"
+					? "Bayar dengan E-Wallet"
+					: "Bayar dengan Kartu Kredit",
+			cancelLabel: "Batal",
+			confirmDisabled: activeTab === "wallet" ? !isBalanceSufficient : false,
+			onCancel: () => {
+				onCloseRef.current();
+			},
+			onSubmit: (e) => {
+				e.preventDefault();
+				if (activeTab === "wallet") {
+					onWalletPay();
+				} else {
+					handleSubmit(onCcPay)(e);
+				}
+				return false;
+			},
+		});
 	}, [
 		isOpen,
+		isTopUpOpen,
 		activeTab,
 		balance,
-		ccName,
-		ccNumber,
-		ccExpiry,
-		ccCvv,
-		errors.cardName,
-		errors.cardNumber,
-		errors.cardExpiry,
-		errors.cardCvv,
+		errors,
+		openModal,
+		closeModal,
+		globalOpen,
+		config?.id,
+		handleSubmit,
+		register,
+		price,
+		onWalletPay,
+		isBalanceSufficient,
+		commissionTitle,
+		onCcPay,
+		handleExpiryChange,
+		handleCardNumberChange,
+		handleCvvChange,
+		commissionId,
 	]);
 
-	return null;
+	return (
+		<TopUpModal
+			isOpen={isTopUpOpen}
+			onClose={() => setIsTopUpOpen(false)}
+			onSubmitSuccess={handleTopUpSuccess}
+		/>
+	);
 }

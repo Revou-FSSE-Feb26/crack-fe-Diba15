@@ -15,13 +15,16 @@ import AccountMeta from "@/components/profile/AccountMeta";
 import ClientCommissionHistory from "@/components/profile/ClientCommissionHistory";
 import ProfileHeading from "@/components/profile/ProfileHeading";
 import SummaryRow from "@/components/profile/SummaryRow";
+import TopUpModal from "@/components/profile/TopUpModal";
 import type { ProfileUser } from "@/components/profile/types";
+import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useFollowStore } from "@/store/FollowStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
+import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
@@ -40,9 +43,9 @@ export default function ClientProfile({
 	const { profiles } = useProfileStore();
 	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
 
-	const [activeTab, setActiveTab] = useState<"commissions" | "following">(
-		"commissions",
-	);
+	const [activeTab, setActiveTab] = useState<
+		"commissions" | "following" | "transactions"
+	>("commissions");
 
 	const user = useMemo(() => {
 		if (currentUser && currentUser.id === initialUser.id) {
@@ -64,17 +67,28 @@ export default function ClientProfile({
 			});
 	}, [users, followedArtistIds, profiles]);
 
-	const handleTopUp = () => {
-		const amount = 500000;
+	const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+
+	const handleTopUpSuccess = (amount: number) => {
 		const nextBalance = (user.balance ?? 0) + amount;
 		updateUser(user.id, { balance: nextBalance });
 		if (currentUser?.id === user.id) {
 			updateCurrentUser({ balance: nextBalance });
 		}
+
+		// Log transaction
+		useTransactionStore.getState().addTransaction({
+			user_id: user.id,
+			type: "topup",
+			amount: amount,
+			title: "Top Up E-Wallet via Credit Card",
+		});
+
 		addToast({
 			message: `Berhasil Top Up ${formatPrice(amount)} ke E-Wallet.`,
 			type: "success",
 		});
+		setIsTopUpOpen(false);
 	};
 	const clientCommissions = useMemo(
 		() =>
@@ -202,7 +216,7 @@ export default function ClientProfile({
 							<Button
 								variant="secondary"
 								className="text-xs py-1 px-2.5 h-auto shrink-0 bg-verified/10 text-verified border-verified hover:bg-verified/20"
-								onClick={handleTopUp}
+								onClick={() => setIsTopUpOpen(true)}
 							>
 								Top Up
 							</Button>
@@ -237,11 +251,22 @@ export default function ClientProfile({
 				>
 					Artis Diikuti ({followedArtists.length})
 				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("transactions")}
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+						activeTab === "transactions"
+							? "border-primary text-primary"
+							: "border-transparent text-content-muted hover:text-content"
+					}`}
+				>
+					Transaksi E-Wallet
+				</button>
 			</div>
 
 			{activeTab === "commissions" ? (
 				<ClientCommissionHistory commissions={clientCommissions} />
-			) : (
+			) : activeTab === "following" ? (
 				<section className="space-y-4">
 					{followedArtists.length === 0 ? (
 						<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center">
@@ -286,7 +311,14 @@ export default function ClientProfile({
 						</div>
 					)}
 				</section>
+			) : (
+				<WalletTransactionsList userId={user.id} />
 			)}
+			<TopUpModal
+				isOpen={isTopUpOpen}
+				onClose={() => setIsTopUpOpen(false)}
+				onSubmitSuccess={handleTopUpSuccess}
+			/>
 		</div>
 	);
 }

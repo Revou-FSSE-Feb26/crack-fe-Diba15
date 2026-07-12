@@ -82,6 +82,7 @@ function ModalContent() {
 		onConfirm,
 		onSubmit,
 		onCancel,
+		confirmDisabled,
 	} = config;
 
 	const confirmLabel =
@@ -130,6 +131,7 @@ function ModalContent() {
 					variant={variant === "danger" ? "danger" : "primary"}
 					className="flex-1 justify-center"
 					onClick={type === "form" ? undefined : handleConfirm}
+					disabled={confirmDisabled}
 				>
 					{confirmLabel}
 				</Button>
@@ -143,7 +145,11 @@ function ModalContent() {
 				</Button>
 			</div>
 		) : (
-			<Button className="w-full justify-center" onClick={handleConfirm}>
+			<Button
+				className="w-full justify-center"
+				onClick={handleConfirm}
+				disabled={confirmDisabled}
+			>
 				{confirmLabel}
 			</Button>
 		);
