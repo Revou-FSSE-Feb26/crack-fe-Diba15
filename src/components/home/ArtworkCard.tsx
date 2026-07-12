@@ -9,6 +9,9 @@ import {
 	Link as LinkIcon,
 	MoreHorizontal,
 	ShieldCheck,
+	UserCheck,
+	UserPlus,
+	UserX,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +24,7 @@ import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
 import { useFavoriteStore } from "@/store/FavoriteStore";
+import { useFollowStore } from "@/store/FollowStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useReportStore } from "@/store/ReportStore";
@@ -39,6 +43,53 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { isFavorite, toggleFavorite } = useFavoriteStore();
 	const { profiles } = useProfileStore();
 	const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
+
+	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
+	const isArtistFollowed = user ? isFollowing(user.id, artist.id) : false;
+
+	const handleFollowToggle = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (!isAuthenticated || !user) {
+				openModal({
+					title: "Login diperlukan",
+					description: "Silakan login terlebih dahulu untuk mengikuti artist.",
+					type: "confirm",
+					confirmLabel: "Login",
+					cancelLabel: "Batal",
+					onConfirm: () => router.push("/login"),
+				});
+				return;
+			}
+
+			if (user.role !== "artist" && user.role !== "client") {
+				openModal({
+					title: "Akses Terbatas",
+					description:
+						"Hanya akun client dan artist yang dapat mengikuti artis.",
+				});
+				return;
+			}
+
+			if (isArtistFollowed) {
+				unfollowArtist(user.id, artist.id);
+			} else {
+				followArtist(user.id, artist.id);
+			}
+		},
+		[
+			isAuthenticated,
+			user,
+			isArtistFollowed,
+			artist.id,
+			followArtist,
+			unfollowArtist,
+			openModal,
+			router,
+		],
+	);
 	const basePrice =
 		profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ??
 		null;
@@ -216,6 +267,35 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 						</div>
 					</div>
 				</Link>
+
+				{/* Follow Button */}
+				{(!user || user.id !== artist.id) && (
+					<button
+						type="button"
+						onClick={handleFollowToggle}
+						className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+							isArtistFollowed
+								? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+								: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
+						}`}
+					>
+						{isArtistFollowed ? (
+							<>
+								<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
+								<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
+								<span className="group-hover:hidden">Mengikuti</span>
+								<span className="hidden group-hover:inline text-red-500">
+									Batal Ikuti
+								</span>
+							</>
+						) : (
+							<>
+								<UserPlus className="w-3.5 h-3.5" />
+								<span>Ikuti</span>
+							</>
+						)}
+					</button>
+				)}
 
 				{/* Dropdown Container */}
 				<div className="relative" ref={dropdownRef}>

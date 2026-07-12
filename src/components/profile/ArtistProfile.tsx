@@ -4,10 +4,12 @@ import {
 	ImageIcon,
 	Palette,
 	ShieldCheck,
+	UserMinus,
 	Wallet,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
@@ -21,6 +23,7 @@ import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
+import { useFollowStore } from "@/store/FollowStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
@@ -47,7 +50,25 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const { updateCurrentUser } = useUserStore();
 	const { addToast } = useToastStore();
 	const [isEditOpen, setIsEditOpen] = useState(false);
+	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
+	const [activeTab, setActiveTab] = useState<"portfolio" | "following">(
+		"portfolio",
+	);
+
 	const profile = profiles.find((item) => item.user_id === user.id);
+
+	const followedArtistIds = getFollowedArtistIds(user.id);
+	const followedArtists = useMemo(() => {
+		return users
+			.filter((u) => followedArtistIds.includes(u.id))
+			.map((u) => {
+				const prof = profiles.find((p) => p.user_id === u.id);
+				return {
+					...u,
+					profile: prof,
+				};
+			});
+	}, [users, followedArtistIds, profiles]);
 	const artistArtworks = buildArtworkWithRelations(
 		artworks,
 		artworkTags,
@@ -295,7 +316,80 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 				</aside>
 			</div>
 
-			<ArtistPortfolio artworksWithTags={artistArtworks} />
+			{/* Tab Switcher */}
+			<div className="flex border-b border-content/10">
+				<button
+					type="button"
+					onClick={() => setActiveTab("portfolio")}
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+						activeTab === "portfolio"
+							? "border-primary text-primary"
+							: "border-transparent text-content-muted hover:text-content"
+					}`}
+				>
+					Karya Saya
+				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("following")}
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+						activeTab === "following"
+							? "border-primary text-primary"
+							: "border-transparent text-content-muted hover:text-content"
+					}`}
+				>
+					Artis Diikuti ({followedArtists.length})
+				</button>
+			</div>
+
+			{activeTab === "portfolio" ? (
+				<ArtistPortfolio artworksWithTags={artistArtworks} />
+			) : (
+				<section className="space-y-4">
+					{followedArtists.length === 0 ? (
+						<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center">
+							<p className="text-sm text-content-muted">
+								Anda belum mengikuti artis manapun.
+							</p>
+						</div>
+					) : (
+						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							{followedArtists.map((artist) => (
+								<div
+									key={artist.id}
+									className="bg-surface border border-content/10 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-sm transition-all"
+								>
+									<Link
+										href={`/artists/${artist.id}`}
+										className="flex items-center gap-3 flex-1 min-w-0"
+									>
+										<AvatarInitials
+											name={artist.name}
+											className="w-12 h-12 text-sm shrink-0"
+										/>
+										<div className="min-w-0">
+											<p className="text-sm font-bold text-content truncate hover:text-primary transition-colors">
+												{artist.name}
+											</p>
+											<p className="text-xs text-content-muted truncate">
+												{artist.profile?.bio || "Belum ada bio."}
+											</p>
+										</div>
+									</Link>
+									<button
+										type="button"
+										onClick={() => unfollowArtist(user.id, artist.id)}
+										className="px-3 py-1.5 text-xs font-semibold border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+									>
+										<UserMinus className="w-3.5 h-3.5" />
+										Batal Ikuti
+									</button>
+								</div>
+							))}
+						</div>
+					)}
+				</section>
+			)}
 
 			<EditProfileModal
 				userName={user.name}

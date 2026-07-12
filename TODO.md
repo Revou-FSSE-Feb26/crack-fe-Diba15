@@ -78,12 +78,13 @@ Suggestions:
 - chip tags: Fate
 
 (HIGH)
-TODO 12 = Menerapkan fitur follow artist untuk mengikuti artis.
+TODO 12 = Menerapkan fitur follow artist untuk mengikuti artis. (Clear)
 Requirements:
 1. User (Client dan artists) dapat mengikuti artis dengan mengklik tombol follow.
 2. User dapat melihat daftar artis yang sedang diikuti mereka di halaman profile.
 3. User dapat menghentikan pengikutiannya dengan mengklik tombol unfollow.
 4. User dapat memfilter artwork nantinya di feed untuk beranda dan halaman followed artists.
+5. Follow artists hanya bisa di lakukan oleh client dan sesama artists.
 
 (MID)
 TODO 13 = Menerapkan fitur popular artist dan popular tags pada halaman feed.

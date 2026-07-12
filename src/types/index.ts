@@ -360,6 +360,23 @@ export interface FavoriteState {
 	clearFavorites: (userId: string) => void;
 }
 
+// ── Follow Store ─────────────────────────────────────────────────────────────
+
+export interface FollowRecord {
+	id: string;
+	follower_id: string;
+	artist_id: string;
+	created_at: string;
+}
+
+export interface FollowState {
+	follows: FollowRecord[];
+	followArtist: (followerId: string, artistId: string) => ActionResult;
+	unfollowArtist: (followerId: string, artistId: string) => ActionResult;
+	isFollowing: (followerId: string, artistId: string) => boolean;
+	getFollowedArtistIds: (followerId: string) => string[];
+}
+
 // ── User Management Store ────────────────────────────────────────────────────
 
 export interface UserPayload {

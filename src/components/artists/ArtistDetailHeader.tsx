@@ -9,14 +9,21 @@ import {
 	MessageCircle,
 	Palette,
 	ShieldCheck,
+	UserCheck,
+	UserPlus,
+	UserX,
 	Wallet,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
 import users from "@/data/users";
+import { useFollowStore } from "@/store/FollowStore";
+import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
+import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 
 interface ArtistDetailHeaderProps {
@@ -30,6 +37,52 @@ export default function ArtistDetailHeader({
 	const user = users.find((item) => item.id === artistId);
 	const { profiles } = useProfileStore();
 	const profile = profiles.find((item) => item.user_id === artistId);
+
+	const currentUser = useUserStore((state) => state.user);
+	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+	const { openModal } = useModalStore();
+	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
+
+	const isArtistFollowed = currentUser
+		? isFollowing(currentUser.id, artistId)
+		: false;
+
+	const handleFollowToggle = useCallback(() => {
+		if (!isAuthenticated || !currentUser) {
+			openModal({
+				title: "Login diperlukan",
+				description: "Silakan login terlebih dahulu untuk mengikuti artist.",
+				type: "confirm",
+				confirmLabel: "Login",
+				cancelLabel: "Batal",
+				onConfirm: () => router.push("/login"),
+			});
+			return;
+		}
+
+		if (currentUser.role !== "artist" && currentUser.role !== "client") {
+			openModal({
+				title: "Akses Terbatas",
+				description: "Hanya akun client dan artist yang dapat mengikuti artis.",
+			});
+			return;
+		}
+
+		if (isArtistFollowed) {
+			unfollowArtist(currentUser.id, artistId);
+		} else {
+			followArtist(currentUser.id, artistId);
+		}
+	}, [
+		isAuthenticated,
+		currentUser,
+		isArtistFollowed,
+		artistId,
+		followArtist,
+		unfollowArtist,
+		openModal,
+		router,
+	]);
 
 	// Existence sudah divalidasi di server component (page.tsx) via notFound(),
 	// ini cuma safety-net kalau data hilang setelah mount.
@@ -63,7 +116,7 @@ export default function ArtistDetailHeader({
 					/>
 
 					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 flex-wrap">
+						<div className="flex items-center gap-3 flex-wrap">
 							<h1 className="font-display text-2xl font-bold text-content">
 								{user.name}
 							</h1>
@@ -72,6 +125,33 @@ export default function ArtistDetailHeader({
 									<BadgeCheck className="w-3.5 h-3.5" />
 									Terverifikasi
 								</span>
+							)}
+							{(!currentUser || currentUser.id !== artistId) && (
+								<button
+									type="button"
+									onClick={handleFollowToggle}
+									className={`group px-3.5 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1.5 ${
+										isArtistFollowed
+											? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+											: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
+									}`}
+								>
+									{isArtistFollowed ? (
+										<>
+											<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
+											<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
+											<span className="group-hover:hidden">Mengikuti</span>
+											<span className="hidden group-hover:inline text-red-500">
+												Batal Ikuti
+											</span>
+										</>
+									) : (
+										<>
+											<UserPlus className="w-3.5 h-3.5" />
+											Ikuti
+										</>
+									)}
+								</button>
 							)}
 						</div>
 
