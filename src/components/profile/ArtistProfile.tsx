@@ -3,6 +3,8 @@ import {
 	CalendarDays,
 	ImageIcon,
 	Palette,
+	Send,
+	ShieldAlert,
 	ShieldCheck,
 	UserMinus,
 	Wallet,
@@ -19,8 +21,10 @@ import EditProfileModal, {
 import ProfileHeading from "@/components/profile/ProfileHeading";
 import SummaryRow from "@/components/profile/SummaryRow";
 import type { ProfileUser } from "@/components/profile/types";
+import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
+import { useAppealStore } from "@/store/AppealStore";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useFollowStore } from "@/store/FollowStore";
@@ -51,8 +55,18 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const { addToast } = useToastStore();
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
-	const [activeTab, setActiveTab] = useState<"portfolio" | "following">(
-		"portfolio",
+	const [activeTab, setActiveTab] = useState<
+		"portfolio" | "following" | "transactions"
+	>("portfolio");
+
+	const { appeals, createAppeal } = useAppealStore();
+	const [appealReason, setAppealReason] = useState("");
+
+	const activeAppeal = appeals.find(
+		(app) => app.artist_id === user.id && app.status === "pending",
+	);
+	const rejectedAppeal = appeals.find(
+		(app) => app.artist_id === user.id && app.status === "rejected",
 	);
 
 	const profile = profiles.find((item) => item.user_id === user.id);
@@ -222,6 +236,78 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 							</p>
 						</div>
 					)}
+
+					{profile?.strike_count !== undefined && profile.strike_count >= 5 && (
+						<div className="mt-5 rounded-xl border border-danger/20 bg-danger/5 p-4 space-y-3">
+							<div className="flex items-start gap-3">
+								<ShieldAlert className="w-5 h-5 text-danger shrink-0 mt-0.5" />
+								<div>
+									<h3 className="text-sm font-bold text-danger">
+										Akun Ditangguhkan (Blocked)
+									</h3>
+									<p className="text-xs text-content-muted mt-0.5">
+										Akun Anda telah ditangguhkan karena melanggar aturan anti-AI
+										TruBrush (Strike Count: {profile.strike_count}/5).
+									</p>
+								</div>
+							</div>
+
+							{activeAppeal ? (
+								<div className="rounded-lg bg-primary/5 border border-primary/10 p-3 text-xs text-primary leading-relaxed">
+									<strong>Status Banding: Menunggu Tinjauan Admin</strong>
+									<p className="mt-1 text-content-muted">
+										Pesan Anda: &ldquo;{activeAppeal.reason}&rdquo;
+									</p>
+									<p className="mt-2 text-[10px] text-content-muted">
+										Diajukan pada:{" "}
+										{new Date(activeAppeal.created_at).toLocaleString("id-ID")}
+									</p>
+								</div>
+							) : (
+								<div className="space-y-2">
+									<p className="text-xs text-content-muted">
+										Silakan ajukan banding dengan memberikan penjelasan/bukti
+										proses manual karya Anda untuk ditinjau oleh Admin.
+									</p>
+									{rejectedAppeal && (
+										<div className="rounded-lg bg-danger/10 p-2.5 text-xs text-danger">
+											<strong>Banding Sebelumnya Ditolak:</strong> Akun Anda
+											tetap ditangguhkan. Silakan kirim permohonan banding baru
+											dengan penjelasan yang lebih detail.
+										</div>
+									)}
+									<form
+										onSubmit={(e) => {
+											e.preventDefault();
+											const res = createAppeal(user.id, appealReason);
+											addToast({
+												message: res.message,
+												type: res.success ? "success" : "error",
+											});
+											if (res.success) setAppealReason("");
+										}}
+										className="space-y-2"
+									>
+										<textarea
+											value={appealReason}
+											onChange={(e) => setAppealReason(e.target.value)}
+											placeholder="Tulis alasan banding Anda di sini (minimal 30 karakter)..."
+											className="w-full min-h-20 rounded-lg border border-content/10 bg-background p-2.5 text-xs text-content outline-none focus:border-danger dark:border-slate-700 dark:bg-slate-900"
+										/>
+										<Button
+											type="submit"
+											variant="danger"
+											className="w-full text-xs justify-center gap-1.5 py-2 cursor-pointer"
+											disabled={appealReason.trim().length < 30}
+										>
+											<Send className="w-3.5 h-3.5" />
+											Kirim Permohonan Banding
+										</Button>
+									</form>
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 
 				<aside className="lg:w-72 shrink-0">
@@ -340,11 +426,22 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 				>
 					Artis Diikuti ({followedArtists.length})
 				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("transactions")}
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+						activeTab === "transactions"
+							? "border-primary text-primary"
+							: "border-transparent text-content-muted hover:text-content"
+					}`}
+				>
+					Transaksi E-Wallet
+				</button>
 			</div>
 
 			{activeTab === "portfolio" ? (
 				<ArtistPortfolio artworksWithTags={artistArtworks} />
-			) : (
+			) : activeTab === "following" ? (
 				<section className="space-y-4">
 					{followedArtists.length === 0 ? (
 						<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center">
@@ -389,6 +486,8 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 						</div>
 					)}
 				</section>
+			) : (
+				<WalletTransactionsList userId={user.id} />
 			)}
 
 			<EditProfileModal

@@ -242,7 +242,20 @@ export default function ArtistDetailHeader({
 
 					<hr className="border-slate-200 dark:border-slate-700" />
 
-					{profile.is_verified ? (
+					{profile.strike_count !== undefined && profile.strike_count >= 5 ? (
+						<div className="space-y-2">
+							<Button
+								variant="danger"
+								className="w-full text-sm justify-center pointer-events-none"
+								disabled
+							>
+								Akun Ditangguhkan (Blocked)
+							</Button>
+							<p className="text-xs text-danger text-center font-semibold">
+								Artis ini ditangguhkan karena melanggar aturan TruBrush.
+							</p>
+						</div>
+					) : profile.is_verified ? (
 						profile.is_open_for_commission ? (
 							<CommissionButton
 								artistId={user.id}

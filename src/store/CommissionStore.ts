@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import initialCommissions from "@/data/commissions";
+import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type {
@@ -122,6 +123,14 @@ export const useCommissionStore = create<CommissionState>()(
 								.getState()
 								.updateCurrentUser({ balance: newBalance });
 						}
+
+						// Log transaction
+						useTransactionStore.getState().addTransaction({
+							user_id: commission.client_id,
+							type: "payment",
+							amount: commission.price,
+							title: `Pembayaran Uang Muka Komisi: ${commission.commission_title}`,
+						});
 					}
 				}
 
@@ -185,6 +194,14 @@ export const useCommissionStore = create<CommissionState>()(
 								.getState()
 								.updateCurrentUser({ balance: newBalance });
 						}
+
+						// Log transaction
+						useTransactionStore.getState().addTransaction({
+							user_id: commission.artists_id,
+							type: "release",
+							amount: commission.price,
+							title: `Pelepasan Dana Komisi Selesai: ${commission.commission_title}`,
+						});
 					}
 				}
 
@@ -290,6 +307,14 @@ export const useCommissionStore = create<CommissionState>()(
 									.getState()
 									.updateCurrentUser({ balance: newBalance });
 							}
+
+							// Log transaction
+							useTransactionStore.getState().addTransaction({
+								user_id: commission.client_id,
+								type: "refund",
+								amount: commission.price,
+								title: `Refund Sengketa Komisi Disetujui: ${commission.commission_title}`,
+							});
 						}
 					}
 
@@ -324,6 +349,14 @@ export const useCommissionStore = create<CommissionState>()(
 								.getState()
 								.updateCurrentUser({ balance: newBalance });
 						}
+
+						// Log transaction
+						useTransactionStore.getState().addTransaction({
+							user_id: commission.artists_id,
+							type: "release",
+							amount: commission.price,
+							title: `Pelepasan Dana Sengketa Komisi Ditolak: ${commission.commission_title}`,
+						});
 					}
 
 					set((state) => ({

@@ -446,6 +446,7 @@ export interface ModalConfig {
 	cancelLabel?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
+	confirmDisabled?: boolean;
 }
 
 export interface ModalState {
