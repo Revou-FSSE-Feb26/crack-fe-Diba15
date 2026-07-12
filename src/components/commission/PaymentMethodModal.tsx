@@ -3,13 +3,19 @@
 import { AlertCircle, CheckCircle, CreditCard, Wallet } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import TopUpModal from "@/components/profile/TopUpModal";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
-import TopUpModal from "@/components/profile/TopUpModal";
+import {
+	formatCardNumber,
+	formatCvv,
+	formatExpiry,
+	getLastFourDigits,
+} from "@/utils/payments";
 
 interface PaymentFormValues {
 	cardName: string;
@@ -121,8 +127,7 @@ export default function PaymentMethodModal({
 
 	const onCcPay = useCallback(
 		(values: PaymentFormValues) => {
-			const cleanCardNum = values.cardNumber.replace(/\s+/g, "");
-			const lastFour = cleanCardNum.slice(-4);
+			const lastFour = getLastFourDigits(values.cardNumber);
 			onSubmitSuccessRef.current("credit_card", lastFour);
 			closeModal();
 		},
@@ -132,9 +137,7 @@ export default function PaymentMethodModal({
 	// Formats CC Number: XXXX XXXX XXXX XXXX
 	const handleCardNumberChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			let value = e.target.value.replace(/\D/g, "");
-			value = value.slice(0, 16);
-			const formattedValue = value.replace(/(\d{4})(?=\d)/g, "$1 ");
+			const formattedValue = formatCardNumber(e.target.value);
 			setValue("cardNumber", formattedValue, { shouldValidate: true });
 		},
 		[setValue],
@@ -143,12 +146,8 @@ export default function PaymentMethodModal({
 	// Formats Expiry: MM/YY
 	const handleExpiryChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			let value = e.target.value.replace(/\D/g, "");
-			value = value.slice(0, 4);
-			if (value.length >= 2) {
-				value = `${value.slice(0, 2)}/${value.slice(2)}`;
-			}
-			setValue("cardExpiry", value, { shouldValidate: true });
+			const formattedValue = formatExpiry(e.target.value);
+			setValue("cardExpiry", formattedValue, { shouldValidate: true });
 		},
 		[setValue],
 	);
@@ -156,7 +155,7 @@ export default function PaymentMethodModal({
 	// Formats CVV: 3 digits
 	const handleCvvChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const value = e.target.value.replace(/\D/g, "").slice(0, 3);
+			const value = formatCvv(e.target.value);
 			setValue("cardCvv", value, { shouldValidate: true });
 		},
 		[setValue],
@@ -165,7 +164,7 @@ export default function PaymentMethodModal({
 	// render the CC and Wallet options dynamically inside the modal content
 	useEffect(() => {
 		// If the modal is not open, close it if the global open state matches
-    if (!isOpen) {
+		if (!isOpen) {
 			if (globalOpen && config?.id === modalId) {
 				closeModal();
 			}

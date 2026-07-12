@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
 import { formatPrice } from "@/utils";
+import { formatCardNumber, formatCvv, formatExpiry } from "@/utils/payments";
 
 interface TopUpModalProps {
 	isOpen: boolean;
@@ -37,9 +38,7 @@ export default function TopUpModal({
 
 	const handleCardNumberChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			let value = e.target.value.replace(/\D/g, "");
-			value = value.slice(0, 16);
-			const formattedValue = value.replace(/(\d{4})(?=\d)/g, "$1 ");
+			const formattedValue = formatCardNumber(e.target.value);
 			setValue("cardNumber", formattedValue, { shouldValidate: true });
 		},
 		[setValue],
@@ -47,19 +46,15 @@ export default function TopUpModal({
 
 	const handleExpiryChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			let value = e.target.value.replace(/\D/g, "");
-			value = value.slice(0, 4);
-			if (value.length >= 2) {
-				value = `${value.slice(0, 2)}/${value.slice(2)}`;
-			}
-			setValue("cardExpiry", value, { shouldValidate: true });
+			const formattedValue = formatExpiry(e.target.value);
+			setValue("cardExpiry", formattedValue, { shouldValidate: true });
 		},
 		[setValue],
 	);
 
 	const handleCvvChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const value = e.target.value.replace(/\D/g, "").slice(0, 3);
+			const value = formatCvv(e.target.value);
 			setValue("cardCvv", value, { shouldValidate: true });
 		},
 		[setValue],
