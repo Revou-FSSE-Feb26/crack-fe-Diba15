@@ -2,7 +2,9 @@
 
 import { FileText, Info, Search, Tag, User } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
+import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { parseSearchQuery, searchArtworks } from "@/utils/search";
@@ -27,6 +29,16 @@ const TYPE_CONFIG = {
 
 export default function SearchPage() {
 	const params = useParams();
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		setIsLoading(true);
+		const _ = params.param; // Read param to re-run effect on search query updates
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 500);
+		return () => clearTimeout(timer);
+	}, [params.param]);
 
 	const rawQuery = decodeURIComponent(params.param as string);
 	const { artworks, artworkTags, tags } = useArtworkStore();
@@ -96,7 +108,13 @@ export default function SearchPage() {
 				</div>
 
 				{/* Results */}
-				{results.length > 0 ? (
+				{isLoading ? (
+					<div className="flex flex-col gap-4">
+						<ArtworkSkeleton />
+						<ArtworkSkeleton />
+						<ArtworkSkeleton />
+					</div>
+				) : results.length > 0 ? (
 					<section className="flex flex-col gap-4">
 						{results.map((artwork) => (
 							<ArtworkCard key={artwork.id} artwork={artwork} />
