@@ -12,15 +12,18 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
+import ReportArtModal from "@/components/home/ReportArtModal";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
 import { useFavoriteStore } from "@/store/FavoriteStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
+import { useReportStore } from "@/store/ReportStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
@@ -28,6 +31,7 @@ import { randomKey } from "@/utils";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
+	const router = useRouter();
 	const { copyPath } = useCopyLink();
 	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
@@ -46,6 +50,8 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [isReportOpen, setIsReportOpen] = useState(false);
+	const { createReport } = useReportStore();
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
 	const [touchEndX, setTouchEndX] = useState<number | null>(null);
@@ -93,7 +99,8 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 			// Prevent navigation on swipe gesture
 			if (e.cancelable) {
 				e.preventDefault();
-			}
+      }
+			// Prevent event propagation to avoid closing the dropdown prematurely
 			e.stopPropagation();
 
 			if (isLeftSwipe && currentImageIndex < imageCount - 1) {
@@ -138,19 +145,27 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		});
 	};
 
-	const handleReport = (artName: string) => {
-		openModal({
-			type: "confirm",
-			variant: "danger",
-			title: "Laporkan Karya",
-			description: `Apakah Anda yakin ingin melaporkan karya: ${artName}?`,
-			onConfirm: () => {
-				addToast({
-					message: `Karya: ${artName} berhasil dilaporkan.`,
-					type: "warning",
-				});
-			},
-		});
+	const handleReport = () => {
+		if (!isAuthenticated || !user) {
+			openModal({
+				title: "Login diperlukan",
+				description: "Silakan login terlebih dahulu untuk melaporkan karya.",
+				type: "confirm",
+				confirmLabel: "Login",
+				cancelLabel: "Batal",
+				onConfirm: () => router.push("/login"),
+			});
+			return;
+		}
+		if (user.role !== "artist" && user.role !== "client") {
+			openModal({
+				title: "Hanya client dan artist yang bisa melapor",
+				description:
+					"Akun dengan peran curator atau admin tidak diperbolehkan melaporkan karya.",
+			});
+			return;
+		}
+		setIsReportOpen(true);
 	};
 
 	const handleCopyLink = (id: string) => {
@@ -191,7 +206,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</button>
 
 					{isDropdownOpen && (
-						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-10 overflow-hidden py-1">
+						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-20 overflow-hidden py-1">
 							<button
 								type="button"
 								className="w-full text-left px-4 py-2.5 text-sm text-content hover:bg-content/5 flex items-center gap-2.5 transition-colors"
@@ -206,7 +221,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 								type="button"
 								className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
 								onClick={() => {
-									handleReport(artwork.title);
+									handleReport();
 									setIsDropdownOpen(false);
 								}}
 							>
@@ -387,6 +402,29 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</div>
 				)}
 			</div>
+
+			{user && (
+				<ReportArtModal
+					artworkId={artwork.id}
+					artworkTitle={artwork.title}
+					isOpen={isReportOpen}
+					onClose={() => setIsReportOpen(false)}
+					onSubmit={(reason) => {
+						const res = createReport({
+							reporter_id: user.id,
+							target_type: "artwork",
+							target_id: artwork.id,
+							reason,
+						});
+						if (res.success) {
+							addToast({ message: res.message, type: "success" });
+						} else {
+							addToast({ message: res.message, type: "error" });
+						}
+						setIsReportOpen(false);
+					}}
+				/>
+			)}
 		</article>
 	);
 }

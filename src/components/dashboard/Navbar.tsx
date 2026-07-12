@@ -58,7 +58,7 @@ export default function Navbar() {
 
 			{/* Center: Brand */}
 			<div className="flex justify-center text-center">
-				<NavbarBrand />
+				<NavbarBrand link="/dashboard" />
 			</div>
 
 			{/* Right: Dropdown / Login */}

@@ -5,6 +5,7 @@ import {
 	BadgeCheck,
 	Check,
 	ChevronDown,
+	Flag,
 	ImageIcon,
 	PenTool,
 	Share2,
@@ -17,11 +18,16 @@ import { useState } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
 import FavoriteButton from "@/components/detail/FavoriteButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
+import ReportArtModal from "@/components/home/ReportArtModal";
 import { useCopyLink } from "@/hooks/useCopyLink";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useLightboxStore } from "@/store/LightboxStore";
+import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
+import { useReportStore } from "@/store/ReportStore";
+import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useUserStore } from "@/store/UserStore";
 import { randomKey } from "@/utils/index";
 import { buildArtworkWithRelations } from "@/utils/search";
 
@@ -37,6 +43,34 @@ export default function Detail() {
 	const { copied, copyPath } = useCopyLink({
 		successMessage: "Link karya berhasil disalin.",
 	});
+	const { user, isAuthenticated } = useUserStore();
+	const { addToast } = useToastStore();
+	const { openModal } = useModalStore();
+	const { createReport } = useReportStore();
+	const [isReportOpen, setIsReportOpen] = useState(false);
+
+	const handleReport = () => {
+		if (!isAuthenticated || !user) {
+			openModal({
+				title: "Login diperlukan",
+				description: "Silakan login terlebih dahulu untuk melaporkan karya.",
+				type: "confirm",
+				confirmLabel: "Login",
+				cancelLabel: "Batal",
+				onConfirm: () => router.push("/login"),
+			});
+			return;
+		}
+		if (user.role !== "artist" && user.role !== "client") {
+			openModal({
+				title: "Hanya client dan artist yang bisa melapor",
+				description:
+					"Akun dengan peran curator atau admin tidak diperbolehkan melaporkan karya.",
+			});
+			return;
+		}
+		setIsReportOpen(true);
+	};
 	const artwork = buildArtworkWithRelations(
 		artworks,
 		artworkTags,
@@ -257,7 +291,7 @@ export default function Detail() {
 								<button
 									type="button"
 									title="Share"
-									className="p-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors"
+									className="p-2.5 rounded-lg bg-content/5 hover:bg-content/10 text-content transition-colors cursor-pointer"
 									onClick={() => handleCopyLink(artwork.id)}
 								>
 									{copied ? (
@@ -266,11 +300,42 @@ export default function Detail() {
 										<Share2 size={20} />
 									)}
 								</button>
+								<button
+									type="button"
+									title="Laporkan"
+									className="p-2.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors flex items-center gap-2 text-sm font-medium border border-red-200 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:border-red-500/20 cursor-pointer"
+									onClick={handleReport}
+								>
+									<Flag size={18} />
+									Laporkan
+								</button>
 							</div>
 						</div>
 					</aside>
 				</div>
 			</div>
+			{user && (
+				<ReportArtModal
+					artworkId={artwork.id}
+					artworkTitle={artwork.title}
+					isOpen={isReportOpen}
+					onClose={() => setIsReportOpen(false)}
+					onSubmit={(reason) => {
+						const res = createReport({
+							reporter_id: user.id,
+							target_type: "artwork",
+							target_id: artwork.id,
+							reason,
+						});
+						if (res.success) {
+							addToast({ message: res.message, type: "success" });
+						} else {
+							addToast({ message: res.message, type: "error" });
+						}
+						setIsReportOpen(false);
+					}}
+				/>
+			)}
 		</main>
 	);
 }

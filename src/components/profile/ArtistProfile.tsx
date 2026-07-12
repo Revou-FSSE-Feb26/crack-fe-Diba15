@@ -6,9 +6,8 @@ import {
 	ShieldCheck,
 	Wallet,
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
@@ -22,6 +21,7 @@ import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
+import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
@@ -38,6 +38,8 @@ interface ArtistProfileProps {
 }
 
 export default function ArtistProfile({ user }: ArtistProfileProps) {
+	const router = useRouter();
+	const { openModal } = useModalStore();
 	const { commissions } = useCommissionStore();
 	const { artworks, artworkTags, tags } = useArtworkStore();
 	const { profiles, updateProfile } = useProfileStore();
@@ -51,9 +53,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		artworkTags,
 		tags,
 		users,
-	).filter(
-		(artwork) => artwork.artists_id === user.id && artwork.is_visible_on_feed,
-	);
+	).filter((artwork) => artwork.artists_id === user.id);
 	const verificationProgress = evaluateVerification(
 		artworks.filter((artwork) => artwork.artists_id === user.id),
 	);
@@ -130,6 +130,12 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 										Terverifikasi
 									</span>
 								)}
+								{profile?.strike_count !== undefined &&
+									profile.strike_count >= 5 && (
+										<span className="inline-flex items-center gap-1 text-xs font-medium text-danger bg-danger/10 px-2 py-0.5 rounded-full">
+											Blocked
+										</span>
+									)}
 							</div>
 
 							<AccountMeta user={user} />
@@ -265,12 +271,25 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 							>
 								Edit Profil
 							</Button>
-							<Link
-								href="/post-art"
-								className="flex w-full justify-center rounded-lg bg-accent/20 px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-accent/40 dark:text-accent"
+							<button
+								type="button"
+								onClick={() => {
+									if (profile && profile.strike_count >= 5) {
+										openModal({
+											title: "Akun Ditangguhkan (Blocked)",
+											description:
+												"Akun Anda telah ditangguhkan karena melanggar aturan TruBrush (Strike Count mencapai 5/5). Anda tidak dapat mengunggah karya baru.",
+											type: "alert",
+											variant: "danger",
+										});
+									} else {
+										router.push("/post-art");
+									}
+								}}
+								className="flex w-full justify-center rounded-lg bg-accent/20 px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-accent/40 dark:text-accent cursor-pointer border-transparent"
 							>
 								Upload Karya
-							</Link>
+							</button>
 						</div>
 					</div>
 				</aside>

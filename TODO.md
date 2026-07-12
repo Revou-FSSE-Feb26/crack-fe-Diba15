@@ -54,6 +54,8 @@ Requirements:
 8. Jika strike_count mencapai 5, akun artis akan diblokir dan tidak dapat mengunggah art lagi.
 9. Akun artis yang diblokir tidak dapat mengunggah art lagi.
 10. Tampilan laporan art pada halaman kurator berbentuk tabel untuk melihat art, alasan laporan, status laporan, dan tombol aksi.
+11. Laporan art = laporan artist, jadi skenarionya jika ada yang melaporkan art yang tidak sesuai dengan aturan trubrush, maka laporan tersebut akan tercatat sebagai laporan kepada artist terkait.
+12. Jadi tidak ada 2 laporan berbeda antara laporan art dan laporan artist. Hanya ada satu laporan yang tercatat sebagai laporan art dan laporan artist terkait.
 
 (HIGH)
 TODO 10 = Menerapkan alur verifikasi user dengan verifikasi art oleh kurator sebanyak 3/5 dari total art yang diunggah oleh artis. (Clear)

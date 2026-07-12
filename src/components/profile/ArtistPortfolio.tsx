@@ -69,6 +69,30 @@ export default function ArtistPortfolio({
 										</span>
 									</div>
 								)}
+
+								{artwork.curation_status !== "approved" && (
+									<div className="absolute bottom-2 left-2">
+										<span
+											className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm text-white ${
+												artwork.curation_status === "pending"
+													? "bg-amber-500/85"
+													: artwork.curation_status === "flagged"
+														? "bg-orange-500/85"
+														: artwork.curation_status === "rejected"
+															? "bg-red-500/85"
+															: "bg-slate-500/85"
+											}`}
+										>
+											{artwork.curation_status === "pending"
+												? "Pending"
+												: artwork.curation_status === "flagged"
+													? "Flagged"
+													: artwork.curation_status === "rejected"
+														? "Rejected"
+														: "Unapproved"}
+										</span>
+									</div>
+								)}
 							</div>
 
 							<div className="p-3 space-y-2">

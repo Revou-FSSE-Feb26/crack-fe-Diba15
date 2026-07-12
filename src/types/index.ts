@@ -177,6 +177,13 @@ export interface JoinedDispute extends DisputeLog {
 	artist?: User;
 }
 
+/** Laporan lengkap dengan artwork, pelapor, dan artist — untuk tabel review laporan */
+export interface JoinedReport extends Report {
+	artwork?: Artwork;
+	reporter?: User;
+	artist?: User;
+}
+
 // =============================================================================
 // BAGIAN 2: API, DATA TRANSPORT & PAGINATION
 // =============================================================================
@@ -321,6 +328,22 @@ export interface CommissionState {
 		approved: boolean,
 		mediator_id: string,
 	) => ActionResult;
+}
+
+// ── Report Store ─────────────────────────────────────────────────────────────
+
+export interface CreateReportPayload {
+	reporter_id: string;
+	target_type: ReportTargetType;
+	target_id: string;
+	reason: string;
+}
+
+export interface ReportState {
+	reports: Report[];
+	createReport: (payload: CreateReportPayload) => ActionResult;
+	resolveReport: (reportId: string, curatorId: string) => ActionResult;
+	dismissReport: (reportId: string, curatorId: string) => ActionResult;
 }
 
 // ── Favorite Store ───────────────────────────────────────────────────────────
