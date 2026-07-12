@@ -248,7 +248,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	};
 
 	return (
-		<article className="bg-surface rounded-lg overflow-hidden shadow-sm border border-transparent hover:border-warm/30 hover:shadow-md transition-all duration-200">
+		<article className="bg-surface rounded-lg overflow-hidden border border-transparent hover:border-warm/30 hover:shadow-md transition-all duration-200">
 			{/* Header */}
 			<div className="flex items-center justify-between px-4 py-3 border-b border-content/5">
 				<Link
