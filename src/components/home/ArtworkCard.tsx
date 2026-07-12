@@ -2,29 +2,40 @@
 
 import {
 	BadgeCheck,
+	ChevronLeft,
+	ChevronRight,
 	Flag,
 	Heart,
 	Link as LinkIcon,
 	MoreHorizontal,
 	ShieldCheck,
+	UserCheck,
+	UserPlus,
+	UserX,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
+import AvatarInitials from "@/components/home/AvatarInitials";
+import ReportArtModal from "@/components/home/ReportArtModal";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
 import { useFavoriteStore } from "@/store/FavoriteStore";
+import { useFollowStore } from "@/store/FollowStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
+import { useReportStore } from "@/store/ReportStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
-import AvatarInitials from "./AvatarInitials";
+import { randomKey } from "@/utils";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
+	const router = useRouter();
 	const { copyPath } = useCopyLink();
 	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
@@ -32,6 +43,53 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { isFavorite, toggleFavorite } = useFavoriteStore();
 	const { profiles } = useProfileStore();
 	const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
+
+	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
+	const isArtistFollowed = user ? isFollowing(user.id, artist.id) : false;
+
+	const handleFollowToggle = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (!isAuthenticated || !user) {
+				openModal({
+					title: "Login diperlukan",
+					description: "Silakan login terlebih dahulu untuk mengikuti artist.",
+					type: "confirm",
+					confirmLabel: "Login",
+					cancelLabel: "Batal",
+					onConfirm: () => router.push("/login"),
+				});
+				return;
+			}
+
+			if (user.role !== "artist" && user.role !== "client") {
+				openModal({
+					title: "Akses Terbatas",
+					description:
+						"Hanya akun client dan artist yang dapat mengikuti artis.",
+				});
+				return;
+			}
+
+			if (isArtistFollowed) {
+				unfollowArtist(user.id, artist.id);
+			} else {
+				followArtist(user.id, artist.id);
+			}
+		},
+		[
+			isAuthenticated,
+			user,
+			isArtistFollowed,
+			artist.id,
+			followArtist,
+			unfollowArtist,
+			openModal,
+			router,
+		],
+	);
 	const basePrice =
 		profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ??
 		null;
@@ -41,8 +99,68 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	];
 	const imageCount = images.length;
 
+	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [isReportOpen, setIsReportOpen] = useState(false);
+	const { createReport } = useReportStore();
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const [touchStartX, setTouchStartX] = useState<number | null>(null);
+	const [touchEndX, setTouchEndX] = useState<number | null>(null);
+
+	const minSwipeDistance = 50;
+
+	const handlePrev = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (currentImageIndex > 0) {
+			setCurrentImageIndex((prev) => prev - 1);
+		}
+	};
+
+	const handleNext = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (currentImageIndex < imageCount - 1) {
+			setCurrentImageIndex((prev) => prev + 1);
+		}
+	};
+
+	const handleDotClick = (e: React.MouseEvent, index: number) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setCurrentImageIndex(index);
+	};
+
+	const handleTouchStart = (e: React.TouchEvent) => {
+		setTouchEndX(null);
+		setTouchStartX(e.targetTouches[0].clientX);
+	};
+
+	const handleTouchMove = (e: React.TouchEvent) => {
+		setTouchEndX(e.targetTouches[0].clientX);
+	};
+
+	const handleTouchEnd = (e: React.TouchEvent) => {
+		if (!touchStartX || !touchEndX) return;
+		const distance = touchStartX - touchEndX;
+		const isLeftSwipe = distance > minSwipeDistance;
+		const isRightSwipe = distance < -minSwipeDistance;
+
+		if (isLeftSwipe || isRightSwipe) {
+			// Prevent navigation on swipe gesture
+			if (e.cancelable) {
+				e.preventDefault();
+			}
+			// Prevent event propagation to avoid closing the dropdown prematurely
+			e.stopPropagation();
+
+			if (isLeftSwipe && currentImageIndex < imageCount - 1) {
+				setCurrentImageIndex((prev) => prev + 1);
+			} else if (isRightSwipe && currentImageIndex > 0) {
+				setCurrentImageIndex((prev) => prev - 1);
+			}
+		}
+	};
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -78,20 +196,51 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		});
 	};
 
-	const handleReport = (artName: string) => {
-		openModal({
-			type: "confirm",
-			variant: "danger",
-			title: "Laporkan Karya",
-			description: `Apakah Anda yakin ingin melaporkan karya: ${artName}?`,
-			onConfirm: () => {
-				addToast({
-					message: `Karya: ${artName} berhasil dilaporkan.`,
-					type: "warning",
-				});
-			},
-		});
+	const handleReport = () => {
+		if (!isAuthenticated || !user) {
+			openModal({
+				title: "Login diperlukan",
+				description: "Silakan login terlebih dahulu untuk melaporkan karya.",
+				type: "confirm",
+				confirmLabel: "Login",
+				cancelLabel: "Batal",
+				onConfirm: () => router.push("/login"),
+			});
+			return;
+		}
+		if (user.role !== "artist" && user.role !== "client") {
+			openModal({
+				title: "Hanya client dan artist yang bisa melapor",
+				description:
+					"Akun dengan peran curator atau admin tidak diperbolehkan melaporkan karya.",
+			});
+			return;
+		}
+		setIsReportOpen(true);
 	};
+
+	const handleReportClose = useCallback(() => {
+		setIsReportOpen(false);
+	}, []);
+
+	const handleReportSubmit = useCallback(
+		(reason: string) => {
+			if (!user) return;
+			const res = createReport({
+				reporter_id: user.id,
+				target_type: "artwork",
+				target_id: artwork.id,
+				reason,
+			});
+			if (res.success) {
+				addToast({ message: res.message, type: "success" });
+			} else {
+				addToast({ message: res.message, type: "error" });
+			}
+			setIsReportOpen(false);
+		},
+		[user, artwork.id, createReport, addToast],
+	);
 
 	const handleCopyLink = (id: string) => {
 		copyPath(`/detail/${id}`);
@@ -99,7 +248,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	};
 
 	return (
-		<article className="bg-surface rounded-lg overflow-hidden shadow-sm border border-transparent hover:border-warm/30 hover:shadow-md transition-all duration-200">
+		<article className="bg-surface rounded-lg overflow-hidden border border-transparent transition-all duration-200">
 			{/* Header */}
 			<div className="flex items-center justify-between px-4 py-3 border-b border-content/5">
 				<Link
@@ -119,6 +268,35 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</div>
 				</Link>
 
+				{/* Follow Button */}
+				{(!user || user.id !== artist.id) && (
+					<button
+						type="button"
+						onClick={handleFollowToggle}
+						className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+							isArtistFollowed
+								? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+								: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
+						}`}
+					>
+						{isArtistFollowed ? (
+							<>
+								<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
+								<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
+								<span className="group-hover:hidden">Mengikuti</span>
+								<span className="hidden group-hover:inline text-red-500">
+									Batal Ikuti
+								</span>
+							</>
+						) : (
+							<>
+								<UserPlus className="w-3.5 h-3.5" />
+								<span>Ikuti</span>
+							</>
+						)}
+					</button>
+				)}
+
 				{/* Dropdown Container */}
 				<div className="relative" ref={dropdownRef}>
 					<button
@@ -131,7 +309,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</button>
 
 					{isDropdownOpen && (
-						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-10 overflow-hidden py-1">
+						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-20 overflow-hidden py-1">
 							<button
 								type="button"
 								className="w-full text-left px-4 py-2.5 text-sm text-content hover:bg-content/5 flex items-center gap-2.5 transition-colors"
@@ -146,7 +324,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 								type="button"
 								className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
 								onClick={() => {
-									handleReport(artwork.title);
+									handleReport();
 									setIsDropdownOpen(false);
 								}}
 							>
@@ -158,69 +336,88 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 				</div>
 			</div>
 
-			{/* Image Grid */}
-			<Link
-				href={`/detail/${artwork.id}`}
-				className="relative w-full bg-content/5 overflow-hidden aspect-4/3 grid grid-cols-2 grid-rows-2 gap-0.5 cursor-pointer"
+			{/* Image Carousel */}
+			<div
+				className="relative w-full bg-content/5 overflow-hidden aspect-4/3 group/carousel"
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={handleTouchEnd}
 			>
+				<Link
+					href={`/detail/${artwork.id}`}
+					className="block w-full h-full cursor-pointer relative"
+				>
+					{imageCount > 0 ? (
+						<Image
+							src={images[currentImageIndex]}
+							alt={`${artwork.title} - Image ${currentImageIndex + 1}`}
+							fill
+							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+							className="object-cover transition-opacity duration-300"
+							loading="eager"
+						/>
+					) : (
+						<div className="w-full h-full flex items-center justify-center text-content-muted">
+							Tidak ada gambar
+						</div>
+					)}
+				</Link>
+
 				{artwork.curation_status === "approved" && (
-					<div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full">
+					<div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full pointer-events-none">
 						<ShieldCheck className="w-3 h-3" />
 						Terkurasi
 					</div>
 				)}
 
-				{imageCount > 0 && (
-					<div
-						className={`relative w-full h-full overflow-hidden ${imageCount === 1 ? "col-span-2 row-span-2" : "col-span-1 row-span-2"}`}
-					>
-						<Image
-							src={images[0]}
-							alt={`${artwork.title} - Image 1`}
-							fill
-							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-							className="object-cover transition-transform duration-300"
-						/>
+				{imageCount > 1 && (
+					<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1 rounded-full pointer-events-none select-none">
+						{currentImageIndex + 1} / {imageCount}
 					</div>
 				)}
 
 				{imageCount > 1 && (
-					<div
-						className={`relative w-full h-full overflow-hidden ${imageCount === 2 ? "col-span-1 row-span-2" : "col-span-1 row-span-1"}`}
-					>
-						<Image
-							src={images[1]}
-							alt={`${artwork.title} - Image 2`}
-							fill
-							sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-							className="object-cover transition-transform duration-300"
-						/>
-					</div>
-				)}
-
-				{imageCount > 2 && (
-					<div className="relative w-full h-full overflow-hidden col-span-1 row-span-1">
-						<Image
-							src={images[2]}
-							alt={`${artwork.title} - Image 3`}
-							fill
-							sizes="max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
-							className="object-cover transition-transform duration-300"
-						/>
-
-						{imageCount > 3 && (
-							<div className="absolute inset-0 bg-black/40 backdrop-blur-[3px] flex flex-col items-center justify-center gap-1 hover:bg-black/50 transition-colors duration-200 z-10">
-								<span className="text-white text-xl font-bold tracking-wider">
-									+{imageCount - 3}
-								</span>
-								<span className="text-white text-xs font-medium px-2">
-									Tampilkan Semua
-								</span>
-							</div>
+					<>
+						{currentImageIndex > 0 && (
+							<button
+								type="button"
+								onClick={handlePrev}
+								className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white transition-all duration-200 cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
+								aria-label="Previous image"
+							>
+								<ChevronLeft size={16} />
+							</button>
 						)}
-					</div>
+
+						{currentImageIndex < imageCount - 1 && (
+							<button
+								type="button"
+								onClick={handleNext}
+								className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white transition-all duration-200 cursor-pointer opacity-0 group-hover/carousel:opacity-100 focus:opacity-100"
+								aria-label="Next image"
+							>
+								<ChevronRight size={16} />
+							</button>
+						)}
+
+						<div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center">
+							{images.map((_, index) => (
+								<button
+									key={randomKey()}
+									type="button"
+									onClick={(e) => handleDotClick(e, index)}
+									className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+										currentImageIndex === index
+											? "bg-white scale-125 shadow-sm"
+											: "bg-white/40 hover:bg-white/70"
+									}`}
+									aria-label={`Go to image ${index + 1}`}
+								/>
+							))}
+						</div>
+					</>
 				)}
-			</Link>
+			</div>
 
 			{/* Action Bar */}
 			<div className="flex flex-col px-4 py-3 border-b border-content/5">
@@ -308,6 +505,16 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</div>
 				)}
 			</div>
+
+			{user && (
+				<ReportArtModal
+					artworkId={artwork.id}
+					artworkTitle={artwork.title}
+					isOpen={isReportOpen}
+					onClose={handleReportClose}
+					onSubmit={handleReportSubmit}
+				/>
+			)}
 		</article>
 	);
 }

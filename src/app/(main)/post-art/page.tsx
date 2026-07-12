@@ -11,13 +11,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useModalStore } from "@/store/ModalStore";
+import { useProfileStore } from "@/store/ProfileStore";
 import { useUserStore } from "@/store/UserStore";
 import type { UploadType } from "@/types";
 
@@ -49,7 +50,22 @@ export default function PostArtPage() {
 	const { createArtwork, tags: existingTags } = useArtworkStore();
 	const { openModal } = useModalStore();
 	const [tagInput, setTagInput] = useState("");
+	const { profiles } = useProfileStore();
+	const profile = profiles.find((item) => item.user_id === user?.id);
 
+	useEffect(() => {
+		if (profile && profile.strike_count >= 5) {
+			openModal({
+				title: "Akun Ditangguhkan (Blocked)",
+				description:
+					"Akun Anda telah ditangguhkan karena melanggar aturan TruBrush (Strike Count mencapai 5/5). Anda tidak dapat mengunggah karya baru.",
+				type: "alert",
+				variant: "danger",
+				onConfirm: () => router.push("/profile"),
+				onCancel: () => router.push("/profile"),
+			});
+		}
+	}, [profile, openModal, router]);
 	const {
 		register,
 		handleSubmit,
@@ -120,6 +136,18 @@ export default function PostArtPage() {
 				title: "Hanya artist yang bisa post art",
 				description:
 					"Gunakan akun artist untuk mengunggah artwork ke TruBrush.",
+			});
+			return;
+		}
+
+		if (profile && profile.strike_count >= 5) {
+			openModal({
+				title: "Akun Ditangguhkan (Blocked)",
+				description:
+					"Akun Anda telah ditangguhkan karena melanggar aturan TruBrush (Strike Count mencapai 5/5). Anda tidak dapat mengunggah karya baru.",
+				type: "alert",
+				variant: "danger",
+				onConfirm: () => router.push("/profile"),
 			});
 			return;
 		}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Lock, Mail, User } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import Input from "@/components/ui/form/Input";
@@ -42,6 +42,15 @@ export default function UserFormModal({
 }: UserFormModalProps) {
 	const modalId = "manage-user-form-modal";
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+
+	const onSubmitRef = useRef(onSubmit);
+	const onCloseRef = useRef(onClose);
+
+	useEffect(() => {
+		onSubmitRef.current = onSubmit;
+		onCloseRef.current = onClose;
+	}, [onSubmit, onClose]);
+
 	const {
 		register,
 		handleSubmit,
@@ -257,9 +266,11 @@ export default function UserFormModal({
 				formClassName: "mt-5 space-y-4",
 				confirmLabel,
 				cancelLabel: "Batal",
-				onCancel: onClose,
+				onCancel: () => {
+					onCloseRef.current();
+				},
 				onSubmit: (event) => {
-					handleSubmit((values) => onSubmit(values))(event);
+					handleSubmit((values) => onSubmitRef.current(values))(event);
 					// Biarkan parent yang mengontrol kapan modal ditutup.
 					return false;
 				},
@@ -274,8 +285,6 @@ export default function UserFormModal({
 		globalOpen,
 		handleSubmit,
 		isOpen,
-		onClose,
-		onSubmit,
 		openModal,
 		title,
 	]);

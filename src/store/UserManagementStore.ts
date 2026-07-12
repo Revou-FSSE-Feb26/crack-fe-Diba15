@@ -31,6 +31,7 @@ export const useUserManagementStore = create<UserManagementState>()(
 					email,
 					password: payload.password,
 					role: payload.role,
+					balance: payload.balance ?? (payload.role === "client" ? 2000000 : 0),
 					created_at: timestamp,
 					updated_at: timestamp,
 				};
@@ -72,6 +73,10 @@ export const useUserManagementStore = create<UserManagementState>()(
 						? payload.password
 						: target.password,
 					role: payload.role ?? target.role,
+					balance:
+						typeof payload.balance === "number"
+							? payload.balance
+							: target.balance,
 					updated_at: now(),
 				};
 

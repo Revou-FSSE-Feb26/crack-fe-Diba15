@@ -19,14 +19,14 @@ export default function DashboardPage() {
 	const { user } = useUserStore();
 	const { users } = useUserManagementStore();
 	const { artworks } = useArtworkStore();
-	const { commissions } = useCommissionStore();
+	const { disputes, commissions } = useCommissionStore();
 
 	const stats = useMemo(() => {
 		const pendingArtworks = artworks.filter(
 			(artwork) => artwork.curation_status === "pending",
 		);
-		const disputedCommissions = commissions.filter(
-			(commission) => commission.status === "disputed",
+		const disputedCommissions = disputes.filter(
+			(dispute) => dispute.status === "approved",
 		);
 		const activeCommissions = commissions.filter((commission) =>
 			["pending", "accepted", "in_progress", "revision"].includes(
@@ -42,7 +42,7 @@ export default function DashboardPage() {
 			disputedCommissions: disputedCommissions.length,
 			activeCommissions: activeCommissions.length,
 		};
-	}, [artworks, commissions, users]);
+	}, [artworks, commissions, users, disputes]);
 
 	return (
 		<>

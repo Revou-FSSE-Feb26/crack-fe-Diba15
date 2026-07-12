@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
+import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useMounted } from "@/hooks/useMounted";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useFavoriteStore } from "@/store/FavoriteStore";
@@ -60,9 +61,10 @@ export default function FavoriteList() {
 
 			<div className="max-w-2xl mx-auto px-4 pt-6 pb-10 space-y-5">
 				{!mounted ? (
-					<section className="flex flex-col items-center justify-center py-20 px-4">
-						<p className="text-content-muted text-sm">Memuat favorites...</p>
-					</section>
+					<div className="flex flex-col gap-4">
+						<ArtworkSkeleton />
+						<ArtworkSkeleton />
+					</div>
 				) : !isAuthenticated || !user ? (
 					<section className="flex flex-col items-center py-20 gap-4 text-center">
 						<div className="w-16 h-16 rounded-full bg-content/5 flex items-center justify-center">

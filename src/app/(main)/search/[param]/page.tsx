@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowLeft, FileText, Info, Search, Tag, User, X } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { FileText, Info, Search, Tag, User } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
+import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { parseSearchQuery, searchArtworks } from "@/utils/search";
@@ -29,10 +29,18 @@ const TYPE_CONFIG = {
 
 export default function SearchPage() {
 	const params = useParams();
-	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		setIsLoading(true);
+		const _ = params.param; // Read param to re-run effect on search query updates
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 500);
+		return () => clearTimeout(timer);
+	}, [params.param]);
 
 	const rawQuery = decodeURIComponent(params.param as string);
-	const [inputValue, setInputValue] = useState(rawQuery);
 	const { artworks, artworkTags, tags } = useArtworkStore();
 	const { users } = useUserManagementStore();
 
@@ -47,63 +55,8 @@ export default function SearchPage() {
 
 	const { label, Icon, pill } = TYPE_CONFIG[parsed.type];
 
-	// Sync input value when URL param changes (e.g. tag pill click)
-	useEffect(() => {
-		setTimeout(() => {
-			setInputValue(rawQuery);
-		}, 0);
-	}, [rawQuery]);
-
-	const handleSearch = (e: React.FormEvent) => {
-		e.preventDefault();
-		const q = inputValue.trim();
-		if (!q) return;
-		router.push(`/search/${encodeURIComponent(q)}`);
-	};
-
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">
-			{/* Sticky Search Header */}
-			<div className="bg-background/90 backdrop-blur-md border-b border-content/10 px-4 py-3">
-				<form onSubmit={handleSearch} className="max-w-2xl mx-auto flex gap-2">
-					<Link
-						href="/"
-						className="shrink-0 p-2 rounded-full hover:bg-content/5 transition-colors"
-					>
-						<ArrowLeft size={20} className="text-content" />
-					</Link>
-
-					<div className="flex flex-col md:flex-row items-center gap-2 w-full">
-						<div className="flex-1 flex items-center gap-2 bg-surface rounded-lg px-3 py-2 border border-content/10 focus-within:border-primary/50 transition-colors">
-							<Search size={15} className="text-content-muted shrink-0" />
-							<input
-								type="text"
-								value={inputValue}
-								onChange={(e) => setInputValue(e.target.value)}
-								placeholder='Judul, tags:"nama", artists:"nama"'
-								className="flex-1 bg-transparent outline-none text-sm text-content placeholder:text-content-muted"
-							/>
-							{inputValue && (
-								<button
-									type="button"
-									onClick={() => setInputValue("")}
-									className="p-0.5 rounded-full hover:bg-content/10 transition-colors"
-								>
-									<X size={14} className="text-content-muted" />
-								</button>
-							)}
-						</div>
-
-						<button
-							type="submit"
-							className="shrink-0 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
-						>
-							Cari
-						</button>
-					</div>
-				</form>
-			</div>
-
 			{/* Content */}
 			<div className="max-w-2xl mx-auto px-4 pt-6 pb-10 space-y-5">
 				{/* Filter badge + result count */}
@@ -155,7 +108,13 @@ export default function SearchPage() {
 				</div>
 
 				{/* Results */}
-				{results.length > 0 ? (
+				{isLoading ? (
+					<div className="flex flex-col gap-4">
+						<ArtworkSkeleton />
+						<ArtworkSkeleton />
+						<ArtworkSkeleton />
+					</div>
+				) : results.length > 0 ? (
 					<section className="flex flex-col gap-4">
 						{results.map((artwork) => (
 							<ArtworkCard key={artwork.id} artwork={artwork} />

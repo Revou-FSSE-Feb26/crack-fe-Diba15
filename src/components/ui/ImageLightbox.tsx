@@ -108,6 +108,22 @@ function LightboxContent() {
 		setPosition({ x: posStart.current.x + dx, y: posStart.current.y + dy });
 	};
 
+	const handleTouchStart = (e: React.TouchEvent) => {
+		if (scale <= 1) return;
+		setIsDragging(true);
+		const touch = e.touches[0];
+		dragStart.current = { x: touch.clientX, y: touch.clientY };
+		posStart.current = position;
+	};
+
+	const handleTouchMove = (e: React.TouchEvent) => {
+		if (!isDragging) return;
+		const touch = e.touches[0];
+		const dx = touch.clientX - dragStart.current.x;
+		const dy = touch.clientY - dragStart.current.y;
+		setPosition({ x: posStart.current.x + dx, y: posStart.current.y + dy });
+	};
+
 	const stopDragging = () => {
 		setIsDragging(false);
 	};
@@ -200,6 +216,9 @@ function LightboxContent() {
 				onMouseMove={handleMouseMove}
 				onMouseUp={stopDragging}
 				onMouseLeave={stopDragging}
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={stopDragging}
 				onDoubleClick={handleDoubleClick}
 			>
 				{hasMultiple && (
@@ -288,9 +307,19 @@ export default function ImageLightbox() {
 	const { isOpen } = useLightboxStore();
 
 	useEffect(() => {
-		document.body.style.overflow = isOpen ? "hidden" : "";
+		if (isOpen) {
+			document.body.style.overflow = "hidden";
+		} else {
+			const activeOverlays = document.querySelectorAll(".fixed.inset-0");
+			if (activeOverlays.length <= 1) {
+				document.body.style.overflow = "";
+			}
+		}
 		return () => {
-			document.body.style.overflow = "";
+			const activeOverlays = document.querySelectorAll(".fixed.inset-0");
+			if (activeOverlays.length <= 1) {
+				document.body.style.overflow = "";
+			}
 		};
 	}, [isOpen]);
 

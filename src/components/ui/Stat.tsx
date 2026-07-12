@@ -85,12 +85,14 @@ export default function Stat({
 		}
 
 		return (
-			<div className={`rounded-xl px-3 py-2 ${toneBg} ${className}`}>
-				<div className="flex items-center gap-1.5 text-xs text-content-muted">
-					<Icon className="w-3.5 h-3.5" />
+			<div
+				className={`rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 ${toneBg} ${className}`}
+			>
+				<div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-content-muted">
+					<Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
 					{label}
 				</div>
-				<p className="mt-1 text-sm font-medium text-content truncate">
+				<p className="mt-1 text-xs sm:text-sm font-medium text-content truncate">
 					{displayValue}
 				</p>
 			</div>

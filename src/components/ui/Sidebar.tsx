@@ -8,6 +8,7 @@ import {
 	Home,
 	LayoutDashboard,
 	LogIn,
+	LogOut,
 	Moon,
 	PanelLeftClose,
 	PlusCircle,
@@ -15,7 +16,9 @@ import {
 	User,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AvatarInitials from "@/components/home/AvatarInitials";
 import Brand from "@/components/ui/brand/Brand";
 import { useMounted } from "@/hooks/useMounted";
 import { useThemeStore } from "@/store/ThemeStore";
@@ -33,15 +36,23 @@ const userMenuItems: Array<{ label: string; href: string; icon: LucideIcon }> =
 	[
 		{ label: "Favorites", href: "/favorite", icon: Heart },
 		{ label: "Commissions", href: "/commissions", icon: Briefcase },
-		{ label: "Profil", href: "/profile", icon: User },
 	];
 
 export default function Sidebar({ onClose }: SidebarProps) {
 	const { theme, toggleTheme } = useThemeStore();
 	const mounted = useMounted();
+	const router = useRouter();
 	const { isAuthenticated, user, logout, isArtist, isAdmin, isCurator } =
 		useUserStore();
 	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+	const roles = {
+		artist: "Artist",
+		client: "Client",
+		admin: "Admin",
+		curator: "Curator",
+	};
+	const userRole = roles[user?.role as keyof typeof roles];
 
 	// Jika isAuth maka satukan menu user dengan menu default
 	const postArtMenu =
@@ -56,12 +67,17 @@ export default function Sidebar({ onClose }: SidebarProps) {
 		? [...menuItems, ...postArtMenu, ...dashboardMenu, ...userMenuItems]
 		: menuItems;
 
+	const handleLogout = () => {
+		logout();
+		router.push("/login");
+	};
+
 	return (
 		<aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">
 			{/* Bagian Atas: Logo & Navigasi */}
 			<div>
 				<div className="mb-6 flex items-center justify-between gap-2">
-					<Brand />
+					<Brand onClick={onClose} />
 					<button
 						type="button"
 						onClick={onClose}
@@ -97,43 +113,63 @@ export default function Sidebar({ onClose }: SidebarProps) {
 				{!isAuthenticated ? (
 					<Link
 						href="/login"
+						onClick={onClose}
 						className="group md:hidden mb-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
 					>
 						<LogIn className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
 						Login
 					</Link>
 				) : (
-					<div className="group md:hidden mb-2 flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary">
+					<div className="group md:hidden mb-2 flex items-center gap-3">
 						<div className="relative w-full">
 							<button
 								type="button"
 								onClick={() => setProfileMenuOpen((prev) => !prev)}
-								className="w-full flex justify-between items-center gap-3"
+								className="w-full flex items-center justify-between gap-3 rounded-full border border-slate-200/70 dark:border-slate-700/60 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
 							>
-								<span>{user?.name}</span>
+								<div className="flex items-center gap-2">
+									<AvatarInitials
+										className="w-8 h-8 shrink-0"
+										name={user?.name || ""}
+									/>
+									<div className="flex flex-col items-start gap-0 text-left">
+										<span className="text-sm font-medium text-primary">
+											{user?.name}
+										</span>
+										<span className={`text-[10px] font-medium text-warm`}>
+											{userRole}
+										</span>
+									</div>
+								</div>
 								<ChevronUp
 									className={`h-5 w-5 transition-all duration-200 group-hover:text-primary ${profileMenuOpen ? "rotate-180" : ""}`}
 								/>
 							</button>
 
 							{profileMenuOpen && (
-								<div className="absolute bottom-full left-0 mb-2 w-full rounded-2xl border border-slate-200/70 bg-surface shadow-lg dark:border-slate-700/60">
-									<button
-										type="button"
-										onClick={() => setProfileMenuOpen(false)}
-										className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 dark:hover:bg-primary/10"
+								<div className="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50 overflow-hidden flex flex-col">
+									<Link
+										href="/profile"
+										onClick={() => {
+											setProfileMenuOpen(false);
+											onClose();
+										}}
+										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-content hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
 									>
-										<span>{user?.role}</span>
-									</button>
+										<User className="h-5 w-5 text-content-muted" />
+										<span className="font-semibold">Profil Saya</span>
+									</Link>
+									<div className="border-t border-slate-100 dark:border-slate-800" />
 									<button
 										type="button"
 										onClick={() => {
-											logout();
+											handleLogout();
+											onClose();
 										}}
-										className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-red-500 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950"
+										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
 									>
-										<LogIn className="h-5 w-5" />
-										Logout
+										<LogOut className="h-5 w-5" />
+										<span className="font-semibold">Logout</span>
 									</button>
 								</div>
 							)}
@@ -170,23 +206,30 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
 				<footer className="border-t border-slate-200/70 pt-4 text-sm text-content-muted dark:border-slate-700/60">
 					<div className="mb-3 flex flex-wrap gap-2 text-xs max-w-50">
-						<Link href="/help" className="transition-colors hover:text-primary">
+						<Link
+							href="/help"
+							onClick={onClose}
+							className="transition-colors hover:text-primary"
+						>
 							Help
 						</Link>
 						<Link
 							href="/privacy"
+							onClick={onClose}
 							className="transition-colors hover:text-primary"
 						>
 							Privacy
 						</Link>
 						<Link
 							href="/about"
+							onClick={onClose}
 							className="transition-colors hover:text-primary"
 						>
 							About TruBrush
 						</Link>
 						<Link
 							href="/careers"
+							onClick={onClose}
 							className="transition-colors hover:text-primary"
 						>
 							Careers

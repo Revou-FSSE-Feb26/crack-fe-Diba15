@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import FileDisputeModal from "@/components/commission/FileDisputeModal";
+import PaymentMethodModal from "@/components/commission/PaymentMethodModal";
 import ProofPreview from "@/components/commission/ProofPreview";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
@@ -21,6 +23,7 @@ import users from "@/data/users";
 import { useMounted } from "@/hooks/useMounted";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useModalStore } from "@/store/ModalStore";
+import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { Commission } from "@/types";
 import { formatDate, formatPrice } from "@/utils";
@@ -35,22 +38,32 @@ export default function CommissionDetailContent({
 }: CommissionDetailContentProps) {
 	const { user, isAuthenticated } = useUserStore();
 	const { openModal } = useModalStore();
+	const { addToast } = useToastStore();
 	const {
 		commissions,
 		progress,
 		revisions,
+		disputes,
 		setCommissionStatus,
 		setPaymentStatus,
 		uploadDummyResult,
 		approveResult,
 		addRevision,
+		fileDispute,
 	} = useCommissionStore();
 	const mounted = useMounted();
 	const [comment, setComment] = useState("");
+	const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+	const [isDisputeOpen, setIsDisputeOpen] = useState(false);
 
 	const commission = useMemo(
 		() => commissions.find((item) => item.id === commissionId),
 		[commissionId, commissions],
+	);
+
+	const commissionDispute = useMemo(
+		() => disputes?.find((d) => d.commission_id === commissionId),
+		[commissionId, disputes],
 	);
 
 	if (!mounted) {
@@ -134,12 +147,13 @@ export default function CommissionDetailContent({
 		(item) => item.commission_id === commission.id,
 	);
 	const status = commissionStatusConfig[commission.status];
-	const canCancel = !["completed", "cancelled", "disputed"].includes(
-		commission.status,
-	);
+	const canCancel =
+		!["completed", "cancelled", "disputed"].includes(commission.status) &&
+		!commissionDispute;
 	const canApprove =
 		Boolean(progressItem?.final_artwork_url) &&
-		commission.status !== "completed";
+		commission.status !== "completed" &&
+		!commissionDispute;
 	const canPay =
 		!isArtistView &&
 		commission.payment_status === "unpaid" &&
@@ -180,38 +194,38 @@ export default function CommissionDetailContent({
 				Kembali ke list commission
 			</Link>
 
-			<article className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5">
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-					<div className="flex items-start gap-3 min-w-0">
+			<article className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 xs:p-4 sm:p-5">
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between w-full">
+					<div className="flex items-start gap-2.5 sm:gap-3 min-w-0 w-full">
 						<AvatarInitials
 							name={counterpartName}
-							className="w-12 h-12 text-sm shrink-0"
+							className="w-10 h-10 sm:w-12 sm:h-12 text-sm shrink-0"
 						/>
-						<div className="min-w-0">
-							<div className="flex flex-wrap items-center gap-2">
-								<h1 className="font-heading text-2xl font-bold text-content">
+						<div className="min-w-0 flex-1">
+							<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+								<h1 className="font-heading text-xl sm:text-2xl font-bold text-content break-words min-w-0">
 									{commission.commission_title}
 								</h1>
 								<span
-									className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}
+									className={`rounded-full px-2 py-0.5 text-xs font-medium shrink-0 ${status.className}`}
 								>
 									{status.label}
 								</span>
 							</div>
-							<p className="mt-1 text-sm text-content-muted">
+							<p className="mt-1 text-xs sm:text-sm text-content-muted">
 								{isArtistView
 									? `Client: ${counterpartName}`
 									: `Artist: ${counterpartName}`}
 							</p>
 							{commission.description && (
-								<p className="mt-3 text-sm leading-relaxed text-content-muted">
+								<p className="mt-3 text-xs sm:text-sm leading-relaxed text-content-muted break-words">
 									{commission.description}
 								</p>
 							)}
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-107.5">
+					<div className="grid grid-cols-2 gap-1.5 xs:gap-2 sm:grid-cols-4 lg:w-107.5 w-full">
 						<Stat
 							icon={CreditCard}
 							label="Bayar"
@@ -241,13 +255,29 @@ export default function CommissionDetailContent({
 						<div className="grid gap-3 sm:grid-cols-2">
 							<ProofPreview
 								title="WIP Proof"
-								src={progressItem?.sketch_url}
-								empty="Artist belum upload WIP proof."
+								src={
+									!isArtistView && commissionDispute?.status === "approved"
+										? null
+										: progressItem?.sketch_url
+								}
+								empty={
+									!isArtistView && commissionDispute?.status === "approved"
+										? "WIP proof tidak dapat diakses karena sengketa disetujui."
+										: "Artist belum upload WIP proof."
+								}
 							/>
 							<ProofPreview
 								title="Preview Final"
-								src={progressItem?.final_artwork_url}
-								empty="Final artwork belum tersedia."
+								src={
+									!isArtistView && commissionDispute?.status === "approved"
+										? null
+										: progressItem?.final_artwork_url
+								}
+								empty={
+									!isArtistView && commissionDispute?.status === "approved"
+										? "Hasil tidak dapat diakses karena sengketa disetujui."
+										: "Final artwork belum tersedia."
+								}
 							/>
 						</div>
 
@@ -263,7 +293,7 @@ export default function CommissionDetailContent({
 							{canPay && (
 								<Button
 									className="flex gap-1 items-center w-full justify-center text-sm"
-									onClick={() => setPaymentStatus(commission.id, "paid")}
+									onClick={() => setIsPaymentOpen(true)}
 								>
 									<CreditCard className="w-4 h-4" />
 									Bayar Uang Muka
@@ -339,7 +369,21 @@ export default function CommissionDetailContent({
 								<>
 									<Button
 										className="flex gap-1 items-center w-full justify-center text-sm"
-										onClick={() => approveResult(commission.id)}
+										onClick={() => {
+											openModal({
+												title: "Approve hasil?",
+												description: `Dengan menyetujui hasil, dana sebesar ${formatPrice(commission.price)} akan dilepaskan ke wallet artist.`,
+												type: "confirm",
+												confirmLabel: "Approve",
+												onConfirm: () => {
+													approveResult(commission.id);
+													addToast({
+														message: "Hasil komisi disetujui.",
+														type: "success",
+													});
+												},
+											});
+										}}
 									>
 										<CheckCircle2 className="w-4 h-4" />
 										Approve Hasil
@@ -347,9 +391,7 @@ export default function CommissionDetailContent({
 									<Button
 										variant="danger"
 										className="flex gap-1 items-center w-full justify-center text-sm"
-										onClick={() =>
-											confirmStatus(commission, "disputed", "Ajukan dispute?")
-										}
+										onClick={() => setIsDisputeOpen(true)}
 									>
 										<AlertTriangle className="w-4 h-4" />
 										Ajukan Dispute
@@ -371,6 +413,50 @@ export default function CommissionDetailContent({
 								>
 									Batalkan Commission
 								</Button>
+							)}
+
+							{/* Dispute status banner */}
+							{commissionDispute && (
+								<div
+									className={`rounded-xl border p-4 text-xs leading-relaxed ${
+										commissionDispute.status === "pending"
+											? "bg-premium/10 border-premium/30 text-premium"
+											: commissionDispute.status === "approved"
+												? "bg-verified/10 border-verified/30 text-verified"
+												: "bg-content/5 border-content/10 text-content-muted"
+									}`}
+								>
+									<div className="flex items-center gap-1.5 font-bold mb-1">
+										<AlertTriangle className="w-4 h-4 shrink-0" />
+										<span>
+											{commissionDispute.status === "pending" &&
+												"Komisi dalam Sengketa (Dispute)"}
+											{commissionDispute.status === "approved" &&
+												"Sengketa Disetujui Kurator"}
+											{commissionDispute.status === "rejected" &&
+												"Sengketa Ditolak Kurator"}
+										</span>
+									</div>
+									<p className="font-semibold text-content mb-1">
+										Alasan dispute: &ldquo;{commissionDispute.reason}&rdquo;
+									</p>
+									<p className="text-content-muted mt-1">
+										{commissionDispute.status === "pending" &&
+											"Laporan sengketa sedang ditinjau oleh Kurator TruBrush. Keputusan sengketa bersifat mutlak."}
+										{commissionDispute.status === "approved" &&
+											(commission.payment_method === "wallet"
+												? isArtistView
+													? `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke saldo E-Wallet Klien.`
+													: `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke saldo E-Wallet Anda.`
+												: isArtistView
+													? `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke kartu kredit Klien (berakhir di ${commission.card_last_four ?? "••••"}).`
+													: `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke kartu kredit Anda (berakhir di ${commission.card_last_four ?? "••••"}).`)}
+										{commissionDispute.status === "rejected" &&
+											(isArtistView
+												? `Dana sebesar ${formatPrice(commission.price)} telah dilepaskan ke dompet E-Wallet Anda karena dispute ditolak.`
+												: `Dana sebesar ${formatPrice(commission.price)} telah dilepaskan ke dompet Artist karena dispute ditolak.`)}
+									</p>
+								</div>
 							)}
 						</div>
 
@@ -431,6 +517,39 @@ export default function CommissionDetailContent({
 					</div>
 				</div>
 			</article>
+
+			{/* Modals for payment and dispute */}
+			<PaymentMethodModal
+				commissionId={commission.id}
+				commissionTitle={commission.commission_title}
+				price={commission.price}
+				isOpen={isPaymentOpen}
+				onClose={() => setIsPaymentOpen(false)}
+				onSubmitSuccess={(method, lastFour) => {
+					const res = setPaymentStatus(commission.id, "paid", method, lastFour);
+					if (res.success) {
+						addToast({ message: res.message, type: "success" });
+					} else {
+						addToast({ message: res.message, type: "error" });
+					}
+					setIsPaymentOpen(false);
+				}}
+			/>
+
+			<FileDisputeModal
+				commissionTitle={commission.commission_title}
+				isOpen={isDisputeOpen}
+				onClose={() => setIsDisputeOpen(false)}
+				onSubmit={(reason) => {
+					const res = fileDispute(commission.id, reason);
+					if (res.success) {
+						addToast({ message: res.message, type: "success" });
+					} else {
+						addToast({ message: res.message, type: "error" });
+					}
+					setIsDisputeOpen(false);
+				}}
+			/>
 		</div>
 	);
 }

@@ -19,13 +19,7 @@ export const roleBadgeClass: Record<UserRole, string> = {
 	client: "bg-accent/20 text-primary dark:text-accent",
 };
 
-export function formatUserDate(value: string) {
-	return new Intl.DateTimeFormat("id-ID", {
-		day: "numeric",
-		month: "short",
-		year: "numeric",
-	}).format(new Date(value));
-}
+import { formatShortDate } from "@/utils";
 
 interface CreateUsersTableColumnsOptions {
 	currentUserId?: string;
@@ -79,7 +73,7 @@ export function createUsersTableColumns({
 			header: "Bergabung",
 			cell: (user) => (
 				<span className="text-content-muted">
-					{formatUserDate(user.created_at)}
+					{formatShortDate(user.created_at)}
 				</span>
 			),
 		},

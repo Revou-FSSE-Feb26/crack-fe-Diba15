@@ -219,9 +219,19 @@ export default function Modal() {
 
 	// Body scroll lock lives here so it always fires on open/close
 	useEffect(() => {
-		document.body.style.overflow = isOpen ? "hidden" : "";
+		if (isOpen) {
+			document.body.style.overflow = "hidden";
+		} else {
+			const activeOverlays = document.querySelectorAll(".fixed.inset-0");
+			if (activeOverlays.length <= 1) {
+				document.body.style.overflow = "";
+			}
+		}
 		return () => {
-			document.body.style.overflow = "";
+			const activeOverlays = document.querySelectorAll(".fixed.inset-0");
+			if (activeOverlays.length <= 1) {
+				document.body.style.overflow = "";
+			}
 		};
 	}, [isOpen]);
 

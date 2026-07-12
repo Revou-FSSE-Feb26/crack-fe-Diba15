@@ -21,15 +21,15 @@ export default function MainLayout({
 	const mounted = useMounted();
 	const [showWarn, setShowWarn] = useState(false);
 
+	const isStaff = user?.role === "admin" || user?.role === "curator";
+
 	useEffect(() => {
-		if (!isAuthenticated) {
+		if (isAuthenticated && isStaff) {
 			setTimeout(() => {
 				setShowWarn(true);
 			}, 0);
 		}
-	}, [isAuthenticated]);
-
-	const isStaff = user?.role === "admin" || user?.role === "curator";
+	}, [isAuthenticated, isStaff]);
 
 	const handleWarn = () => {
 		setShowWarn(false);
@@ -116,10 +116,12 @@ export default function MainLayout({
 						)}
 
 						<div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-							<div>
+							<div className="w-full overflow-hidden">
 								<DashboardSidebar />
 							</div>
-							<section className="space-y-4">{children}</section>
+							<section className="space-y-4 min-w-0 w-full overflow-hidden">
+								{children}
+							</section>
 						</div>
 					</div>
 				)}

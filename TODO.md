@@ -27,7 +27,7 @@ Artists POV:
 7. Jika user sudah approve, maka uang muka yang sudah dibayar oleh user akan di kirim ke dalam wallet artis.
 
 (HIGH)
-TODO 8 = Menerapkan alur dispute commission, dimana user dapat mengajukan dispute jika commission tidak sesuai dengan yang diharapkan.
+TODO 8 = Menerapkan alur dispute commission, dimana user dapat mengajukan dispute jika commission tidak sesuai dengan yang diharapkan. (Clear)
 Requirements:
 1. User dapat mengajukan dispute ketika artist sudah upload hasil commission.
 2. Alasan dispute harus diisi oleh user sebelum diajukan.
@@ -42,7 +42,7 @@ Requirements:
 11. Tampilan dispute pada halaman kurator berbentuk tabel untuk melihat art, wip proof, alasan dispute, status dispute, dan tombol aksi.
 
 (MID)
-TODO 9 = Menerapkan alur laporan art melalui tombol laporkan
+TODO 9 = Menerapkan alur laporan art melalui tombol laporkan (clear)
 Requirements:
 1. User (Client dan artist) dapat melaporkan art yang tidak sesuai dengan aturan trubrush.
 2. Art yang dilaporkan harus dapat diidentifikasi (misalnya, melalui ID atau title art).
@@ -54,6 +54,8 @@ Requirements:
 8. Jika strike_count mencapai 5, akun artis akan diblokir dan tidak dapat mengunggah art lagi.
 9. Akun artis yang diblokir tidak dapat mengunggah art lagi.
 10. Tampilan laporan art pada halaman kurator berbentuk tabel untuk melihat art, alasan laporan, status laporan, dan tombol aksi.
+11. Laporan art = laporan artist, jadi skenarionya jika ada yang melaporkan art yang tidak sesuai dengan aturan trubrush, maka laporan tersebut akan tercatat sebagai laporan kepada artist terkait.
+12. Jadi tidak ada 2 laporan berbeda antara laporan art dan laporan artist. Hanya ada satu laporan yang tercatat sebagai laporan art dan laporan artist terkait.
 
 (HIGH)
 TODO 10 = Menerapkan alur verifikasi user dengan verifikasi art oleh kurator sebanyak 3/5 dari total art yang diunggah oleh artis. (Clear)
@@ -76,15 +78,16 @@ Suggestions:
 - chip tags: Fate
 
 (HIGH)
-TODO 12 = Menerapkan fitur follow artist untuk mengikuti artis.
+TODO 12 = Menerapkan fitur follow artist untuk mengikuti artis. (Clear)
 Requirements:
 1. User (Client dan artists) dapat mengikuti artis dengan mengklik tombol follow.
 2. User dapat melihat daftar artis yang sedang diikuti mereka di halaman profile.
 3. User dapat menghentikan pengikutiannya dengan mengklik tombol unfollow.
 4. User dapat memfilter artwork nantinya di feed untuk beranda dan halaman followed artists.
+5. Follow artists hanya bisa di lakukan oleh client dan sesama artists.
 
 (MID)
-TODO 13 = Menerapkan fitur popular artist dan popular tags pada halaman feed.
+TODO 13 = Menerapkan fitur popular artist dan popular tags pada halaman feed. (clear)
 Requirements:
 1. Artis yang paling banyak diikuti oleh pengguna akan ditampilkan sebagai popular artist.
 2. Tags yang paling sering digunakan oleh artis akan ditampilkan sebagai popular tags.

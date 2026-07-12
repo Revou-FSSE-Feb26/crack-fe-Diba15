@@ -13,21 +13,15 @@ import { useMemo, useState } from "react";
 
 import ArtworkReviewCard from "@/components/dashboard/review-artworks/ArtworkReviewCard";
 import RejectArtworkModal from "@/components/dashboard/review-artworks/RejectArtworkModal";
+import Stat from "@/components/ui/Stat";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
+import { formatShortDate } from "@/utils";
 import { buildArtworkWithRelations } from "@/utils/search";
-
-function formatDate(value: string) {
-	return new Intl.DateTimeFormat("id-ID", {
-		day: "numeric",
-		month: "short",
-		year: "numeric",
-	}).format(new Date(value));
-}
 
 export default function ReviewArtworksPage() {
 	const { user, isCurator } = useUserStore();
@@ -148,58 +142,31 @@ export default function ReviewArtworksPage() {
 	return (
 		<>
 			<div className="space-y-4">
-				<div className="rounded-2xl border border-content/10 bg-surface p-5">
-					<div className="flex items-start gap-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-							<ImageIcon className="h-5 w-5" />
-						</div>
-						<div>
-							<h1 className="font-heading text-2xl font-semibold text-content">
-								Review Artworks
-							</h1>
-							<p className="mt-1 text-sm text-content-muted">
-								Periksa artwork yang memilih opsi kurasi. Setujui karya yang
-								memenuhi standar atau tolak dengan alasan yang jelas jika tidak
-								lolos review.
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<div className="grid gap-3 sm:grid-cols-3">
-					<div className="rounded-xl border border-premium/20 bg-premium/5 px-4 py-3">
-						<div className="flex items-center gap-2 text-premium">
-							<Clock3 className="h-4 w-4" />
-							<p className="text-xs font-medium">Menunggu Review</p>
-						</div>
-						<p className="mt-1 font-display text-2xl font-bold text-content">
-							{pendingArtworks.length}
-						</p>
-					</div>
-					<div className="rounded-xl border border-verified/20 bg-verified/5 px-4 py-3">
-						<div className="flex items-center gap-2 text-verified">
-							<CheckCircle2 className="h-4 w-4" />
-							<p className="text-xs font-medium">Disetujui (total)</p>
-						</div>
-						<p className="mt-1 font-display text-2xl font-bold text-content">
-							{
-								artworks.filter((item) => item.curation_status === "approved")
-									.length
-							}
-						</p>
-					</div>
-					<div className="rounded-xl border border-danger/20 bg-danger/5 px-4 py-3">
-						<div className="flex items-center gap-2 text-danger">
-							<XCircle className="h-4 w-4" />
-							<p className="text-xs font-medium">Ditolak (total)</p>
-						</div>
-						<p className="mt-1 font-display text-2xl font-bold text-content">
-							{
-								artworks.filter((item) => item.curation_status === "rejected")
-									.length
-							}
-						</p>
-					</div>
+				<div className="grid gap-4 sm:grid-cols-3">
+					<Stat
+						variant="card"
+						label="Menunggu Review"
+						value={pendingArtworks.length}
+						icon={Clock3}
+					/>
+					<Stat
+						variant="card"
+						label="Disetujui (total)"
+						value={
+							artworks.filter((item) => item.curation_status === "approved")
+								.length
+						}
+						icon={CheckCircle2}
+					/>
+					<Stat
+						variant="card"
+						label="Ditolak (total)"
+						value={
+							artworks.filter((item) => item.curation_status === "rejected")
+								.length
+						}
+						icon={XCircle}
+					/>
 				</div>
 
 				<div className="rounded-2xl border border-content/10 bg-surface">
@@ -287,7 +254,7 @@ export default function ReviewArtworksPage() {
 										</div>
 										<p className="mt-0.5 text-xs text-content-muted">
 											{artwork.artist.name} ·{" "}
-											{formatDate(artwork.reviewed_at ?? "")} ·{" "}
+											{formatShortDate(artwork.reviewed_at ?? "")} ·{" "}
 											{getReviewerName(artwork.reviewed_by)}
 										</p>
 										{artwork.curation_status === "rejected" &&

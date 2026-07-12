@@ -50,10 +50,10 @@ export const curatorMenu: DashboardMenuItem[] = [
 		enabled: true,
 	},
 	{
-		label: "Review User",
-		description: "Review user yang dilaporkan",
+		label: "Review Laporan",
+		description: "Review laporan yang dilaporkan",
 		icon: Users,
-		href: "/dashboard/review-users",
+		href: "/dashboard/review-reports",
 		enabled: true,
 	},
 ];

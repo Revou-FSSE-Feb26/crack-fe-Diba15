@@ -1,17 +1,5 @@
 import { create } from "zustand";
-
-interface LightboxState {
-	isOpen: boolean;
-	images: string[];
-	initialIndex: number;
-	title?: string;
-	openLightbox: (
-		images: string[],
-		initialIndex?: number,
-		title?: string,
-	) => void;
-	closeLightbox: () => void;
-}
+import type { LightboxState } from "@/types";
 
 export const useLightboxStore = create<LightboxState>((set) => ({
 	isOpen: false,

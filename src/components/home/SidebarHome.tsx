@@ -1,75 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import FeaturedArtistCard from "@/components/home/FeaturedArtist";
 import Divider from "@/components/ui/Divider";
 import Pill from "@/components/ui/Pill";
 import SectionLabel from "@/components/ui/SectionLabel";
-import type { ProfileWithUser } from "@/types";
-
-const DUMMY_FEATURED_ARTISTS: ProfileWithUser[] = [
-	{
-		id: "p-001",
-		user_id: "u-001",
-		bio: "Ilustrator cat air berbasis di Jakarta. Spesialis lanskap urban dan alam.",
-		is_verified: true,
-		approved_portfolio_count: 12,
-		is_open_for_commission: true,
-		base_price_idr: 250000,
-		strike_count: 0,
-		updated_at: "2024-01-15T08:00:00Z",
-		user: {
-			id: "u-001",
-			name: "Ari Ramadan",
-			email: "ari@example.com",
-			role: "artist",
-		},
-	},
-	{
-		id: "p-002",
-		user_id: "u-002",
-		bio: "Character designer & illustrator. Suka Sci-Fi dan fantasy. No AI, ever.",
-		is_verified: true,
-		approved_portfolio_count: 8,
-		is_open_for_commission: true,
-		base_price_idr: 350000,
-		strike_count: 0,
-		updated_at: "2024-02-10T09:15:00Z",
-		user: {
-			id: "u-002",
-			name: "Nadia Suryani",
-			email: "nadia@example.com",
-			role: "artist",
-		},
-	},
-	{
-		id: "p-003",
-		user_id: "u-003",
-		bio: "Ink artist. Menggambar dengan tangan sejak 2015.",
-		is_verified: true,
-		approved_portfolio_count: 20,
-		is_open_for_commission: false,
-		base_price_idr: 200000,
-		strike_count: 0,
-		updated_at: "2024-03-25T11:00:00Z",
-		user: {
-			id: "u-003",
-			name: "Budi Laksono",
-			email: "budi@example.com",
-			role: "artist",
-		},
-	},
-];
-
-const DUMMY_POPULAR_TAGS = [
-	{ id: "t-001", tag_name: "Cat Air" },
-	{ id: "t-002", tag_name: "Lanskap" },
-	{ id: "t-004", tag_name: "Karakter" },
-	{ id: "t-005", tag_name: "Sci-Fi" },
-	{ id: "t-007", tag_name: "Ink" },
-	{ id: "t-008", tag_name: "Fantasy" },
-	{ id: "t-009", tag_name: "Webtoon" },
-	{ id: "t-010", tag_name: "Cover Art" },
-];
+import { useArtworkStore } from "@/store/ArtworkStore";
+import { useFollowStore } from "@/store/FollowStore";
+import { useProfileStore } from "@/store/ProfileStore";
+import { useUserManagementStore } from "@/store/UserManagementStore";
 
 const tagColorVariants = [
 	"bg-primary/10 text-primary hover:bg-primary/20",
@@ -78,26 +17,93 @@ const tagColorVariants = [
 ];
 
 export default function SidebarHome() {
+	const { follows } = useFollowStore();
+	const { users } = useUserManagementStore();
+	const { profiles } = useProfileStore();
+	const { artworkTags, tags } = useArtworkStore();
+
+	const artists = useMemo(
+		() => users.filter((u) => u.role === "artist"),
+		[users],
+	);
+
+	const followerCounts = useMemo(() => {
+		return follows.reduce(
+			(acc, f) => {
+				acc[f.artist_id] = (acc[f.artist_id] || 0) + 1;
+				return acc;
+			},
+			{} as Record<string, number>,
+		);
+	}, [follows]);
+
+	const artistProfiles = useMemo(() => {
+		return artists
+			.map((u) => {
+				const prof = profiles.find((p) => p.user_id === u.id);
+				if (!prof) return null;
+				return {
+					...prof,
+					user: u,
+					followersCount: followerCounts[u.id] || 0,
+				};
+			})
+			.filter((p): p is NonNullable<typeof p> => p !== null);
+	}, [artists, profiles, followerCounts]);
+
+	const popularArtists = useMemo(() => {
+		return [...artistProfiles]
+			.sort((a, b) => {
+				if (b.followersCount !== a.followersCount) {
+					return b.followersCount - a.followersCount;
+				}
+				return b.approved_portfolio_count - a.approved_portfolio_count;
+			})
+			.slice(0, 3);
+	}, [artistProfiles]);
+
+	const tagUsageCounts = useMemo(() => {
+		return artworkTags.reduce(
+			(acc, at) => {
+				acc[at.tag_id] = (acc[at.tag_id] || 0) + 1;
+				return acc;
+			},
+			{} as Record<string, number>,
+		);
+	}, [artworkTags]);
+
+	const popularTags = useMemo(() => {
+		return [...tags]
+			.map((tag) => ({
+				...tag,
+				count: tagUsageCounts[tag.id] || 0,
+			}))
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 8);
+	}, [tags, tagUsageCounts]);
+
 	return (
 		<aside
 			id="sidebar-home"
 			className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)]"
 		>
-			{/* Artis Unggulan */}
-			<section>
-				<SectionLabel>Artis Unggulan</SectionLabel>
-				{DUMMY_FEATURED_ARTISTS.map((profile) => (
-					<FeaturedArtistCard key={profile.id} profile={profile} />
-				))}
-			</section>
+			{/* Artis Terpopuler */}
+			{popularArtists.length > 0 && (
+				<section>
+					<SectionLabel>Artis Terpopuler</SectionLabel>
+					{popularArtists.map((profile) => (
+						<FeaturedArtistCard key={profile.id} profile={profile} />
+					))}
+				</section>
+			)}
 
-			<Divider />
+			{popularArtists.length > 0 && <Divider />}
 
 			{/* Tag Populer */}
 			<section>
 				<SectionLabel>Tag Populer</SectionLabel>
 				<div className="flex flex-wrap gap-1.5">
-					{DUMMY_POPULAR_TAGS.map((tag, i) => (
+					{popularTags.map((tag, i) => (
 						<Pill
 							key={tag.id}
 							link={`/search/${encodeURIComponent(`tags:"${tag.tag_name}"`)}`}

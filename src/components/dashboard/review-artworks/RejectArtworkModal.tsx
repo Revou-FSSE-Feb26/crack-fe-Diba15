@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useModalStore } from "@/store/ModalStore";
 
@@ -29,6 +29,15 @@ export default function RejectArtworkModal({
 }: RejectArtworkModalProps) {
 	const modalId = "reject-artwork-form-modal";
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+
+	const onSubmitRef = useRef(onSubmit);
+	const onCloseRef = useRef(onClose);
+
+	useEffect(() => {
+		onSubmitRef.current = onSubmit;
+		onCloseRef.current = onClose;
+	}, [onSubmit, onClose]);
+
 	const {
 		register,
 		handleSubmit,
@@ -124,9 +133,11 @@ export default function RejectArtworkModal({
 				formClassName: "space-y-4",
 				confirmLabel: "Tolak Artwork",
 				cancelLabel: "Batal",
-				onCancel: onClose,
+				onCancel: () => {
+					onCloseRef.current();
+				},
 				onSubmit: (event) => {
-					handleSubmit((values) => onSubmit(values.reason))(event);
+					handleSubmit((values) => onSubmitRef.current(values.reason))(event);
 					return false;
 				},
 			});
@@ -139,8 +150,6 @@ export default function RejectArtworkModal({
 		globalOpen,
 		handleSubmit,
 		isOpen,
-		onClose,
-		onSubmit,
 		openModal,
 	]);
 
