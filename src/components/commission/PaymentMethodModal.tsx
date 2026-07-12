@@ -9,7 +9,7 @@ import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
-import TopUpModal from "../profile/TopUpModal";
+import TopUpModal from "@/components/profile/TopUpModal";
 
 interface PaymentFormValues {
 	cardName: string;
@@ -164,13 +164,15 @@ export default function PaymentMethodModal({
 
 	// render the CC and Wallet options dynamically inside the modal content
 	useEffect(() => {
-		if (!isOpen) {
+		// If the modal is not open, close it if the global open state matches
+    if (!isOpen) {
 			if (globalOpen && config?.id === modalId) {
 				closeModal();
 			}
 			return;
 		}
 
+		// If top-up is open, close the modal if it's open and matches the modal ID
 		if (isTopUpOpen) {
 			if (globalOpen && config?.id === modalId) {
 				closeModal();
@@ -178,6 +180,7 @@ export default function PaymentMethodModal({
 			return;
 		}
 
+		// Render the modal content
 		const renderContent = () => {
 			return (
 				<div className="space-y-5">
@@ -389,6 +392,7 @@ export default function PaymentMethodModal({
 			);
 		};
 
+		// close the modal if it's not open and the global open state matches
 		if (!isOpen) {
 			if (globalOpen && config?.id === modalId) {
 				closeModal();
