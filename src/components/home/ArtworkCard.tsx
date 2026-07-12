@@ -13,7 +13,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import ReportArtModal from "@/components/home/ReportArtModal";
@@ -99,7 +99,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 			// Prevent navigation on swipe gesture
 			if (e.cancelable) {
 				e.preventDefault();
-      }
+			}
 			// Prevent event propagation to avoid closing the dropdown prematurely
 			e.stopPropagation();
 
@@ -167,6 +167,29 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		}
 		setIsReportOpen(true);
 	};
+
+	const handleReportClose = useCallback(() => {
+		setIsReportOpen(false);
+	}, []);
+
+	const handleReportSubmit = useCallback(
+		(reason: string) => {
+			if (!user) return;
+			const res = createReport({
+				reporter_id: user.id,
+				target_type: "artwork",
+				target_id: artwork.id,
+				reason,
+			});
+			if (res.success) {
+				addToast({ message: res.message, type: "success" });
+			} else {
+				addToast({ message: res.message, type: "error" });
+			}
+			setIsReportOpen(false);
+		},
+		[user, artwork.id, createReport, addToast],
+	);
 
 	const handleCopyLink = (id: string) => {
 		copyPath(`/detail/${id}`);
@@ -408,21 +431,8 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					artworkId={artwork.id}
 					artworkTitle={artwork.title}
 					isOpen={isReportOpen}
-					onClose={() => setIsReportOpen(false)}
-					onSubmit={(reason) => {
-						const res = createReport({
-							reporter_id: user.id,
-							target_type: "artwork",
-							target_id: artwork.id,
-							reason,
-						});
-						if (res.success) {
-							addToast({ message: res.message, type: "success" });
-						} else {
-							addToast({ message: res.message, type: "error" });
-						}
-						setIsReportOpen(false);
-					}}
+					onClose={handleReportClose}
+					onSubmit={handleReportSubmit}
 				/>
 			)}
 		</article>

@@ -42,7 +42,7 @@ Requirements:
 11. Tampilan dispute pada halaman kurator berbentuk tabel untuk melihat art, wip proof, alasan dispute, status dispute, dan tombol aksi.
 
 (MID)
-TODO 9 = Menerapkan alur laporan art melalui tombol laporkan
+TODO 9 = Menerapkan alur laporan art melalui tombol laporkan (clear)
 Requirements:
 1. User (Client dan artist) dapat melaporkan art yang tidak sesuai dengan aturan trubrush.
 2. Art yang dilaporkan harus dapat diidentifikasi (misalnya, melalui ID atau title art).

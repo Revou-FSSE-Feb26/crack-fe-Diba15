@@ -1,7 +1,7 @@
 "use client";
 
 import { ShieldCheck, User, Wallet } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 
 import Input from "@/components/ui/form/Input";
@@ -32,6 +32,14 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
 	const modalId = "edit-profile-form-modal";
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+
+	const onSubmitRef = useRef(onSubmit);
+	const onCloseRef = useRef(onClose);
+
+	useEffect(() => {
+		onSubmitRef.current = onSubmit;
+		onCloseRef.current = onClose;
+	}, [onSubmit, onClose]);
 
 	const defaultValues: EditProfileFormValues = {
 		name: userName,
@@ -176,9 +184,11 @@ export default function EditProfileModal({
 				formClassName: "space-y-4",
 				confirmLabel: "Simpan Perubahan",
 				cancelLabel: "Batal",
-				onCancel: onClose,
+				onCancel: () => {
+					onCloseRef.current();
+				},
 				onSubmit: (event) => {
-					handleSubmit((values) => onSubmit(values))(event);
+					handleSubmit((values) => onSubmitRef.current(values))(event);
 					return false;
 				},
 			});
@@ -190,8 +200,6 @@ export default function EditProfileModal({
 		globalOpen,
 		handleSubmit,
 		isOpen,
-		onClose,
-		onSubmit,
 		openModal,
 	]);
 

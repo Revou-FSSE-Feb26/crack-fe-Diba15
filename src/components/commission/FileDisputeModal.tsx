@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useModalStore } from "@/store/ModalStore";
 
@@ -23,6 +23,14 @@ export default function FileDisputeModal({
 }: FileDisputeModalProps) {
 	const modalId = "file-dispute-form-modal";
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+
+	const onSubmitRef = useRef(onSubmit);
+	const onCloseRef = useRef(onClose);
+
+	useEffect(() => {
+		onSubmitRef.current = onSubmit;
+		onCloseRef.current = onClose;
+	}, [onSubmit, onClose]);
 	const {
 		register,
 		handleSubmit,
@@ -106,10 +114,12 @@ export default function FileDisputeModal({
 				formClassName: "space-y-4",
 				confirmLabel: "Ajukan Dispute",
 				cancelLabel: "Batal",
-				onCancel: onClose,
+				onCancel: () => {
+					onCloseRef.current();
+				},
 				onSubmit: (event) => {
 					handleSubmit((values) => {
-						onSubmit(values.reason);
+						onSubmitRef.current(values.reason);
 					})(event);
 					return false; // prevent closing immediately without state updates
 				},
@@ -123,8 +133,6 @@ export default function FileDisputeModal({
 		globalOpen,
 		handleSubmit,
 		isOpen,
-		onClose,
-		onSubmit,
 		openModal,
 	]);
 

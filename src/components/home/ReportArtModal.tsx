@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useModalStore } from "@/store/ModalStore";
 
@@ -25,6 +25,15 @@ export default function ReportArtModal({
 }: ReportArtModalProps) {
 	const modalId = `report-art-form-modal-${artworkId}`;
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+
+	const onSubmitRef = useRef(onSubmit);
+	const onCloseRef = useRef(onClose);
+
+	useEffect(() => {
+		onSubmitRef.current = onSubmit;
+		onCloseRef.current = onClose;
+	}, [onSubmit, onClose]);
+
 	const {
 		register,
 		handleSubmit,
@@ -104,10 +113,12 @@ export default function ReportArtModal({
 				formClassName: "space-y-4",
 				confirmLabel: "Laporkan",
 				cancelLabel: "Batal",
-				onCancel: onClose,
+				onCancel: () => {
+					onCloseRef.current();
+				},
 				onSubmit: (event) => {
 					handleSubmit((values) => {
-						onSubmit(values.reason);
+						onSubmitRef.current(values.reason);
 					})(event);
 					return false; // Mencegah penutupan modal sebelum state diperbarui.
 				},
@@ -121,8 +132,6 @@ export default function ReportArtModal({
 		globalOpen,
 		handleSubmit,
 		isOpen,
-		onClose,
-		onSubmit,
 		openModal,
 		modalId,
 	]);

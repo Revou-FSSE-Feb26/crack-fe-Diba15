@@ -14,7 +14,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
 import FavoriteButton from "@/components/detail/FavoriteButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
@@ -49,6 +49,13 @@ export default function Detail() {
 	const { createReport } = useReportStore();
 	const [isReportOpen, setIsReportOpen] = useState(false);
 
+	const artwork = buildArtworkWithRelations(
+		artworks,
+		artworkTags,
+		tags,
+		users,
+	).find((item) => item.id === id);
+
 	const handleReport = () => {
 		if (!isAuthenticated || !user) {
 			openModal({
@@ -71,12 +78,29 @@ export default function Detail() {
 		}
 		setIsReportOpen(true);
 	};
-	const artwork = buildArtworkWithRelations(
-		artworks,
-		artworkTags,
-		tags,
-		users,
-	).find((item) => item.id === id);
+
+	const handleReportClose = useCallback(() => {
+		setIsReportOpen(false);
+	}, []);
+
+	const handleReportSubmit = useCallback(
+		(reason: string) => {
+			if (!user || !artwork) return;
+			const res = createReport({
+				reporter_id: user.id,
+				target_type: "artwork",
+				target_id: artwork.id,
+				reason,
+			});
+			if (res.success) {
+				addToast({ message: res.message, type: "success" });
+			} else {
+				addToast({ message: res.message, type: "error" });
+			}
+			setIsReportOpen(false);
+		},
+		[user, artwork, createReport, addToast],
+	);
 
 	if (!artwork) {
 		return (
@@ -314,26 +338,13 @@ export default function Detail() {
 					</aside>
 				</div>
 			</div>
-			{user && (
+			{user && artwork && (
 				<ReportArtModal
 					artworkId={artwork.id}
 					artworkTitle={artwork.title}
 					isOpen={isReportOpen}
-					onClose={() => setIsReportOpen(false)}
-					onSubmit={(reason) => {
-						const res = createReport({
-							reporter_id: user.id,
-							target_type: "artwork",
-							target_id: artwork.id,
-							reason,
-						});
-						if (res.success) {
-							addToast({ message: res.message, type: "success" });
-						} else {
-							addToast({ message: res.message, type: "error" });
-						}
-						setIsReportOpen(false);
-					}}
+					onClose={handleReportClose}
+					onSubmit={handleReportSubmit}
 				/>
 			)}
 		</main>
