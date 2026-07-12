@@ -87,7 +87,7 @@ Requirements:
 5. Follow artists hanya bisa di lakukan oleh client dan sesama artists.
 
 (MID)
-TODO 13 = Menerapkan fitur popular artist dan popular tags pada halaman feed.
+TODO 13 = Menerapkan fitur popular artist dan popular tags pada halaman feed. (clear)
 Requirements:
 1. Artis yang paling banyak diikuti oleh pengguna akan ditampilkan sebagai popular artist.
 2. Tags yang paling sering digunakan oleh artis akan ditampilkan sebagai popular tags.
