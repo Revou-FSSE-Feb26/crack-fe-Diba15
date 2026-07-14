@@ -289,7 +289,7 @@ export interface ProfileState {
 	updateProfile: (
 		userId: string,
 		payload: UpdateProfilePayload,
-	) => ActionResult;
+	) => Promise<ActionResult>;
 }
 
 // ── Commission Store ─────────────────────────────────────────────────────────
@@ -389,10 +389,14 @@ export interface UserPayload {
 
 export interface UserManagementState {
 	users: User[];
-	createUser: (payload: UserPayload) => ActionResult;
-	createCurator: (payload: Omit<UserPayload, "role">) => ActionResult;
-	updateUser: (id: string, payload: Partial<UserPayload>) => ActionResult;
-	deleteUser: (id: string) => ActionResult;
+	fetchUsers: () => Promise<void>;
+	createUser: (payload: UserPayload) => Promise<ActionResult>;
+	createCurator: (payload: Omit<UserPayload, "role">) => Promise<ActionResult>;
+	updateUser: (
+		id: string,
+		payload: Partial<UserPayload>,
+	) => Promise<ActionResult>;
+	deleteUser: (id: string) => Promise<ActionResult>;
 }
 
 // ── User Store (Auth) ────────────────────────────────────────────────────────
@@ -403,6 +407,7 @@ export interface UserState {
 	user: SafeUser | null;
 	isAuthenticated: boolean;
 	login: (email: string, password: string) => Promise<ActionResult>;
+	register: (payload: UserPayload) => Promise<ActionResult>;
 	logout: () => void;
 	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 	hasRole: (role: UserRole) => boolean;

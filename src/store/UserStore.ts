@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { axiosClient, setAccessToken } from "@/lib/axiosClient";
+import { useProfileStore } from "@/store/ProfileStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { UserState } from "@/types";
 
@@ -37,6 +38,35 @@ export const useUserStore = create<UserState>()(
 						updated_at: dbUser.updatedAt,
 					};
 
+					// Jika ada data profile dari backend, simpan ke ProfileStore!
+					if (dbUser.profile) {
+						useProfileStore.setState((state) => {
+							const mappedProfile = {
+								id: dbUser.profile.id || `p-${dbUser.id}`,
+								user_id: dbUser.id,
+								avatar_url: dbUser.profile.avatarUrl,
+								bio: dbUser.profile.bio,
+								is_verified: dbUser.profile.isVerified,
+								approved_portfolio_count: dbUser.profile.approvedPortfolioCount,
+								is_open_for_commission: dbUser.profile.isOpenForCommission,
+								base_price_idr: dbUser.profile.basePriceIdr,
+								strike_count: dbUser.profile.strikeCount,
+								updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
+							};
+
+							const exists = state.profiles.some(
+								(p) => p.user_id === dbUser.id,
+							);
+							const nextProfiles = exists
+								? state.profiles.map((p) =>
+										p.user_id === dbUser.id ? mappedProfile : p,
+									)
+								: [mappedProfile, ...state.profiles];
+
+							return { profiles: nextProfiles };
+						});
+					}
+
 					set({ user: safeUser, isAuthenticated: true });
 					return { success: true, message: "Login berhasil via API." };
 				} catch (error) {
@@ -66,6 +96,73 @@ export const useUserStore = create<UserState>()(
 
 					const errMsg =
 						err.response?.data?.message || "Email atau password salah.";
+					return { success: false, message: errMsg };
+				}
+			},
+
+			register: async (payload) => {
+				try {
+					// 1. Coba daftar ke API Route Handler Next.js
+					const res = await axiosClient.post("/auth/register", payload);
+					const { accessToken } = res.data;
+
+					// Simpan access token ke memori
+					setAccessToken(accessToken);
+
+					// Ambil data profil dari Route Handler Next.js
+					const meRes = await axiosClient.get("/auth/me");
+					const dbUser = meRes.data;
+
+					// Petakan properti dari backend (camelCase) ke tipe frontend (snake_case)
+					const safeUser = {
+						id: dbUser.id,
+						name: dbUser.name,
+						email: dbUser.email,
+						role: dbUser.role,
+						balance: dbUser.balance,
+						created_at: dbUser.createdAt,
+						updated_at: dbUser.updatedAt,
+					};
+
+					// Jika ada data profile dari backend, simpan ke ProfileStore!
+					if (dbUser.profile) {
+						useProfileStore.setState((state) => {
+							const mappedProfile = {
+								id: dbUser.profile.id || `p-${dbUser.id}`,
+								user_id: dbUser.id,
+								avatar_url: dbUser.profile.avatarUrl,
+								bio: dbUser.profile.bio,
+								is_verified: dbUser.profile.isVerified,
+								approved_portfolio_count: dbUser.profile.approvedPortfolioCount,
+								is_open_for_commission: dbUser.profile.isOpenForCommission,
+								base_price_idr: dbUser.profile.basePriceIdr,
+								strike_count: dbUser.profile.strikeCount,
+								updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
+							};
+
+							const exists = state.profiles.some(
+								(p) => p.user_id === dbUser.id,
+							);
+							const nextProfiles = exists
+								? state.profiles.map((p) =>
+										p.user_id === dbUser.id ? mappedProfile : p,
+									)
+								: [mappedProfile, ...state.profiles];
+
+							return { profiles: nextProfiles };
+						});
+					}
+
+					set({ user: safeUser, isAuthenticated: true });
+					return { success: true, message: "Pendaftaran berhasil via API." };
+				} catch (error) {
+					const err = error as {
+						response?: { status?: number; data?: { message?: string } };
+					};
+
+					const errMsg =
+						err.response?.data?.message ??
+						"Gagal melakukan pendaftaran. Pastikan server berjalan.";
 					return { success: false, message: errMsg };
 				}
 			},

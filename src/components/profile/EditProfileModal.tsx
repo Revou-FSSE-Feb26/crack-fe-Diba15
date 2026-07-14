@@ -21,6 +21,7 @@ interface EditProfileModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onSubmit: (values: EditProfileFormValues) => void;
+	isArtist?: boolean;
 }
 
 export default function EditProfileModal({
@@ -29,6 +30,7 @@ export default function EditProfileModal({
 	isOpen,
 	onClose,
 	onSubmit,
+	isArtist = true,
 }: EditProfileModalProps) {
 	const modalId = "edit-profile-form-modal";
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
@@ -104,7 +106,11 @@ export default function EditProfileModal({
 					<textarea
 						id="profile-bio"
 						rows={4}
-						placeholder="Ceritakan gaya, medium, dan spesialisasi kamu sebagai artist."
+						placeholder={
+							isArtist
+								? "Ceritakan gaya, medium, dan spesialisasi kamu sebagai artist."
+								: "Tulis bio singkat profil kamu di sini."
+						}
 						className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
 						{...register("bio", {
 							maxLength: { value: 500, message: "Bio maksimal 500 karakter" },
@@ -115,54 +121,58 @@ export default function EditProfileModal({
 					)}
 				</div>
 
-				<div>
-					<label
-						htmlFor="profile-price"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
-						Harga Mulai Dari
-					</label>
-					<Input
-						id="profile-price"
-						type="number"
-						min={0}
-						{...register("base_price_idr", {
-							valueAsNumber: true,
-							required: "Harga wajib diisi",
-							min: { value: 0, message: "Harga tidak boleh negatif" },
-							validate: (value) =>
-								Number.isFinite(value) || "Harga harus berupa angka",
-						})}
-					>
-						<Wallet className="h-5 w-5 text-gray-400" />
-					</Input>
-					{errors.base_price_idr && (
-						<p className="mt-1 text-xs text-danger">
-							{errors.base_price_idr.message}
-						</p>
-					)}
-				</div>
+				{isArtist && (
+					<>
+						<div>
+							<label
+								htmlFor="profile-price"
+								className="mb-1.5 block text-sm font-semibold text-content"
+							>
+								Harga Mulai Dari
+							</label>
+							<Input
+								id="profile-price"
+								type="number"
+								min={0}
+								{...register("base_price_idr", {
+									valueAsNumber: true,
+									required: "Harga wajib diisi",
+									min: { value: 0, message: "Harga tidak boleh negatif" },
+									validate: (value) =>
+										Number.isFinite(value) || "Harga harus berupa angka",
+								})}
+							>
+								<Wallet className="h-5 w-5 text-gray-400" />
+							</Input>
+							{errors.base_price_idr && (
+								<p className="mt-1 text-xs text-danger">
+									{errors.base_price_idr.message}
+								</p>
+							)}
+						</div>
 
-				<label className="flex items-start gap-3 rounded-xl border border-content/10 bg-content/5 px-4 py-3 cursor-pointer">
-					<input
-						type="checkbox"
-						className="mt-1 h-4 w-4 accent-primary"
-						{...register("is_open_for_commission")}
-					/>
-					<span>
-						<span className="flex items-center gap-2 text-sm font-semibold text-content">
-							<ShieldCheck className="h-4 w-4 text-verified" />
-							Buka untuk Komisi
-						</span>
-						<span className="mt-1 block text-xs text-content-muted">
-							Jika aktif, client bisa memesan komisi langsung dari profil dan
-							artwork kamu.
-						</span>
-					</span>
-				</label>
+						<label className="flex items-start gap-3 rounded-xl border border-content/10 bg-content/5 px-4 py-3 cursor-pointer">
+							<input
+								type="checkbox"
+								className="mt-1 h-4 w-4 accent-primary"
+								{...register("is_open_for_commission")}
+							/>
+							<span>
+								<span className="flex items-center gap-2 text-sm font-semibold text-content">
+									<ShieldCheck className="h-4 w-4 text-verified" />
+									Buka untuk Komisi
+								</span>
+								<span className="mt-1 block text-xs text-content-muted">
+									Jika aktif, client bisa memesan komisi langsung dari profil
+									dan artwork kamu.
+								</span>
+							</span>
+						</label>
+					</>
+				)}
 			</div>
 		),
-		[errors.bio, errors.base_price_idr, register, errors.name],
+		[errors.bio, errors.base_price_idr, register, errors.name, isArtist],
 	);
 
 	useEffect(() => {
@@ -176,9 +186,10 @@ export default function EditProfileModal({
 			openModal({
 				id: modalId,
 				type: "form",
-				title: "Edit Profil Artist",
-				description:
-					"Perbarui bio, harga, dan status ketersediaan komisi kamu.",
+				title: isArtist ? "Edit Profil Artist" : "Edit Profil Client",
+				description: isArtist
+					? "Perbarui bio, harga, dan status ketersediaan komisi kamu."
+					: "Perbarui bio dan nama profil kamu.",
 				content,
 				maxWidthClassName: "max-w-lg",
 				formClassName: "space-y-4",
@@ -201,6 +212,7 @@ export default function EditProfileModal({
 		handleSubmit,
 		isOpen,
 		openModal,
+		isArtist,
 	]);
 
 	return null;

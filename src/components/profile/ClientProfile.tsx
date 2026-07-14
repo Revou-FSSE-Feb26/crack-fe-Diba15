@@ -13,6 +13,9 @@ import { useMemo, useState } from "react";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ClientCommissionHistory from "@/components/profile/ClientCommissionHistory";
+import EditProfileModal, {
+	type EditProfileFormValues,
+} from "@/components/profile/EditProfileModal";
 import ProfileHeading from "@/components/profile/ProfileHeading";
 import SummaryRow from "@/components/profile/SummaryRow";
 import TopUpModal from "@/components/profile/TopUpModal";
@@ -40,7 +43,7 @@ export default function ClientProfile({
 	const { updateUser, users } = useUserManagementStore();
 	const { user: currentUser, updateCurrentUser } = useUserStore();
 	const { addToast } = useToastStore();
-	const { profiles } = useProfileStore();
+	const { profiles, updateProfile } = useProfileStore();
 	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
 
 	const [activeTab, setActiveTab] = useState<
@@ -68,10 +71,20 @@ export default function ClientProfile({
 	}, [users, followedArtistIds, profiles]);
 
 	const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+	const [isEditOpen, setIsEditOpen] = useState(false);
 
-	const handleTopUpSuccess = (amount: number) => {
+	const handleTopUpSuccess = async (amount: number) => {
 		const nextBalance = (user.balance ?? 0) + amount;
-		updateUser(user.id, { balance: nextBalance });
+		const res = await updateUser(user.id, { balance: nextBalance });
+
+		if (!res.success) {
+			addToast({
+				message: res.message,
+				type: "error",
+			});
+			return;
+		}
+
 		if (currentUser?.id === user.id) {
 			updateCurrentUser({ balance: nextBalance });
 		}
@@ -89,6 +102,36 @@ export default function ClientProfile({
 			type: "success",
 		});
 		setIsTopUpOpen(false);
+	};
+
+	const handleEditSubmit = async (values: EditProfileFormValues) => {
+		const trimmedName = values.name.trim();
+		const nameChanged = trimmedName !== user.name;
+
+		const nameResult = nameChanged
+			? await updateUser(user.id, { name: trimmedName })
+			: { success: true, message: "" };
+
+		const profileResult = await updateProfile(user.id, {
+			bio: values.bio.trim() || null,
+		});
+
+		if (nameChanged && nameResult.success) {
+			updateCurrentUser({ name: trimmedName });
+		}
+
+		const success = nameResult.success && profileResult.success;
+
+		addToast({
+			message: success
+				? "Profil berhasil diperbarui"
+				: !nameResult.success
+					? nameResult.message
+					: profileResult.message,
+			type: success ? "success" : "error",
+		});
+
+		if (success) setIsEditOpen(false);
 	};
 	const clientCommissions = useMemo(
 		() =>
@@ -140,8 +183,8 @@ export default function ClientProfile({
 							<AccountMeta user={user} />
 
 							<p className="mt-4 text-content-muted text-sm leading-relaxed">
-								Akun client digunakan untuk mencari artist human-verified,
-								memesan komisi, dan memantau progres pekerjaan.
+								{profiles[0]?.bio ||
+									"Akun client digunakan untuk mencari artist human-verified, memesan komisi, dan memantau progres pekerjaan."}
 							</p>
 
 							<div className="mt-4 flex flex-wrap gap-4 text-sm">
@@ -223,6 +266,12 @@ export default function ClientProfile({
 						</div>
 
 						<hr className="border-slate-200 dark:border-slate-700" />
+						<Button
+							className="w-full text-sm justify-center"
+							onClick={() => setIsEditOpen(true)}
+						>
+							Edit Profil
+						</Button>
 					</div>
 				</aside>
 			</div>
@@ -318,6 +367,14 @@ export default function ClientProfile({
 				isOpen={isTopUpOpen}
 				onClose={() => setIsTopUpOpen(false)}
 				onSubmitSuccess={handleTopUpSuccess}
+			/>
+			<EditProfileModal
+				userName={user.name}
+				profile={profiles.find((p) => p.user_id === user.id)}
+				isOpen={isEditOpen}
+				onClose={() => setIsEditOpen(false)}
+				onSubmit={handleEditSubmit}
+				isArtist={false}
 			/>
 		</div>
 	);

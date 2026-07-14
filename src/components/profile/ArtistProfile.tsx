@@ -106,15 +106,15 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		? formatPrice(profile.base_price_idr)
 		: null;
 
-	const handleEditSubmit = (values: EditProfileFormValues) => {
+	const handleEditSubmit = async (values: EditProfileFormValues) => {
 		const trimmedName = values.name.trim();
 		const nameChanged = trimmedName !== user.name;
 
 		const nameResult = nameChanged
-			? updateUserRecord(user.id, { name: trimmedName })
+			? await updateUserRecord(user.id, { name: trimmedName })
 			: { success: true, message: "" };
 
-		const profileResult = updateProfile(user.id, {
+		const profileResult = await updateProfile(user.id, {
 			bio: values.bio.trim() || null,
 			base_price_idr: values.base_price_idr,
 			is_open_for_commission: values.is_open_for_commission,

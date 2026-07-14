@@ -1,8 +1,15 @@
 "use client";
 
-import { AlertTriangle, Plus, Search, ShieldAlert, Users } from "lucide-react";
+import {
+	AlertTriangle,
+	Loader2,
+	Plus,
+	Search,
+	ShieldAlert,
+	Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import UserFormModal from "@/components/dashboard/manage-users/UserFormModal";
 import Button from "@/components/ui/Button";
@@ -24,7 +31,7 @@ type RoleFilter = "all" | UserRole;
 
 export default function ManageUsersPage() {
 	const { user: currentUser, isAdmin } = useUserStore();
-	const { users, createCurator, updateUser, deleteUser } =
+	const { users, fetchUsers, createCurator, updateUser, deleteUser } =
 		useUserManagementStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
@@ -36,6 +43,12 @@ export default function ManageUsersPage() {
 	const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
 	const [formOpen, setFormOpen] = useState(false);
 	const [editingUser, setEditingUser] = useState<User | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Fetch users dari backend saat halaman dimuat
+	useEffect(() => {
+		fetchUsers().finally(() => setIsLoading(false));
+	}, [fetchUsers]);
 
 	useResetPageOnChange(resetPage, [search, roleFilter]);
 
@@ -85,13 +98,13 @@ export default function ManageUsersPage() {
 
 			openModal({
 				title: "Hapus user?",
-				description: `User "${target.name}" akan dihapus permanen dari daftar mock data.`,
+				description: `User "${target.name}" akan dihapus permanen dari database.`,
 				type: "confirm",
 				variant: "danger",
 				confirmLabel: "Hapus",
 				cancelLabel: "Batal",
-				onConfirm: () => {
-					const result = deleteUser(target.id);
+				onConfirm: async () => {
+					const result = await deleteUser(target.id);
 					addToast({
 						message: result.message,
 						type: result.success ? "success" : "error",
@@ -173,13 +186,13 @@ export default function ManageUsersPage() {
 		setEditingUser(null);
 	};
 
-	const handleCreate = (values: {
+	const handleCreate = async (values: {
 		name: string;
 		email: string;
 		password: string;
 		role: UserRole;
 	}) => {
-		const result = createCurator({
+		const result = await createCurator({
 			name: values.name,
 			email: values.email,
 			password: values.password,
@@ -193,7 +206,7 @@ export default function ManageUsersPage() {
 		if (result.success) closeForm();
 	};
 
-	const handleEdit = (values: {
+	const handleEdit = async (values: {
 		name: string;
 		email: string;
 		password: string;
@@ -209,7 +222,7 @@ export default function ManageUsersPage() {
 			return;
 		}
 
-		const result = updateUser(editingUser.id, {
+		const result = await updateUser(editingUser.id, {
 			name: values.name,
 			email: values.email,
 			role: values.role,
@@ -240,6 +253,15 @@ export default function ManageUsersPage() {
 				>
 					Kembali ke Dashboard
 				</Link>
+			</div>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<div className="flex flex-col items-center justify-center gap-3 py-24 text-content-muted">
+				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+				<p className="text-sm">Memuat daftar user...</p>
 			</div>
 		);
 	}
