@@ -402,7 +402,7 @@ export type SafeUser = Omit<User, "password">;
 export interface UserState {
 	user: SafeUser | null;
 	isAuthenticated: boolean;
-	login: (email: string, password: string) => ActionResult;
+	login: (email: string, password: string) => Promise<ActionResult>;
 	logout: () => void;
 	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 	hasRole: (role: UserRole) => boolean;

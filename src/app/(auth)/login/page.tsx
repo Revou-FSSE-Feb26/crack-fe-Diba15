@@ -29,7 +29,7 @@ export default function Login() {
 	const router = useRouter();
 
 	const onSubmit = async (data: LoginForm) => {
-		const result = login(data.email, data.password);
+		const result = await login(data.email, data.password);
 		if (!result.success) return;
 
 		const currentUser = useUserStore.getState().user;

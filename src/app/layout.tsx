@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
+import QueryProvider from "@/components/providers/QueryProvider";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 import Modal from "@/components/ui/Modal";
 import ToastContainer from "@/components/ui/Toast";
@@ -61,7 +62,7 @@ export default function RootLayout({
 		>
 			<body className="h-full">
 				<ThemeProvider />
-				{children}
+				<QueryProvider>{children}</QueryProvider>
 				{/* Global UI layers — rendered above all page content */}
 				<Modal />
 				<ToastContainer />
