@@ -1,7 +1,9 @@
 import {
 	BadgeCheck,
 	CalendarDays,
+	Camera,
 	ImageIcon,
+	Loader2,
 	Palette,
 	Send,
 	ShieldAlert,
@@ -24,6 +26,7 @@ import type { ProfileUser } from "@/components/profile/types";
 import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
+import { axiosClient } from "@/lib/axiosClient";
 import { useAppealStore } from "@/store/AppealStore";
 import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
@@ -58,6 +61,67 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const [activeTab, setActiveTab] = useState<
 		"portfolio" | "following" | "transactions"
 	>("portfolio");
+	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		// Validasi tipe berkas
+		const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+		if (!allowed.includes(file.type)) {
+			addToast({
+				message:
+					"Format file tidak valid. Hanya png, jpg, jpeg, dan webp yang diperbolehkan.",
+				type: "error",
+			});
+			return;
+		}
+
+		// Validasi ukuran (maksimal 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			addToast({
+				message: "Ukuran file avatar maksimal 5MB.",
+				type: "error",
+			});
+			return;
+		}
+
+		setIsUploadingAvatar(true);
+		const formData = new FormData();
+		formData.append("file", file);
+
+		try {
+			const res = await axiosClient.post("/upload", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			});
+
+			const { url } = res.data;
+			const cacheBustedUrl = `${url}?t=${Date.now()}`;
+
+			// Update state lokal ProfileStore dengan cache-buster agar browser me-reload gambar baru
+			useProfileStore.setState((state) => ({
+				profiles: state.profiles.map((p) =>
+					p.user_id === user.id ? { ...p, avatar_url: cacheBustedUrl } : p,
+				),
+			}));
+
+			addToast({
+				message: "Avatar berhasil diperbarui.",
+				type: "success",
+			});
+		} catch (error) {
+			console.error("Gagal upload avatar:", error);
+			addToast({
+				message: "Gagal memperbarui avatar.",
+				type: "error",
+			});
+		} finally {
+			setIsUploadingAvatar(false);
+		}
+	};
 
 	const { appeals, createAppeal } = useAppealStore();
 	const [appealReason, setAppealReason] = useState("");
@@ -149,10 +213,28 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 			<div className="flex flex-col lg:flex-row gap-6">
 				<div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
 					<div className="flex items-start gap-4">
-						<AvatarInitials
-							name={user.name}
-							className="w-20 h-20 text-2xl shrink-0"
-						/>
+						<div className="relative group cursor-pointer shrink-0">
+							<AvatarInitials
+								name={user.name}
+								src={profile?.avatar_url}
+								className="w-20 h-20 text-2xl"
+							/>
+							<label className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
+								{" "}
+								{isUploadingAvatar ? (
+									<Loader2 className="w-5 h-5 text-white animate-spin" />
+								) : (
+									<Camera className="w-5 h-5 text-white" />
+								)}
+								<input
+									type="file"
+									accept="image/*"
+									className="hidden"
+									disabled={isUploadingAvatar}
+									onChange={handleAvatarUpload}
+								/>
+							</label>
+						</div>
 
 						<div className="flex-1 min-w-0">
 							<div className="flex items-center gap-2 flex-wrap">

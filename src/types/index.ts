@@ -60,6 +60,7 @@ export interface Profile {
 	user_id: string;
 	bio: string | null;
 	is_verified: boolean;
+	avatar_url: string | null;
 	approved_portfolio_count: number;
 	is_open_for_commission: boolean;
 	base_price_idr: number | null;

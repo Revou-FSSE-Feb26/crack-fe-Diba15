@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getInitials } from "@/utils";
 
 const avatarPalette = [
@@ -20,11 +21,30 @@ function getAvatarColor(name: string): string {
 
 export default function AvatarInitials({
 	name,
+	src,
 	className = "",
 }: {
 	name: string;
+	src?: string | null;
 	className?: string;
 }) {
+	if (src) {
+		return (
+			<Image
+				src={src}
+				alt={name}
+				width={150}
+				height={150}
+				className={`rounded-full object-cover shrink-0 ${className}`}
+				unoptimized
+				onError={(e) => {
+					// Fallback to initials if image load fails
+					e.currentTarget.style.display = "none";
+				}}
+			/>
+		);
+	}
+
 	const initials = getInitials(name);
 	const colorClass = getAvatarColor(name);
 
