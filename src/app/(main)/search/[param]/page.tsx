@@ -2,12 +2,12 @@
 
 import { FileText, Info, Search, Tag, User } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
-import { useArtworkStore } from "@/store/ArtworkStore";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import { parseSearchQuery, searchArtworks } from "@/utils/search";
+import { buildArtworkWithRelations, parseSearchQuery } from "@/utils/search";
 
 const TYPE_CONFIG = {
 	title: {
@@ -29,111 +29,83 @@ const TYPE_CONFIG = {
 
 export default function SearchPage() {
 	const params = useParams();
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		setIsLoading(true);
-		const _ = params.param; // Read param to re-run effect on search query updates
-		const timer = setTimeout(() => {
-			setIsLoading(false);
-		}, 500);
-		return () => clearTimeout(timer);
-	}, [params.param]);
-
 	const rawQuery = decodeURIComponent(params.param as string);
-	const { artworks, artworkTags, tags } = useArtworkStore();
+	const parsed = parseSearchQuery(rawQuery);
 	const { users } = useUserManagementStore();
 
-	const parsed = parseSearchQuery(rawQuery);
-	const results = searchArtworks(
-		parsed,
-		artworks,
-		artworkTags,
-		tags,
-		users,
-	).filter((artwork) => artwork.is_visible_on_feed);
+	// Tentukan parameter filter backend berdasarkan query type
+	const filters = useMemo(() => {
+		if (parsed.type === "tags") {
+			return { tag: parsed.value };
+		}
+		return { search: parsed.value };
+	}, [parsed.type, parsed.value]);
+
+	const { data: artworks = [], isLoading } = useArtworks(filters);
+
+	const results = useMemo(() => {
+		return buildArtworkWithRelations(artworks, [], [], users).filter(
+			(artwork) => artwork.is_visible_on_feed,
+		);
+	}, [artworks, users]);
 
 	const { label, Icon, pill } = TYPE_CONFIG[parsed.type];
 
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">
-			{/* Content */}
-			<div className="max-w-2xl mx-auto px-4 pt-6 pb-10 space-y-5">
-				{/* Filter badge + result count */}
-				<div className="flex flex-col gap-1.5">
-					<div className="flex items-center gap-2 flex-wrap">
-						<span className="text-sm text-content-muted">
-							Menampilkan hasil untuk:
-						</span>
-						<span
-							className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${pill}`}
-						>
-							<Icon size={11} />
-							{label}: {parsed.value}
-						</span>
-					</div>
-					<p className="text-xs text-content-muted">
-						{results.length} karya ditemukan
-					</p>
-				</div>
-
-				{/* Search tips */}
-				<div className="bg-surface rounded-xl p-4 border border-content/5 text-xs">
-					<div className="flex items-start gap-2">
-						<Info size={14} className="text-content-muted mt-0.5 shrink-0" />
-						<div className="space-y-1 text-content-muted">
-							<p className="font-semibold text-content text-[11px] uppercase tracking-wide mb-2">
-								Tips Pencarian
-							</p>
-							<p>
-								Ketik nama karya → cari berdasarkan{" "}
-								<strong className="text-content">judul</strong>
-							</p>
-							<p>
-								<code className="bg-content/10 px-1 py-0.5 rounded text-primary">
-									tags:&quot;nama-tag&quot;
-								</code>{" "}
-								→ filter berdasarkan{" "}
-								<strong className="text-content">tag</strong>
-							</p>
-							<p>
-								<code className="bg-content/10 px-1 py-0.5 rounded text-primary">
-									artists:&quot;nama-artis&quot;
-								</code>{" "}
-								→ filter berdasarkan{" "}
-								<strong className="text-content">artis</strong>
-							</p>
+			{/* Header */}
+			<header className="border-b border-content/10 bg-surface/50 backdrop-blur-md sticky top-0 z-40">
+				<div className="max-w-5xl mx-auto px-4 py-4 sm:px-6 flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<Search className="w-5 h-5 text-content-muted" />
+						<div>
+							<h1 className="text-sm font-semibold text-content-muted">
+								Hasil pencarian untuk
+							</h1>
+							<div className="flex items-center gap-2 mt-1">
+								<span className="text-lg font-bold text-content truncate max-w-[200px] sm:max-w-xs">
+									{parsed.value}
+								</span>
+								<span
+									className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${pill}`}
+								>
+									<Icon size={12} />
+									{label}
+								</span>
+							</div>
 						</div>
 					</div>
+					<div className="text-xs text-content-muted font-medium bg-content/5 px-3 py-1.5 rounded-lg">
+						{isLoading ? "Mencari..." : `${results.length} karya ditemukan`}
+					</div>
 				</div>
+			</header>
 
-				{/* Results */}
+			{/* Content */}
+			<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 				{isLoading ? (
-					<div className="flex flex-col gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						<ArtworkSkeleton />
 						<ArtworkSkeleton />
 						<ArtworkSkeleton />
 					</div>
-				) : results.length > 0 ? (
-					<section className="flex flex-col gap-4">
+				) : results.length === 0 ? (
+					<div className="flex flex-col items-center justify-center py-20 px-4 bg-surface border border-content/10 rounded-2xl text-center max-w-md mx-auto mt-8">
+						<Info className="w-12 h-12 text-content-muted mb-4" />
+						<h2 className="font-heading text-lg font-bold text-content">
+							Tidak ada hasil
+						</h2>
+						<p className="mt-2 text-sm text-content-muted leading-relaxed">
+							Kami tidak dapat menemukan karya yang cocok dengan pencarian Anda.
+							Coba periksa ejaan atau gunakan kata kunci lain.
+						</p>
+					</div>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{results.map((artwork) => (
 							<ArtworkCard key={artwork.id} artwork={artwork} />
 						))}
-					</section>
-				) : (
-					<section className="flex flex-col items-center py-20 gap-4 text-center">
-						<div className="w-16 h-16 rounded-full bg-content/5 flex items-center justify-center">
-							<Search size={28} className="text-content-muted" />
-						</div>
-						<div>
-							<p className="font-semibold text-content">
-								Tidak ada karya ditemukan
-							</p>
-							<p className="text-sm text-content-muted mt-1">
-								Coba kata kunci lain atau gunakan prefix yang berbeda.
-							</p>
-						</div>
-					</section>
+					</div>
 				)}
 			</div>
 		</main>

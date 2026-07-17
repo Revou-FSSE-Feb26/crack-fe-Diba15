@@ -48,6 +48,22 @@ export function buildArtworkWithRelations(
 	sourceProfiles: Profile[] = profiles, // NEW
 ): ArtworkWithRelations[] {
 	return sourceArtworks.map((artwork) => {
+		// biome-ignore lint/suspicious/noExplicitAny: backend data normalization check
+		const anyArt = artwork as any;
+
+		// Jika data relasi sudah dipopulasi langsung oleh API backend, gunakan langsung
+		if (anyArt.artist && Array.isArray(anyArt.tags)) {
+			return {
+				...artwork,
+				artist: anyArt.artist,
+				artist_profile: anyArt.artist_profile || {
+					is_verified: false,
+					is_open_for_commission: false,
+				},
+				tags: anyArt.tags,
+			};
+		}
+
 		const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
 		const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
 		const tagIds = sourceArtworkTags

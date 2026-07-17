@@ -208,9 +208,9 @@ function LightboxContent() {
 			</div>
 
 			{/* Image stage */}
-      <div
-        role="application"
-        aria-label="Image viewer"
+			<div
+				role="application"
+				aria-label="Image viewer"
 				className="relative z-10 flex flex-1 items-center justify-center overflow-hidden px-4 pb-4 sm:px-10"
 				onWheel={handleWheel}
 				onMouseDown={handleMouseDown}

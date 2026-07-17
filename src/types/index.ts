@@ -264,13 +264,23 @@ export interface ArtworkState {
 	artworks: Artwork[];
 	artworkTags: ArtworkTag[];
 	tags: Tag[];
-	createArtwork: (payload: CreateArtworkPayload) => Artwork;
-	approveArtwork: (id: string, curatorId: string) => ActionResult;
+	fetchArtworks: (filters?: {
+		search?: string;
+		tag?: string;
+		artistId?: string;
+		curationStatus?: string;
+		isVisibleOnFeed?: string;
+	}) => Promise<void>;
+	fetchPopularTags: () => Promise<Tag[]>;
+	fetchArtworkById: (id: string) => Promise<Artwork | null>;
+	createArtwork: (payload: CreateArtworkPayload) => Promise<Artwork>;
+	approveArtwork: (id: string, curatorId: string) => Promise<ActionResult>;
 	rejectArtwork: (
 		id: string,
 		curatorId: string,
 		reason: string,
-	) => ActionResult;
+	) => Promise<ActionResult>;
+	deleteArtwork: (id: string) => Promise<ActionResult>;
 }
 
 // ── Profile Store ────────────────────────────────────────────────────────────

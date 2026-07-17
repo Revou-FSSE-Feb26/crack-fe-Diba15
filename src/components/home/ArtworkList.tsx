@@ -4,17 +4,16 @@ import { RotateCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
-import { useArtworkStore } from "@/store/ArtworkStore";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useFollowStore } from "@/store/FollowStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
-
 import { buildArtworkWithRelations } from "@/utils/search";
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function ArtworkList() {
-	const { artworks, artworkTags, tags } = useArtworkStore();
+	const { data: artworks = [], isLoading, refetch } = useArtworks();
 	const { users } = useUserManagementStore();
 	const { user, isAuthenticated } = useUserStore();
 	const { getFollowedArtistIds } = useFollowStore();
@@ -22,18 +21,19 @@ export default function ArtworkList() {
 	const [feedType, setFeedType] = useState<"all" | "followed">("all");
 	const [isReloading, setIsReloading] = useState(false);
 
-	const handleReload = () => {
+	const handleReload = async () => {
 		setIsReloading(true);
-		setTimeout(() => {
-			setIsReloading(false);
-		}, 800);
+		await refetch();
+		setIsReloading(false);
 	};
 
 	const allArtworks = useMemo(() => {
-		return buildArtworkWithRelations(artworks, artworkTags, tags, users).filter(
+		// Pasang data dummy tags & artworkTags kosong karena data relasi
+		// sudah otomatis dipopulasi dari backend NestJS.
+		return buildArtworkWithRelations(artworks, [], [], users).filter(
 			(item) => item.is_visible_on_feed,
 		);
-	}, [artworks, artworkTags, tags, users]);
+	}, [artworks, users]);
 
 	const followedArtistIds = getFollowedArtistIds(user?.id ?? "");
 
@@ -85,17 +85,17 @@ export default function ArtworkList() {
 				<button
 					type="button"
 					onClick={handleReload}
-					disabled={isReloading}
+					disabled={isReloading || isLoading}
 					className="p-2 -mr-1 text-content-muted hover:text-primary transition-colors cursor-pointer disabled:opacity-50"
 					title="Muat ulang feed"
 				>
 					<RotateCw
-						className={`w-4 h-4 ${isReloading ? "animate-spin text-primary" : ""}`}
+						className={`w-4 h-4 ${isReloading || isLoading ? "animate-spin text-primary" : ""}`}
 					/>
 				</button>
 			</div>
 
-			{isReloading ? (
+			{isLoading || isReloading ? (
 				<div className="flex flex-col gap-4">
 					<ArtworkSkeleton />
 					<ArtworkSkeleton />

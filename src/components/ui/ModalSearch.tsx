@@ -4,8 +4,7 @@ import { ArrowLeft, Search, Tag, User, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { useArtworkStore } from "@/store/ArtworkStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useAllArtists, useAllTags } from "@/hooks/useArtworkQueries";
 
 interface ModalSearchProps {
 	onClose: () => void;
@@ -17,8 +16,9 @@ export default function ModalSearch({ onClose }: ModalSearchProps) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
 
-	const { tags } = useArtworkStore();
-	const { users } = useUserManagementStore();
+	// Mengambil semua tag & artist dari database untuk filter autocomplete instan
+	const { data: tags = [] } = useAllTags();
+	const { data: artistProfiles = [] } = useAllArtists();
 
 	// Debouncing search query input (500ms)
 	useEffect(() => {
@@ -58,8 +58,6 @@ export default function ModalSearch({ onClose }: ModalSearchProps) {
 		};
 	}, []);
 
-	const artists = users.filter((u) => u.role === "artist");
-
 	const matchingTags = debouncedSearchQuery.trim()
 		? tags
 				.filter((t) =>
@@ -69,9 +67,11 @@ export default function ModalSearch({ onClose }: ModalSearchProps) {
 		: [];
 
 	const matchingArtists = debouncedSearchQuery.trim()
-		? artists
-				.filter((a) =>
-					a.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
+		? artistProfiles
+				.filter((ap) =>
+					ap.user.name
+						.toLowerCase()
+						.includes(debouncedSearchQuery.toLowerCase()),
 				)
 				.slice(0, 3)
 		: [];
@@ -198,12 +198,12 @@ export default function ModalSearch({ onClose }: ModalSearchProps) {
 										key={artist.id}
 										type="button"
 										onClick={() =>
-											handleSuggestionClick(`artists:"${artist.name}"`)
+											handleSuggestionClick(`artists:"${artist.user.name}"`)
 										}
 										className="flex items-center gap-3 px-4 py-2.5 text-base text-left hover:bg-content/5 rounded-xl text-content transition-colors cursor-pointer"
 									>
 										<User className="w-5 h-5 text-content-muted shrink-0" />
-										<span>{artist.name}</span>
+										<span>{artist.user.name}</span>
 									</button>
 								))}
 							</>

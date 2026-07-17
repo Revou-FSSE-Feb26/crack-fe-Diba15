@@ -26,9 +26,9 @@ import type { ProfileUser } from "@/components/profile/types";
 import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { axiosClient } from "@/lib/axiosClient";
 import { useAppealStore } from "@/store/AppealStore";
-import { useArtworkStore } from "@/store/ArtworkStore";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useFollowStore } from "@/store/FollowStore";
 import { useModalStore } from "@/store/ModalStore";
@@ -51,7 +51,6 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const router = useRouter();
 	const { openModal } = useModalStore();
 	const { commissions } = useCommissionStore();
-	const { artworks, artworkTags, tags } = useArtworkStore();
 	const { profiles, updateProfile } = useProfileStore();
 	const { updateUser: updateUserRecord, users } = useUserManagementStore();
 	const { updateCurrentUser } = useUserStore();
@@ -147,15 +146,15 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 				};
 			});
 	}, [users, followedArtistIds, profiles]);
-	const artistArtworks = buildArtworkWithRelations(
-		artworks,
-		artworkTags,
-		tags,
-		users,
-	).filter((artwork) => artwork.artists_id === user.id);
-	const verificationProgress = evaluateVerification(
-		artworks.filter((artwork) => artwork.artists_id === user.id),
-	);
+	const { data: artistArtworksRaw = [] } = useArtworks({ artistId: user.id });
+
+	const artistArtworks = useMemo(() => {
+		return buildArtworkWithRelations(artistArtworksRaw, [], [], users);
+	}, [artistArtworksRaw, users]);
+
+	const verificationProgress = useMemo(() => {
+		return evaluateVerification(artistArtworksRaw);
+	}, [artistArtworksRaw]);
 	const artistCommissions = commissions.filter(
 		(commission) => commission.artists_id === user.id,
 	);

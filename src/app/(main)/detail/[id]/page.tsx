@@ -7,6 +7,7 @@ import {
 	ChevronDown,
 	Flag,
 	ImageIcon,
+	Loader2,
 	PenTool,
 	Share2,
 	ShieldCheck,
@@ -19,8 +20,8 @@ import CommissionButton from "@/components/detail/CommissionButton";
 import FavoriteButton from "@/components/detail/FavoriteButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import ReportArtModal from "@/components/home/ReportArtModal";
+import { useArtworkDetail } from "@/hooks/useArtworkQueries";
 import { useCopyLink } from "@/hooks/useCopyLink";
-import { useArtworkStore } from "@/store/ArtworkStore";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
@@ -29,13 +30,11 @@ import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { randomKey } from "@/utils/index";
-import { buildArtworkWithRelations } from "@/utils/search";
 
 export default function Detail() {
 	const params = useParams();
 	const router = useRouter();
 	const id = params.id as string;
-	const { artworks, artworkTags, tags } = useArtworkStore();
 	const { openLightbox } = useLightboxStore();
 	const [showWip, setShowWip] = useState(false);
 	const { users } = useUserManagementStore();
@@ -49,12 +48,8 @@ export default function Detail() {
 	const { createReport } = useReportStore();
 	const [isReportOpen, setIsReportOpen] = useState(false);
 
-	const artwork = buildArtworkWithRelations(
-		artworks,
-		artworkTags,
-		tags,
-		users,
-	).find((item) => item.id === id);
+	// Menggunakan TanStack Query v5 untuk mengambil detail karya
+	const { data: artwork, isLoading } = useArtworkDetail(id);
 
 	const handleReport = () => {
 		if (!isAuthenticated || !user) {
@@ -102,6 +97,14 @@ export default function Detail() {
 		[user, artwork, createReport, addToast],
 	);
 
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background text-content">
+				<Loader2 className="w-8 h-8 text-primary animate-spin" />
+			</div>
+		);
+	}
+
 	if (!artwork) {
 		return (
 			<main className="min-h-screen bg-background text-content pb-20">
@@ -130,10 +133,10 @@ export default function Detail() {
 		);
 	}
 
-	const artist = users.find((user) => user.id === artwork.artists_id);
-	const artistProfile = profiles.find(
-		(profile) => profile.user_id === artist?.id,
-	);
+	const artist =
+		users.find((u) => u.id === artwork.artists_id) || artwork.artist;
+	const artistProfile =
+		profiles.find((p) => p.user_id === artist?.id) || artwork.artist_profile;
 
 	const handleCopyLink = (id: string) => {
 		copyPath(id);
@@ -158,7 +161,7 @@ export default function Detail() {
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 					<div className="lg:col-span-2 space-y-4">
 						{artwork.images_url.length > 0 ? (
-							artwork.images_url.map((imgUrl, index) => {
+							artwork.images_url.map((imgUrl: string, index: number) => {
 								return (
 									<div
 										key={`${imgUrl}-${randomKey()}`}
@@ -250,6 +253,7 @@ export default function Detail() {
 							>
 								<AvatarInitials
 									name={artwork.artist.name}
+									src={artistProfile?.avatar_url}
 									className="w-12 h-12 text-lg"
 								/>
 								<div>

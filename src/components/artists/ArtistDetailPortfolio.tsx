@@ -1,8 +1,7 @@
 "use client";
 
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
-import { useArtworkStore } from "@/store/ArtworkStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { buildArtworkWithRelations } from "@/utils/search";
 
 interface ArtistDetailPortfolioProps {
@@ -12,17 +11,20 @@ interface ArtistDetailPortfolioProps {
 export default function ArtistDetailPortfolio({
 	artistId,
 }: ArtistDetailPortfolioProps) {
-	const { artworks, artworkTags, tags } = useArtworkStore();
-	const { users } = useUserManagementStore();
+	// Mengambil portfolio artist secara dinamis dari database backend
+	const { data: artworks = [], isLoading } = useArtworks({ artistId });
 
-	const artistArtworks = buildArtworkWithRelations(
-		artworks,
-		artworkTags,
-		tags,
-		users,
-	).filter(
-		(artwork) => artwork.artists_id === artistId && artwork.is_visible_on_feed,
+	const artistArtworks = buildArtworkWithRelations(artworks, [], []).filter(
+		(artwork) => artwork.is_visible_on_feed,
 	);
+
+	if (isLoading) {
+		return (
+			<div className="py-12 text-center text-sm text-content-muted">
+				Memuat portfolio artist...
+			</div>
+		);
+	}
 
 	return <ArtistPortfolio artworksWithTags={artistArtworks} />;
 }

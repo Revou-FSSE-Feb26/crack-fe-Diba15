@@ -1,14 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
 import FeaturedArtistCard from "@/components/home/FeaturedArtist";
 import Divider from "@/components/ui/Divider";
 import Pill from "@/components/ui/Pill";
 import SectionLabel from "@/components/ui/SectionLabel";
-import { useArtworkStore } from "@/store/ArtworkStore";
-import { useFollowStore } from "@/store/FollowStore";
-import { useProfileStore } from "@/store/ProfileStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
+import { usePopularArtists, usePopularTags } from "@/hooks/useArtworkQueries";
 
 const tagColorVariants = [
 	"bg-primary/10 text-primary hover:bg-primary/20",
@@ -17,87 +13,35 @@ const tagColorVariants = [
 ];
 
 export default function SidebarHome() {
-	const { follows } = useFollowStore();
-	const { users } = useUserManagementStore();
-	const { profiles } = useProfileStore();
-	const { artworkTags, tags } = useArtworkStore();
-
-	const artists = useMemo(
-		() => users.filter((u) => u.role === "artist"),
-		[users],
-	);
-
-	const followerCounts = useMemo(() => {
-		return follows.reduce(
-			(acc, f) => {
-				acc[f.artist_id] = (acc[f.artist_id] || 0) + 1;
-				return acc;
-			},
-			{} as Record<string, number>,
-		);
-	}, [follows]);
-
-	const artistProfiles = useMemo(() => {
-		return artists
-			.map((u) => {
-				const prof = profiles.find((p) => p.user_id === u.id);
-				if (!prof) return null;
-				return {
-					...prof,
-					user: u,
-					followersCount: followerCounts[u.id] || 0,
-				};
-			})
-			.filter((p): p is NonNullable<typeof p> => p !== null);
-	}, [artists, profiles, followerCounts]);
-
-	const popularArtists = useMemo(() => {
-		return [...artistProfiles]
-			.sort((a, b) => {
-				if (b.followersCount !== a.followersCount) {
-					return b.followersCount - a.followersCount;
-				}
-				return b.approved_portfolio_count - a.approved_portfolio_count;
-			})
-			.slice(0, 3);
-	}, [artistProfiles]);
-
-	const tagUsageCounts = useMemo(() => {
-		return artworkTags.reduce(
-			(acc, at) => {
-				acc[at.tag_id] = (acc[at.tag_id] || 0) + 1;
-				return acc;
-			},
-			{} as Record<string, number>,
-		);
-	}, [artworkTags]);
-
-	const popularTags = useMemo(() => {
-		return [...tags]
-			.map((tag) => ({
-				...tag,
-				count: tagUsageCounts[tag.id] || 0,
-			}))
-			.sort((a, b) => b.count - a.count)
-			.slice(0, 8);
-	}, [tags, tagUsageCounts]);
+	// Mengambil data tag populer & artis terpopuler langsung dari backend menggunakan TanStack Query
+	const { data: popularTags = [] } = usePopularTags();
+	const { data: popularArtists = [], isLoading: isArtistsLoading } =
+		usePopularArtists();
 
 	return (
 		<aside
 			id="sidebar-home"
-			className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)]"
+			className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)] w-60 shrink-0"
 		>
 			{/* Artis Terpopuler */}
-			{popularArtists.length > 0 && (
-				<section>
-					<SectionLabel>Artis Terpopuler</SectionLabel>
-					{popularArtists.map((profile) => (
+			<section>
+				<SectionLabel>Artis Terpopuler</SectionLabel>
+				{isArtistsLoading ? (
+					<div className="py-6 text-center text-xs text-content-muted">
+						Memuat artis...
+					</div>
+				) : popularArtists.length > 0 ? (
+					popularArtists.map((profile) => (
 						<FeaturedArtistCard key={profile.id} profile={profile} />
-					))}
-				</section>
-			)}
+					))
+				) : (
+					<div className="py-6 px-4 rounded-xl border border-content/10 text-center text-xs text-content-muted bg-surface/50">
+						Belum ada artis terpopuler.
+					</div>
+				)}
+			</section>
 
-			{popularArtists.length > 0 && <Divider />}
+			<Divider />
 
 			{/* Tag Populer */}
 			<section>

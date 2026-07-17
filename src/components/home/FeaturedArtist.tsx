@@ -26,7 +26,11 @@ export default function FeaturedArtist({
 				href={`/artists/${user.id}`}
 				className="flex items-center gap-2.5 mb-2.5"
 			>
-				<AvatarInitials name={user.name} className="w-9 h-9" />
+				<AvatarInitials
+					name={user.name}
+					src={profile.avatar_url}
+					className="w-9 h-9"
+				/>
 				<div className="min-w-0">
 					<div className="flex items-center gap-1">
 						<p className="text-sm font-medium text-content truncate">

@@ -14,7 +14,10 @@ import { useMemo, useState } from "react";
 import ArtworkReviewCard from "@/components/dashboard/review-artworks/ArtworkReviewCard";
 import RejectArtworkModal from "@/components/dashboard/review-artworks/RejectArtworkModal";
 import Stat from "@/components/ui/Stat";
-import { useArtworkStore } from "@/store/ArtworkStore";
+import {
+	useCurateArtwork,
+	usePendingArtworks,
+} from "@/hooks/useArtworkQueries";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
@@ -26,8 +29,6 @@ import { buildArtworkWithRelations } from "@/utils/search";
 export default function ReviewArtworksPage() {
 	const { user, isCurator } = useUserStore();
 	const { users } = useUserManagementStore();
-	const { artworks, artworkTags, tags, approveArtwork, rejectArtwork } =
-		useArtworkStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
 
@@ -37,9 +38,13 @@ export default function ReviewArtworksPage() {
 	);
 	const [processingId, setProcessingId] = useState<string | null>(null);
 
+	// Menggunakan TanStack Query v5 untuk mengambil antrean pending & melakukan kurasi
+	const { data: artworks = [], isLoading } = usePendingArtworks();
+	const curateMutation = useCurateArtwork();
+
 	const artworksWithRelations = useMemo(
-		() => buildArtworkWithRelations(artworks, artworkTags, tags),
-		[artworks, artworkTags, tags],
+		() => buildArtworkWithRelations(artworks, [], []),
+		[artworks],
 	);
 
 	const pendingArtworks = useMemo(() => {
@@ -93,30 +98,56 @@ export default function ReviewArtworksPage() {
 			type: "confirm",
 			confirmLabel: "Setujui",
 			cancelLabel: "Batal",
-			onConfirm: () => {
+			onConfirm: async () => {
 				setProcessingId(artwork.id);
-				const result = approveArtwork(artwork.id, user.id);
-				addToast({
-					message: result.message,
-					type: result.success ? "success" : "error",
-				});
-				setProcessingId(null);
+				try {
+					await curateMutation.mutateAsync({
+						id: artwork.id,
+						status: "approved",
+					});
+					addToast({
+						message: `"${artwork.title}" berhasil disetujui dan tampil di feed.`,
+						type: "success",
+					});
+				} catch (error: unknown) {
+					// biome-ignore lint/suspicious/noExplicitAny: error proxy casting
+					const err = error as any;
+					addToast({
+						message: err.response?.data?.message || "Gagal menyetujui artwork.",
+						type: "error",
+					});
+				} finally {
+					setProcessingId(null);
+				}
 			},
 		});
 	};
 
-	const handleRejectSubmit = (reason: string) => {
+	const handleRejectSubmit = async (reason: string) => {
 		if (!user || !rejectTarget) return;
 
 		setProcessingId(rejectTarget.id);
-		const result = rejectArtwork(rejectTarget.id, user.id, reason);
-		addToast({
-			message: result.message,
-			type: result.success ? "success" : "error",
-		});
-		setProcessingId(null);
-
-		if (result.success) setRejectTarget(null);
+		try {
+			await curateMutation.mutateAsync({
+				id: rejectTarget.id,
+				status: "rejected",
+				reason,
+			});
+			addToast({
+				message: `"${rejectTarget.title}" ditolak.`,
+				type: "success",
+			});
+			setRejectTarget(null);
+		} catch (error: unknown) {
+			// biome-ignore lint/suspicious/noExplicitAny: error proxy casting
+			const err = error as any;
+			addToast({
+				message: err.response?.data?.message || "Gagal menolak artwork.",
+				type: "error",
+			});
+		} finally {
+			setProcessingId(null);
+		}
 	};
 
 	if (!isCurator()) {
@@ -193,7 +224,11 @@ export default function ReviewArtworksPage() {
 					</div>
 
 					<div className="space-y-4 p-4">
-						{pendingArtworks.length === 0 ? (
+						{isLoading ? (
+							<div className="py-12 text-center text-content-muted">
+								Memuat antrean pending...
+							</div>
+						) : pendingArtworks.length === 0 ? (
 							<div className="rounded-xl border border-dashed border-content/15 px-4 py-12 text-center">
 								<ImageIcon className="mx-auto mb-2 h-8 w-8 text-content-muted" />
 								<p className="font-medium text-content">
@@ -271,12 +306,15 @@ export default function ReviewArtworksPage() {
 				)}
 			</div>
 
-			<RejectArtworkModal
-				artworkTitle={rejectTarget?.title ?? ""}
-				isOpen={Boolean(rejectTarget)}
-				onClose={() => setRejectTarget(null)}
-				onSubmit={handleRejectSubmit}
-			/>
+			{rejectTarget && (
+				<RejectArtworkModal
+					artworkTitle={rejectTarget.title}
+					isOpen={!!rejectTarget}
+					onClose={() => setRejectTarget(null)}
+					onSubmit={handleRejectSubmit}
+					isSubmitting={processingId === rejectTarget.id}
+				/>
+			)}
 		</>
 	);
 }
