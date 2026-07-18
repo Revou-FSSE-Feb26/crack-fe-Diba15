@@ -3,6 +3,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// TODO(backend): Store ini masih 100% client-side (Zustand + persist ke localStorage).
+// Belum ada Next.js API route / panggilan axiosServer yang menghubungkannya ke backend NestJS.
+// Perlu dibuatkan route handler (mirip src/app/api/artwork atau src/app/api/user) dan
+// diganti pemanggilannya di sini sebelum fitur transaction/wallet ini dianggap production-ready.
+
 export interface Transaction {
 	id: string;
 	user_id: string;

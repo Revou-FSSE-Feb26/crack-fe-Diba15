@@ -4,6 +4,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useProfileStore } from "@/store/ProfileStore";
 
+// TODO(backend): Store ini masih 100% client-side (Zustand + persist ke localStorage).
+// Belum ada Next.js API route / panggilan axiosServer yang menghubungkannya ke backend NestJS.
+// Perlu dibuatkan route handler (mirip src/app/api/artwork atau src/app/api/user) dan
+// diganti pemanggilannya di sini sebelum fitur appeal ini dianggap production-ready.
+
 export interface Appeal {
 	id: string;
 	artist_id: string;
