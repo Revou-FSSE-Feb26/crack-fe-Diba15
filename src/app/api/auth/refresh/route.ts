@@ -1,5 +1,5 @@
-import axios from "axios";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
 export async function POST() {
@@ -11,14 +11,6 @@ export async function POST() {
 
 		return NextResponse.json(res.data);
 	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			const status = error.response?.status || 500;
-			const data = error.response?.data || { message: "Internal Server Error" };
-			return NextResponse.json(data, { status });
-		}
-		return NextResponse.json(
-			{ message: "Internal Server Error" },
-			{ status: 500 },
-		);
+		return handleApiError(error, "POST /api/auth/refresh");
 	}
 }

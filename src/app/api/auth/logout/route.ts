@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
 export async function POST() {
@@ -24,7 +25,6 @@ export async function POST() {
 			message: "Logged out successfully",
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Logout failed";
-		return NextResponse.json({ message }, { status: 500 });
+		return handleApiError(error, "POST /api/auth/logout");
 	}
 }

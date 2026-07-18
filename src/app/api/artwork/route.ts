@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
 export async function GET(request: Request) {
@@ -9,12 +10,8 @@ export async function GET(request: Request) {
 
 		const res = await axiosServer.get(path);
 		return NextResponse.json(res.data);
-	} catch (error: unknown) {
-		// biome-ignore lint/suspicious/noExplicitAny: proxy error casting
-		const err = error as any;
-		const status = err.response?.status || 500;
-		const data = err.response?.data || { message: "Internal Server Error" };
-		return NextResponse.json(data, { status });
+	} catch (error) {
+		return handleApiError(error, "GET /api/artwork");
 	}
 }
 
@@ -23,11 +20,7 @@ export async function POST(request: Request) {
 		const body = await request.json();
 		const res = await axiosServer.post("/artwork", body);
 		return NextResponse.json(res.data);
-	} catch (error: unknown) {
-		// biome-ignore lint/suspicious/noExplicitAny: proxy error casting
-		const err = error as any;
-		const status = err.response?.status || 500;
-		const data = err.response?.data || { message: "Internal Server Error" };
-		return NextResponse.json(data, { status });
+	} catch (error) {
+		return handleApiError(error, "POST /api/artwork");
 	}
 }

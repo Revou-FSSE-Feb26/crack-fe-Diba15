@@ -1,5 +1,5 @@
-import axios from "axios";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
 interface RouteParams {
@@ -13,15 +13,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 		const res = await axiosServer.get(`/user/${id}`);
 		return NextResponse.json(res.data);
 	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			const status = error.response?.status || 500;
-			const data = error.response?.data || { message: "Internal Server Error" };
-			return NextResponse.json(data, { status });
-		}
-		return NextResponse.json(
-			{ message: "Internal Server Error" },
-			{ status: 500 },
-		);
+		return handleApiError(error, "GET /api/user/[id]");
 	}
 }
 
@@ -33,15 +25,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 		const res = await axiosServer.patch(`/user/${id}`, body);
 		return NextResponse.json(res.data);
 	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			const status = error.response?.status || 500;
-			const data = error.response?.data || { message: "Internal Server Error" };
-			return NextResponse.json(data, { status });
-		}
-		return NextResponse.json(
-			{ message: "Internal Server Error" },
-			{ status: 500 },
-		);
+		return handleApiError(error, "PATCH /api/user/[id]");
 	}
 }
 
@@ -52,14 +36,6 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 		const res = await axiosServer.delete(`/user/${id}`);
 		return NextResponse.json(res.data);
 	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			const status = error.response?.status || 500;
-			const data = error.response?.data || { message: "Internal Server Error" };
-			return NextResponse.json(data, { status });
-		}
-		return NextResponse.json(
-			{ message: "Internal Server Error" },
-			{ status: 500 },
-		);
+		return handleApiError(error, "DELETE /api/user/[id]");
 	}
 }

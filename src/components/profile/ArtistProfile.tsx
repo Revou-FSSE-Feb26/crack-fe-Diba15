@@ -374,7 +374,6 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 							</span>
 						</SummaryRow>
 
-
 						<hr className="border-slate-200 dark:border-slate-700" />
 
 						<div className="space-y-2">

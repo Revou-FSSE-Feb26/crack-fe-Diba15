@@ -1,5 +1,5 @@
-import axios from "axios";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
 interface RouteParams {
@@ -12,14 +12,6 @@ export async function GET(_request: Request, { params }: RouteParams) {
 		const res = await axiosServer.get(`/artwork/artists/${id}`);
 		return NextResponse.json(res.data);
 	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			const status = error.response?.status || 500;
-			const data = error.response?.data || { message: "Internal Server Error" };
-			return NextResponse.json(data, { status });
-		}
-		return NextResponse.json(
-			{ message: "Internal Server Error" },
-			{ status: 500 },
-		);
+		return handleApiError(error, "GET /api/artwork/artists/[id]");
 	}
 }

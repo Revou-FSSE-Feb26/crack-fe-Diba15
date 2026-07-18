@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
 interface RouteParams {
@@ -11,11 +12,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 		const body = await request.json();
 		const res = await axiosServer.patch(`/artwork/${id}/curate`, body);
 		return NextResponse.json(res.data);
-	} catch (error: unknown) {
-		// biome-ignore lint/suspicious/noExplicitAny: proxy error casting
-		const err = error as any;
-		const status = err.response?.status || 500;
-		const data = err.response?.data || { message: "Internal Server Error" };
-		return NextResponse.json(data, { status });
+	} catch (error) {
+		return handleApiError(error, "PATCH /api/artwork/[id]/curate");
 	}
 }

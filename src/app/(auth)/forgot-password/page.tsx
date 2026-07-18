@@ -23,8 +23,8 @@ export default function ForgotPassword() {
 		},
 	});
 
-	const onSubmit = (data: LoginForm) => {
-		console.log(data);
+	const onSubmit = (_data: LoginForm) => {
+		// TODO: hubungkan ke endpoint forgot-password saat backend tersedia
 	};
 
 	return (
