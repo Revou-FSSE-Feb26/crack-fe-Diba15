@@ -24,11 +24,7 @@ import type { ProfileUser } from "@/components/profile/types";
 import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
-import { axiosClient } from "@/lib/axiosClient";
-import { useCommissionStore } from "@/store/CommissionStore";
-import { useFollowStore } from "@/store/FollowStore";
-import { useProfileStore } from "@/store/ProfileStore";
-import { useToastStore } from "@/store/ToastStore";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
@@ -41,12 +37,8 @@ interface ClientProfileProps {
 export default function ClientProfile({
 	user: initialUser,
 }: ClientProfileProps) {
-	const { commissions } = useCommissionStore();
-	const { updateUser, users } = useUserManagementStore();
-	const { user: currentUser, updateCurrentUser } = useUserStore();
-	const { addToast } = useToastStore();
-	const { profiles, updateProfile } = useProfileStore();
-	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
+	const { updateUser } = useUserManagementStore();
+	const { user: currentUser } = useUserStore();
 
 	const [activeTab, setActiveTab] = useState<
 		"commissions" | "following" | "transactions"
@@ -59,80 +51,27 @@ export default function ClientProfile({
 		return initialUser;
 	}, [currentUser, initialUser]);
 
-	const followedArtistIds = getFollowedArtistIds(user.id);
-	const followedArtists = useMemo(() => {
-		return users
-			.filter((u) => followedArtistIds.includes(u.id))
-			.map((u) => {
-				const prof = profiles.find((p) => p.user_id === u.id);
-				return {
-					...u,
-					profile: prof,
-				};
-			});
-	}, [users, followedArtistIds, profiles]);
+	const {
+		profile,
+		followedArtists,
+		userCommissions,
+		isUploadingAvatar,
+		handleAvatarUpload,
+		handleUnfollowArtist,
+		updateProfile,
+		updateCurrentUser,
+		addToast,
+	} = useUserProfile(user.id);
 
 	const [isTopUpOpen, setIsTopUpOpen] = useState(false);
 	const [isEditOpen, setIsEditOpen] = useState(false);
-	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleAvatarInputChange = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		const file = e.target.files?.[0];
-		if (!file) return;
-
-		// Validasi tipe berkas
-		const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-		if (!allowed.includes(file.type)) {
-			addToast({
-				message:
-					"Format file tidak valid. Hanya png, jpg, jpeg, dan webp yang diperbolehkan.",
-				type: "error",
-			});
-			return;
-		}
-
-		// Validasi ukuran (maksimal 5MB)
-		if (file.size > 5 * 1024 * 1024) {
-			addToast({
-				message: "Ukuran file avatar maksimal 5MB.",
-				type: "error",
-			});
-			return;
-		}
-
-		setIsUploadingAvatar(true);
-		const formData = new FormData();
-		formData.append("file", file);
-
-		try {
-			const res = await axiosClient.post("/upload", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
-
-			const { url } = res.data;
-			const cacheBustedUrl = `${url}?t=${Date.now()}`;
-
-			// Update state lokal ProfileStore dengan cache-buster agar browser me-reload gambar baru
-			useProfileStore.setState((state) => ({
-				profiles: state.profiles.map((p) =>
-					p.user_id === user.id ? { ...p, avatar_url: cacheBustedUrl } : p,
-				),
-			}));
-
-			addToast({
-				message: "Avatar berhasil diperbarui.",
-				type: "success",
-			});
-		} catch (error) {
-			console.error("Gagal upload avatar:", error);
-			addToast({
-				message: "Gagal memperbarui avatar.",
-				type: "error",
-			});
-		} finally {
-			setIsUploadingAvatar(false);
+		if (file) {
+			await handleAvatarUpload(file);
 		}
 	};
 
@@ -198,13 +137,13 @@ export default function ClientProfile({
 	};
 	const clientCommissions = useMemo(
 		() =>
-			commissions
+			userCommissions
 				.filter((commission) => commission.client_id === user.id)
 				.sort(
 					(a, b) =>
 						new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 				),
-		[commissions, user.id],
+		[userCommissions, user.id],
 	);
 
 	const activeCommissions = clientCommissions.filter((commission) =>
@@ -238,7 +177,7 @@ export default function ClientProfile({
 						<div className="relative group cursor-pointer shrink-0">
 							<AvatarInitials
 								name={user.name}
-								src={profiles.find((p) => p.user_id === user.id)?.avatar_url}
+								src={profile?.avatar_url}
 								className="w-20 h-20 text-2xl"
 							/>
 							<label className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
@@ -252,7 +191,7 @@ export default function ClientProfile({
 									accept="image/*"
 									className="hidden"
 									disabled={isUploadingAvatar}
-									onChange={handleAvatarUpload}
+									onChange={handleAvatarInputChange}
 								/>
 							</label>
 						</div>
@@ -263,7 +202,7 @@ export default function ClientProfile({
 							<AccountMeta user={user} />
 
 							<p className="mt-4 text-content-muted text-sm leading-relaxed">
-								{profiles[0]?.bio ||
+								{profile?.bio ||
 									"Akun client digunakan untuk mencari artist human-verified, memesan komisi, dan memantau progres pekerjaan."}
 							</p>
 
@@ -429,7 +368,7 @@ export default function ClientProfile({
 									</Link>
 									<button
 										type="button"
-										onClick={() => unfollowArtist(user.id, artist.id)}
+										onClick={() => handleUnfollowArtist(artist.id)}
 										className="px-3 py-1.5 text-xs font-semibold border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 shrink-0"
 									>
 										<UserMinus className="w-3.5 h-3.5" />
@@ -450,7 +389,7 @@ export default function ClientProfile({
 			/>
 			<EditProfileModal
 				userName={user.name}
-				profile={profiles.find((p) => p.user_id === user.id)}
+				profile={profile}
 				isOpen={isEditOpen}
 				onClose={() => setIsEditOpen(false)}
 				onSubmit={handleEditSubmit}

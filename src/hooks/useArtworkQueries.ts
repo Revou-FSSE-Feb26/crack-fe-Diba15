@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
 import type {
 	ActionResult,
+	ArtistDetailResponse,
 	Artwork,
 	ArtworkWithRelations,
 	CreateArtworkPayload,
@@ -25,6 +26,7 @@ export const artworkKeys = {
 	artists: ["artists"] as const,
 	popularArtists: () => [...artworkKeys.artists, "popular"] as const,
 	artistsList: () => [...artworkKeys.artists, "all"] as const,
+	artistDetail: (id: string) => [...artworkKeys.artists, "detail", id] as const,
 	tagsList: () => [...artworkKeys.tags, "all"] as const,
 };
 
@@ -36,7 +38,7 @@ export function useArtworks(filters?: {
 	curationStatus?: string;
 	isVisibleOnFeed?: string;
 }) {
-	return useQuery<Artwork[]>({
+	return useQuery<ArtworkWithRelations[]>({
 		queryKey: artworkKeys.list(filters),
 		queryFn: async () => {
 			const res = await axiosClient.get("/artwork", { params: filters });
@@ -75,6 +77,17 @@ export function useAllArtists() {
 	});
 }
 
+export function useArtistDetail(id: string) {
+	return useQuery<ArtistDetailResponse>({
+		queryKey: artworkKeys.artistDetail(id),
+		queryFn: async () => {
+			const res = await axiosClient.get(`/artwork/artists/${id}`);
+			return res.data;
+		},
+		enabled: !!id,
+	});
+}
+
 export function useAllTags() {
 	return useQuery<Tag[]>({
 		queryKey: artworkKeys.tagsList(),
@@ -97,7 +110,7 @@ export function useArtworkDetail(id: string) {
 }
 
 export function usePendingArtworks() {
-	return useQuery<Artwork[]>({
+	return useQuery<ArtworkWithRelations[]>({
 		queryKey: artworkKeys.pending(),
 		queryFn: async () => {
 			const res = await axiosClient.get("/artwork/pending");

@@ -9,11 +9,15 @@ import Clock from "@/components/dashboard/Clock";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import NavbarBrand from "@/components/ui/brand/NavbarBrand";
 import { useMounted } from "@/hooks/useMounted";
+import { useProfileStore } from "@/store/ProfileStore";
 import { useUserStore } from "@/store/UserStore";
 
 export default function Navbar() {
 	const router = useRouter();
 	const { isAdmin, isCurator, logout, user } = useUserStore();
+	const { profiles } = useProfileStore();
+	const userProfile = profiles.find((p) => p.user_id === user?.id);
+	const avatarUrl = userProfile?.avatar_url;
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const mounted = useMounted();
 	const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,7 +76,11 @@ export default function Navbar() {
 									onClick={() => setIsDropdownOpen((prev) => !prev)}
 									className="flex items-center gap-2 rounded-full px-3 py-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
 								>
-									<AvatarInitials className="w-9 h-9" name={user?.name || ""} />
+									<AvatarInitials
+										className="w-9 h-9"
+										name={user?.name || ""}
+										src={avatarUrl}
+									/>
 									<div className="flex flex-col items-start gap-0 text-left">
 										<span className="text-sm font-medium text-primary">
 											{user?.name}

@@ -8,7 +8,7 @@ export function getInitials(name: string): string {
 }
 
 export function formatPrice(price: number | null): string {
-	if (!price) return "—";
+	if (price === null || price === undefined) return "—";
 	return new Intl.NumberFormat("id-ID", {
 		style: "currency",
 		currency: "IDR",

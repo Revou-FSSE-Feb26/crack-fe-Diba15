@@ -4,8 +4,8 @@ import { AlertCircle, CheckCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { usePagination } from "@/hooks/usePagination";
-import { useArtworkStore } from "@/store/ArtworkStore";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useReportStore } from "@/store/ReportStore";
@@ -18,7 +18,7 @@ import { createReportsTableColumns } from "@/utils/dashboard/review-reports/repo
 export default function ReviewReportsPage() {
 	const { user: curator } = useUserStore();
 	const { users } = useUserManagementStore();
-	const { artworks } = useArtworkStore();
+	const { data: artworks = [] } = useArtworks();
 	const { reports, resolveReport, dismissReport } = useReportStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();

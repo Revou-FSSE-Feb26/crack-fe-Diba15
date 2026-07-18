@@ -6,39 +6,30 @@ import { useMemo } from "react";
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useMounted } from "@/hooks/useMounted";
-import { useArtworkStore } from "@/store/ArtworkStore";
 import { useFavoriteStore } from "@/store/FavoriteStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
-import { buildArtworkWithRelations } from "@/utils/search";
 
 export default function FavoriteList() {
 	const { user, isAuthenticated } = useUserStore();
 	const favoritesByUser = useFavoriteStore((state) => state.favoritesByUser);
-	const { artworks, artworkTags, tags } = useArtworkStore();
-	const { users } = useUserManagementStore();
+	const { data: artworks = [], isLoading } = useArtworks();
 	const mounted = useMounted();
 
 	const favoriteArtworks = useMemo(() => {
 		if (!user) return [];
 
 		const favoriteIds = favoritesByUser[user.id] ?? [];
-		const allArtworks = buildArtworkWithRelations(
-			artworks,
-			artworkTags,
-			tags,
-			users,
-		);
 		const artworkById = new Map(
-			allArtworks.map((artwork) => [artwork.id, artwork]),
+			artworks.map((artwork) => [artwork.id, artwork]),
 		);
 
 		return [...favoriteIds]
 			.reverse()
 			.map((id) => artworkById.get(id))
 			.filter((artwork) => artwork !== undefined);
-	}, [user, favoritesByUser, artworks, artworkTags, tags, users]);
+	}, [user, favoritesByUser, artworks]);
 
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">
@@ -60,7 +51,7 @@ export default function FavoriteList() {
 			</div>
 
 			<div className="max-w-2xl mx-auto px-4 pt-6 pb-10 space-y-5">
-				{!mounted ? (
+				{!mounted || isLoading ? (
 					<div className="flex flex-col gap-4">
 						<ArtworkSkeleton />
 						<ArtworkSkeleton />

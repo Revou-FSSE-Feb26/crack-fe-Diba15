@@ -152,12 +152,28 @@ export interface Report {
 /** Artwork lengkap dengan data artist dan tags-nya — untuk feed & detail page */
 export interface ArtworkWithRelations extends Artwork {
 	artist: Pick<User, "id" | "name">;
-	artist_profile: Pick<Profile, "is_verified" | "is_open_for_commission">;
+	artist_profile: Pick<
+		Profile,
+		"is_verified" | "is_open_for_commission" | "avatar_url" | "base_price_idr"
+	>;
 	tags: Tag[];
 }
 
 /** Profile lengkap dengan data user — untuk halaman profil artist */
 export interface ProfileWithUser extends Profile {
+	user: Pick<User, "id" | "name" | "email" | "role">;
+}
+
+export interface ArtistDetailResponse {
+	id: string;
+	user_id: string;
+	avatar_url: string | null;
+	bio: string | null;
+	is_verified: boolean;
+	is_open_for_commission: boolean;
+	base_price_idr: number | null;
+	approved_portfolio_count: number;
+	followersCount: number;
 	user: Pick<User, "id" | "name" | "email" | "role">;
 }
 
@@ -286,6 +302,7 @@ export interface ArtworkState {
 // ── Profile Store ────────────────────────────────────────────────────────────
 
 export interface UpdateProfilePayload {
+	avatar_url?: string | null;
 	bio?: string | null;
 	is_open_for_commission?: boolean;
 	base_price_idr?: number | null;

@@ -15,14 +15,11 @@ import {
 	Wallet,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import CommissionButton from "@/components/detail/CommissionButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
-import users from "@/data/users";
-import { useFollowStore } from "@/store/FollowStore";
-import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
+import { useArtistDetail } from "@/hooks/useArtworkQueries";
+import { useFollowArtist } from "@/hooks/useFollowArtist";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 
@@ -34,68 +31,40 @@ export default function ArtistDetailHeader({
 	artistId,
 }: ArtistDetailHeaderProps) {
 	const router = useRouter();
-	const user = users.find((item) => item.id === artistId);
-	const { profiles } = useProfileStore();
-	const profile = profiles.find((item) => item.user_id === artistId);
+	const { data: artist, isLoading } = useArtistDetail(artistId);
 
 	const currentUser = useUserStore((state) => state.user);
-	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
-	const { openModal } = useModalStore();
-	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
+	const { isArtistFollowed, handleFollowToggle } = useFollowArtist(artistId);
 
-	const isArtistFollowed = currentUser
-		? isFollowing(currentUser.id, artistId)
-		: false;
+	if (isLoading) {
+		return (
+			<div className="flex flex-col gap-6">
+				<div className="h-6 w-20 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+				<div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+					<div className="flex items-start gap-4">
+						<div className="w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse shrink-0" />
+						<div className="flex-1 space-y-3">
+							<div className="h-7 w-48 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+							<div className="h-4 w-32 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+							<div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
-	const handleFollowToggle = useCallback(() => {
-		if (!isAuthenticated || !currentUser) {
-			openModal({
-				title: "Login diperlukan",
-				description: "Silakan login terlebih dahulu untuk mengikuti artist.",
-				type: "confirm",
-				confirmLabel: "Login",
-				cancelLabel: "Batal",
-				onConfirm: () => router.push("/login"),
-			});
-			return;
-		}
+	if (!artist) return null;
 
-		if (currentUser.role !== "artist" && currentUser.role !== "client") {
-			openModal({
-				title: "Akses Terbatas",
-				description: "Hanya akun client dan artist yang dapat mengikuti artis.",
-			});
-			return;
-		}
+	const formattedPrice =
+		artist?.base_price_idr !== null && artist?.base_price_idr !== undefined
+			? formatPrice(artist.base_price_idr)
+			: null;
 
-		if (isArtistFollowed) {
-			unfollowArtist(currentUser.id, artistId);
-		} else {
-			followArtist(currentUser.id, artistId);
-		}
-	}, [
-		isAuthenticated,
-		currentUser,
-		isArtistFollowed,
-		artistId,
-		followArtist,
-		unfollowArtist,
-		openModal,
-		router,
-	]);
-
-	// Existence sudah divalidasi di server component (page.tsx) via notFound(),
-	// ini cuma safety-net kalau data hilang setelah mount.
-	if (!user || !profile) return null;
-
-	const formattedPrice = profile.base_price_idr
-		? formatPrice(profile.base_price_idr)
-		: null;
-
-	const joinedDate = new Date(user.created_at).toLocaleDateString("id-ID", {
-		year: "numeric",
-		month: "long",
-	});
+	// Backend mengembalikan user.createdAt lewat field createdAt
+	// namun API response tidak expose createdAt, jadi kita skip joinedDate
+	// (bisa ditambahkan di backend jika diperlukan)
+	const joinedDate = null as string | null;
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -111,16 +80,17 @@ export default function ArtistDetailHeader({
 			<div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
 				<div className="flex items-start gap-4">
 					<AvatarInitials
-						name={user.name}
+						name={artist.user.name}
+						src={artist.avatar_url ?? undefined}
 						className="w-20 h-20 text-2xl shrink-0"
 					/>
 
 					<div className="flex-1 min-w-0">
 						<div className="flex items-center gap-3 flex-wrap">
 							<h1 className="font-display text-2xl font-bold text-content">
-								{user.name}
+								{artist.user.name}
 							</h1>
-							{profile.is_verified && (
+							{artist.is_verified && (
 								<span className="inline-flex items-center gap-1 text-xs font-medium text-verified bg-verified/10 px-2 py-0.5 rounded-full">
 									<BadgeCheck className="w-3.5 h-3.5" />
 									Terverifikasi
@@ -156,12 +126,12 @@ export default function ArtistDetailHeader({
 						</div>
 
 						<p className="text-sm text-content-muted mt-0.5">
-							@{user.email.split("@")[0]}
+							@{artist.user.email.split("@")[0]}
 						</p>
 
-						{profile.bio && (
+						{artist.bio && (
 							<p className="mt-3 text-content-muted text-sm leading-relaxed">
-								{profile.bio}
+								{artist.bio}
 							</p>
 						)}
 
@@ -170,26 +140,28 @@ export default function ArtistDetailHeader({
 								<ImageIcon className="w-4 h-4 text-primary" />
 								<span>
 									<strong className="text-content">
-										{profile.approved_portfolio_count}
+										{artist.approved_portfolio_count}
 									</strong>{" "}
 									Karya
 								</span>
 							</div>
-							<div className="flex items-center gap-1.5 text-content-muted">
-								<CalendarDays className="w-4 h-4 text-primary" />
-								<span>Bergabung {joinedDate}</span>
-							</div>
+							{joinedDate && (
+								<div className="flex items-center gap-1.5 text-content-muted">
+									<CalendarDays className="w-4 h-4 text-primary" />
+									<span>Bergabung {joinedDate}</span>
+								</div>
+							)}
 							<div className="flex items-center gap-1.5 text-content-muted">
 								<Palette className="w-4 h-4 text-primary" />
 								<span>
-									{profile.approved_portfolio_count} karya di portfolio
+									{artist.approved_portfolio_count} karya di portfolio
 								</span>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				{profile.is_verified && (
+				{artist.is_verified && (
 					<div className="mt-5 flex items-start gap-3 rounded-xl bg-verified/5 border border-verified/20 px-4 py-3">
 						<ShieldCheck className="w-5 h-5 text-verified shrink-0 mt-0.5" />
 						<div>
@@ -242,25 +214,12 @@ export default function ArtistDetailHeader({
 
 					<hr className="border-slate-200 dark:border-slate-700" />
 
-					{profile.strike_count !== undefined && profile.strike_count >= 5 ? (
-						<div className="space-y-2">
-							<Button
-								variant="danger"
-								className="w-full text-sm justify-center pointer-events-none"
-								disabled
-							>
-								Akun Ditangguhkan (Blocked)
-							</Button>
-							<p className="text-xs text-danger text-center font-semibold">
-								Artis ini ditangguhkan karena melanggar aturan TruBrush.
-							</p>
-						</div>
-					) : profile.is_verified ? (
-						profile.is_open_for_commission ? (
+					{artist.is_verified ? (
+						artist.is_open_for_commission ? (
 							<CommissionButton
-								artistId={user.id}
-								artistName={user.name}
-								basePrice={profile.base_price_idr}
+								artistId={artist.user.id}
+								artistName={artist.user.name}
+								basePrice={artist.base_price_idr}
 								className="text-sm justify-center"
 							>
 								Pesan Komisi Sekarang
@@ -284,7 +243,7 @@ export default function ArtistDetailHeader({
 						</Button>
 					)}
 
-					{!profile.is_verified && (
+					{!artist.is_verified && (
 						<p className="text-xs text-content-muted text-center">
 							Artist ini sedang dalam proses verifikasi TruBrush.
 						</p>

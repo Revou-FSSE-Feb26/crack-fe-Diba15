@@ -23,8 +23,8 @@ import ReportArtModal from "@/components/home/ReportArtModal";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
-import { useFavoriteStore } from "@/store/FavoriteStore";
-import { useFollowStore } from "@/store/FollowStore";
+import { useFavoriteArtwork } from "@/hooks/useFavoriteArtwork";
+import { useFollowArtist } from "@/hooks/useFollowArtist";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useReportStore } from "@/store/ReportStore";
@@ -40,56 +40,13 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
 	const { user, isAuthenticated } = useUserStore();
-	const { isFavorite, toggleFavorite } = useFavoriteStore();
-	const { profiles } = useProfileStore();
-	const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
-
-	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
-	const isArtistFollowed = user ? isFollowing(user.id, artist.id) : false;
-
-	const handleFollowToggle = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-
-			if (!isAuthenticated || !user) {
-				openModal({
-					title: "Login diperlukan",
-					description: "Silakan login terlebih dahulu untuk mengikuti artist.",
-					type: "confirm",
-					confirmLabel: "Login",
-					cancelLabel: "Batal",
-					onConfirm: () => router.push("/login"),
-				});
-				return;
-			}
-
-			if (user.role !== "artist" && user.role !== "client") {
-				openModal({
-					title: "Akses Terbatas",
-					description:
-						"Hanya akun client dan artist yang dapat mengikuti artis.",
-				});
-				return;
-			}
-
-			if (isArtistFollowed) {
-				unfollowArtist(user.id, artist.id);
-			} else {
-				followArtist(user.id, artist.id);
-			}
-		},
-		[
-			isAuthenticated,
-			user,
-			isArtistFollowed,
-			artist.id,
-			followArtist,
-			unfollowArtist,
-			openModal,
-			router,
-		],
+	const { isArtworkFavorite, handleFavoriteToggle } = useFavoriteArtwork(
+		artwork.id,
+		artwork.title,
 	);
+	const { profiles } = useProfileStore();
+
+	const { isArtistFollowed, handleFollowToggle } = useFollowArtist(artist.id);
 	const basePrice =
 		profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ??
 		null;
@@ -177,25 +134,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		};
 	}, []);
 
-	const handleFavorite = () => {
-		if (!isAuthenticated || !user) {
-			addToast({
-				message: "Login terlebih dahulu untuk menambahkan favorite.",
-				type: "warning",
-			});
-			return;
-		}
-
-		const addedToFavorite = toggleFavorite(user.id, artwork.id);
-
-		addToast({
-			message: addedToFavorite
-				? `Berhasil ditambahkan ke favorite: ${artwork.title}.`
-				: `Dihapus dari favorite: ${artwork.title}.`,
-			type: addedToFavorite ? "success" : "info",
-		});
-	};
-
 	const handleReport = () => {
 		if (!isAuthenticated || !user) {
 			openModal({
@@ -255,7 +193,11 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					href={`/artists/${artist.id}`}
 					className="flex items-center gap-2.5 flex-1 min-w-0"
 				>
-					<AvatarInitials name={artist.name} className="w-9 h-9" />
+					<AvatarInitials
+						name={artist.name}
+						className="w-9 h-9"
+						src={artist_profile.avatar_url}
+					/>
 					<div className="min-w-0 flex-1">
 						<div className="flex items-center gap-1.5">
 							<p className="text-sm font-semibold text-content truncate">
@@ -430,7 +372,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</Link>
 					<button
 						type="button"
-						onClick={handleFavorite}
+						onClick={handleFavoriteToggle}
 						title={
 							isArtworkFavorite ? "Hapus dari favorite" : "Tambah ke favorite"
 						}

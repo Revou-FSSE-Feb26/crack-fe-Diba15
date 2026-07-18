@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 // Instance Axios khusus untuk Server-Side (Route Handlers / Server Components)
 // yang mengotomatisasi forwarding Authorization header dan Cookie refresh_token.
 export const axiosServer = axios.create({
-	baseURL: process.env.NESTJS_API_URL || "http://localhost:3000/api",
+	baseURL: process.env.NESTJS_API_URL || "http://localhost:3001/api",
 	withCredentials: true,
 });
 

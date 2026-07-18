@@ -9,7 +9,6 @@ import {
 	ShieldAlert,
 	ShieldCheck,
 	UserMinus,
-	Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,15 +26,10 @@ import WalletTransactionsList from "@/components/profile/WalletTransactionsList"
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
-import { axiosClient } from "@/lib/axiosClient";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAppealStore } from "@/store/AppealStore";
-import { useCommissionStore } from "@/store/CommissionStore";
-import { useFollowStore } from "@/store/FollowStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 import {
 	evaluateVerification,
@@ -50,75 +44,30 @@ interface ArtistProfileProps {
 export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const router = useRouter();
 	const { openModal } = useModalStore();
-	const { commissions } = useCommissionStore();
-	const { profiles, updateProfile } = useProfileStore();
 	const { updateUser: updateUserRecord, users } = useUserManagementStore();
-	const { updateCurrentUser } = useUserStore();
-	const { addToast } = useToastStore();
 	const [isEditOpen, setIsEditOpen] = useState(false);
-	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
 	const [activeTab, setActiveTab] = useState<
 		"portfolio" | "following" | "transactions"
 	>("portfolio");
-	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const {
+		profile,
+		followedArtists,
+		userCommissions: artistCommissions,
+		isUploadingAvatar,
+		handleAvatarUpload,
+		handleUnfollowArtist,
+		updateProfile,
+		updateCurrentUser,
+		addToast,
+	} = useUserProfile(user.id);
+
+	const handleAvatarInputChange = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		const file = e.target.files?.[0];
-		if (!file) return;
-
-		// Validasi tipe berkas
-		const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-		if (!allowed.includes(file.type)) {
-			addToast({
-				message:
-					"Format file tidak valid. Hanya png, jpg, jpeg, dan webp yang diperbolehkan.",
-				type: "error",
-			});
-			return;
-		}
-
-		// Validasi ukuran (maksimal 5MB)
-		if (file.size > 5 * 1024 * 1024) {
-			addToast({
-				message: "Ukuran file avatar maksimal 5MB.",
-				type: "error",
-			});
-			return;
-		}
-
-		setIsUploadingAvatar(true);
-		const formData = new FormData();
-		formData.append("file", file);
-
-		try {
-			const res = await axiosClient.post("/upload", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
-
-			const { url } = res.data;
-			const cacheBustedUrl = `${url}?t=${Date.now()}`;
-
-			// Update state lokal ProfileStore dengan cache-buster agar browser me-reload gambar baru
-			useProfileStore.setState((state) => ({
-				profiles: state.profiles.map((p) =>
-					p.user_id === user.id ? { ...p, avatar_url: cacheBustedUrl } : p,
-				),
-			}));
-
-			addToast({
-				message: "Avatar berhasil diperbarui.",
-				type: "success",
-			});
-		} catch (error) {
-			console.error("Gagal upload avatar:", error);
-			addToast({
-				message: "Gagal memperbarui avatar.",
-				type: "error",
-			});
-		} finally {
-			setIsUploadingAvatar(false);
+		if (file) {
+			await handleAvatarUpload(file);
 		}
 	};
 
@@ -132,20 +81,6 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		(app) => app.artist_id === user.id && app.status === "rejected",
 	);
 
-	const profile = profiles.find((item) => item.user_id === user.id);
-
-	const followedArtistIds = getFollowedArtistIds(user.id);
-	const followedArtists = useMemo(() => {
-		return users
-			.filter((u) => followedArtistIds.includes(u.id))
-			.map((u) => {
-				const prof = profiles.find((p) => p.user_id === u.id);
-				return {
-					...u,
-					profile: prof,
-				};
-			});
-	}, [users, followedArtistIds, profiles]);
 	const { data: artistArtworksRaw = [] } = useArtworks({ artistId: user.id });
 
 	const artistArtworks = useMemo(() => {
@@ -155,9 +90,6 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const verificationProgress = useMemo(() => {
 		return evaluateVerification(artistArtworksRaw);
 	}, [artistArtworksRaw]);
-	const artistCommissions = commissions.filter(
-		(commission) => commission.artists_id === user.id,
-	);
 
 	const artistUser = users.find((u) => u.id === user.id) || user;
 
@@ -165,9 +97,10 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		year: "numeric",
 		month: "long",
 	});
-	const formattedPrice = profile?.base_price_idr
-		? formatPrice(profile.base_price_idr)
-		: null;
+	const formattedPrice =
+		profile?.base_price_idr !== null && profile?.base_price_idr !== undefined
+			? formatPrice(profile.base_price_idr)
+			: null;
 
 	const handleEditSubmit = async (values: EditProfileFormValues) => {
 		const trimmedName = values.name.trim();
@@ -230,7 +163,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 									accept="image/*"
 									className="hidden"
 									disabled={isUploadingAvatar}
-									onChange={handleAvatarUpload}
+									onChange={handleAvatarInputChange}
 								/>
 							</label>
 						</div>
@@ -414,7 +347,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 						<SummaryRow label="Order masuk">
 							{artistCommissions.length}
 						</SummaryRow>
-						<SummaryRow label="Strike Count">
+						<SummaryRow label="Strike count">
 							<span
 								className={
 									profile?.strike_count && profile.strike_count > 0
@@ -426,29 +359,21 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 							</span>
 						</SummaryRow>
 
-						{formattedPrice && (
-							<div className="flex items-center gap-2 rounded-xl bg-primary/5 px-3 py-3">
-								<Wallet className="w-4 h-4 text-primary shrink-0" />
-								<div>
-									<p className="text-xs text-content-muted">Harga mulai</p>
-									<p className="font-display text-xl font-bold text-primary">
-										{formattedPrice}
-									</p>
-								</div>
-							</div>
-						)}
+						<hr className="border-slate-200 dark:border-slate-700" />
 
-						<div className="flex items-center gap-2 rounded-xl bg-verified/5 border border-verified/20 px-3 py-3">
-							<Wallet className="w-4 h-4 text-verified shrink-0" />
-							<div>
-								<p className="text-[10px] text-content-muted">
-									Saldo Dompet Artist
-								</p>
-								<p className="font-display text-lg font-bold text-verified">
-									{formatPrice(artistUser.balance ?? 0)}
-								</p>
-							</div>
-						</div>
+						{formattedPrice && (
+							<SummaryRow label="Harga mulai">
+								<span className="font-semibold text-primary">
+									{formattedPrice}
+								</span>
+							</SummaryRow>
+						)}
+						<SummaryRow label="Saldo dompet">
+							<span className="font-semibold text-verified">
+								{formatPrice(artistUser.balance ?? 0)}
+							</span>
+						</SummaryRow>
+
 
 						<hr className="border-slate-200 dark:border-slate-700" />
 
@@ -556,7 +481,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 									</Link>
 									<button
 										type="button"
-										onClick={() => unfollowArtist(user.id, artist.id)}
+										onClick={() => handleUnfollowArtist(artist.id)}
 										className="px-3 py-1.5 text-xs font-semibold border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 shrink-0"
 									>
 										<UserMinus className="w-3.5 h-3.5" />

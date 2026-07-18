@@ -312,7 +312,6 @@ export default function ReviewArtworksPage() {
 					isOpen={!!rejectTarget}
 					onClose={() => setRejectTarget(null)}
 					onSubmit={handleRejectSubmit}
-					isSubmitting={processingId === rejectTarget.id}
 				/>
 			)}
 		</>

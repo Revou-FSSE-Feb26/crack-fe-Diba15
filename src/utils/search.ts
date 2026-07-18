@@ -59,6 +59,8 @@ export function buildArtworkWithRelations(
 				artist_profile: anyArt.artist_profile || {
 					is_verified: false,
 					is_open_for_commission: false,
+					avatar_url: null,
+					base_price_idr: null,
 				},
 				tags: anyArt.tags,
 			};
@@ -77,6 +79,8 @@ export function buildArtworkWithRelations(
 			artist_profile: {
 				is_verified: artist_profile?.is_verified ?? false,
 				is_open_for_commission: artist_profile?.is_open_for_commission ?? false,
+				avatar_url: artist_profile?.avatar_url ?? null,
+				base_price_idr: artist_profile?.base_price_idr ?? null,
 			},
 			tags: artworkTagList as Tag[],
 		};

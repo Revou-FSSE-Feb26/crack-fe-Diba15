@@ -10,7 +10,7 @@ import {
 import { useMemo } from "react";
 
 import Stat from "@/components/ui/Stat";
-import { useArtworkStore } from "@/store/ArtworkStore";
+import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
@@ -18,7 +18,7 @@ import { useUserStore } from "@/store/UserStore";
 export default function DashboardPage() {
 	const { user } = useUserStore();
 	const { users } = useUserManagementStore();
-	const { artworks } = useArtworkStore();
+	const { data: artworks = [] } = useArtworks();
 	const { disputes, commissions } = useCommissionStore();
 
 	const stats = useMemo(() => {
