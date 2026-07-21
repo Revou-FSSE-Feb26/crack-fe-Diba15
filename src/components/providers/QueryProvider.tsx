@@ -8,7 +8,8 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useUserStore } from "@/store/UserStore";
 
 export default function QueryProvider({
 	children,
@@ -26,6 +27,10 @@ export default function QueryProvider({
 				},
 			}),
 	);
+
+	useEffect(() => {
+		useUserStore.getState().checkAuth();
+	}, []);
 
 	return (
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

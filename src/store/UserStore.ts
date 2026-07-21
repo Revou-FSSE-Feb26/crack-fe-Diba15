@@ -11,6 +11,56 @@ export const useUserStore = create<UserState>()(
 			user: null,
 			isAuthenticated: false,
 
+			checkAuth: async () => {
+				try {
+					const meRes = await axiosClient.get("/auth/me");
+					const dbUser = meRes.data;
+
+					const safeUser = {
+						id: dbUser.id,
+						name: dbUser.name,
+						email: dbUser.email,
+						role: dbUser.role,
+						balance: dbUser.balance,
+						created_at: dbUser.createdAt,
+						updated_at: dbUser.updatedAt,
+					};
+
+					if (dbUser.profile) {
+						useProfileStore.setState((state) => {
+							const mappedProfile = {
+								id: dbUser.profile.id || `p-${dbUser.id}`,
+								user_id: dbUser.id,
+								avatar_url: dbUser.profile.avatarUrl,
+								bio: dbUser.profile.bio,
+								is_verified: dbUser.profile.isVerified,
+								approved_portfolio_count: dbUser.profile.approvedPortfolioCount,
+								is_open_for_commission: dbUser.profile.isOpenForCommission,
+								base_price_idr: dbUser.profile.basePriceIdr,
+								strike_count: dbUser.profile.strikeCount,
+								updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
+							};
+
+							const exists = state.profiles.some(
+								(p) => p.user_id === dbUser.id,
+							);
+							const nextProfiles = exists
+								? state.profiles.map((p) =>
+										p.user_id === dbUser.id ? mappedProfile : p,
+									)
+								: [mappedProfile, ...state.profiles];
+
+							return { profiles: nextProfiles };
+						});
+					}
+
+					set({ user: safeUser, isAuthenticated: true });
+				} catch {
+					setAccessToken(null);
+					set({ user: null, isAuthenticated: false });
+				}
+			},
+
 			login: async (email, password) => {
 				try {
 					// 1. Coba login ke API Route Handler Next.js

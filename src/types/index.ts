@@ -434,6 +434,7 @@ export type SafeUser = Omit<User, "password">;
 export interface UserState {
 	user: SafeUser | null;
 	isAuthenticated: boolean;
+	checkAuth: () => Promise<void>;
 	login: (email: string, password: string) => Promise<ActionResult>;
 	register: (payload: UserPayload) => Promise<ActionResult>;
 	logout: () => void;

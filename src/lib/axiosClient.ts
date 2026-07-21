@@ -14,7 +14,7 @@ export const axiosClient = axios.create({
 	baseURL: "/api",
 });
 
-// 1. Request Interceptor: Otomatis menyisipkan Bearer token ke setiap request
+// 1. Request Interceptor: Otomatis menyisipkan Bearer token ke setiap request jika ada
 axiosClient.interceptors.request.use(
 	(config) => {
 		if (accessTokenInMemory) {
@@ -30,6 +30,17 @@ axiosClient.interceptors.response.use(
 	(response) => response,
 	async (error) => {
 		const originalRequest = error.config;
+
+		// Jangan lakukan refresh otomatis untuk request auth spesifik (login, register, logout, refresh)
+		const isAuthBypassUrl =
+			originalRequest?.url?.includes("/auth/login") ||
+			originalRequest?.url?.includes("/auth/register") ||
+			originalRequest?.url?.includes("/auth/logout") ||
+			originalRequest?.url?.includes("/auth/refresh");
+
+		if (isAuthBypassUrl) {
+			return Promise.reject(error);
+		}
 
 		// Jika error 401 dan request belum pernah di-retry
 		if (error.response?.status === 401 && !originalRequest._retry) {
@@ -49,16 +60,8 @@ axiosClient.interceptors.response.use(
 				// Ulangi request asli yang gagal
 				return axiosClient(originalRequest);
 			} catch (refreshError) {
+				// Bersihkan access token jika refresh gagal (misal guest atau session kadaluarsa)
 				setAccessToken(null);
-
-				// Hapus session user di local storage dan arahkan ke login HANYA jika sebelumnya sudah ter-login
-				if (typeof window !== "undefined") {
-					const hasSession = localStorage.getItem("trubrush-user");
-					localStorage.removeItem("trubrush-user");
-					if (hasSession) {
-						window.location.href = "/login";
-					}
-				}
 				return Promise.reject(refreshError);
 			}
 		}
