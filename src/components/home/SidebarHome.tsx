@@ -21,7 +21,7 @@ export default function SidebarHome() {
 	return (
 		<aside
 			id="sidebar-home"
-			className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)] w-60 shrink-0"
+			className="flex flex-col sticky top-24 h-fit max-h-[calc(100vh-96px)] w-full shrink-0"
 		>
 			{/* Artis Terpopuler */}
 			<section>

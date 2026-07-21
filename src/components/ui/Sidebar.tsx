@@ -21,6 +21,7 @@ import { useState } from "react";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Brand from "@/components/ui/brand/Brand";
 import { useMounted } from "@/hooks/useMounted";
+import { useProfileStore } from "@/store/ProfileStore";
 import { useThemeStore } from "@/store/ThemeStore";
 import { useUserStore } from "@/store/UserStore";
 
@@ -44,6 +45,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
 	const router = useRouter();
 	const { isAuthenticated, user, logout, isArtist, isAdmin, isCurator } =
 		useUserStore();
+	const { profiles } = useProfileStore();
+	const currentProfile = profiles.find((p) => p.user_id === user?.id);
+	const avatarUrl = currentProfile?.avatar_url;
 	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
 	const roles = {
@@ -131,6 +135,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 									<AvatarInitials
 										className="w-8 h-8 shrink-0"
 										name={user?.name || ""}
+										src={avatarUrl}
 									/>
 									<div className="flex flex-col items-start gap-0 text-left">
 										<span className="text-sm font-medium text-primary">

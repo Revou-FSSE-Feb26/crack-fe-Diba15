@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	ArrowLeft,
 	BadgeCheck,
 	Check,
 	ChevronDown,
@@ -108,16 +107,6 @@ export default function Detail() {
 	if (!artwork) {
 		return (
 			<main className="min-h-screen bg-background text-content pb-20">
-				<nav className="sticky top-0 z-45 bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
-					<Link
-						href="/"
-						className="inline-flex items-center gap-2 p-2 hover:bg-content/5 rounded-full transition-colors duration-200"
-					>
-						<ArrowLeft size={20} />
-						<span className="text-sm font-medium">Kembali</span>
-					</Link>
-				</nav>
-
 				<div className="max-w-3xl mx-auto px-4 py-16 text-center">
 					<div className="bg-surface border border-content/10 rounded-2xl p-8">
 						<ImageIcon className="w-10 h-10 text-content-muted mx-auto mb-3" />
@@ -144,19 +133,6 @@ export default function Detail() {
 
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">
-			<nav className="bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
-				<div className=" flex items-center gap-4">
-					<button
-						type="button"
-						onClick={() => router.back()}
-						className="p-2 hover:bg-content/5 rounded-full transition-colors duration-200 cursor-pointer"
-					>
-						<ArrowLeft size={20} />
-					</button>
-					<h1 className="font-semibold truncate">{artwork.title}</h1>
-				</div>
-			</nav>
-
 			<div className="max-w-6xl mx-auto px-4 py-6">
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 					<div className="lg:col-span-2 space-y-4">

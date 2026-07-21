@@ -63,7 +63,7 @@ export default function SearchPage() {
 								Hasil pencarian untuk
 							</h1>
 							<div className="flex items-center gap-2 mt-1">
-								<span className="text-lg font-bold text-content truncate max-w-[200px] sm:max-w-xs">
+								<span className="text-lg font-bold text-content truncate max-w-50 sm:max-w-xs">
 									{parsed.value}
 								</span>
 								<span
