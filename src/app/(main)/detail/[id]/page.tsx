@@ -271,7 +271,7 @@ export default function Detail() {
 								</p>
 							</div>
 
-							{artwork.tags.length > 0 && (
+							{artwork.tags && artwork.tags.length > 0 && (
 								<div className="flex flex-wrap gap-2 pt-2">
 									{artwork.tags.map((tag) => (
 										<Link

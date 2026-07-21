@@ -1,24 +1,24 @@
 import { useMemo, useState } from "react";
+import { useToggleFollow, useUserFollowing } from "@/hooks/useSocialQueries";
 import { axiosClient } from "@/lib/axiosClient";
 import { useCommissionStore } from "@/store/CommissionStore";
-import { useFollowStore } from "@/store/FollowStore";
 import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 
 /**
  * 👤 useUserProfile (Custom Hook)
  * Merangkum logika data profil, followed artists, riwayat komisi,
- * upload avatar (dengan validasi tipe & ukuran berkas), serta aksi unfollow.
+ * upload avatar (dengan validasi tipe & ukuran berkas), serta aksi unfollow via API Backend.
  */
 export function useUserProfile(userId: string) {
 	const { profiles, updateProfile } = useProfileStore();
 	const { updateCurrentUser } = useUserStore();
 	const { addToast } = useToastStore();
-	const { getFollowedArtistIds, unfollowArtist } = useFollowStore();
-	const { users } = useUserManagementStore();
 	const { commissions } = useCommissionStore();
+
+	const { data: rawFollowedArtists = [] } = useUserFollowing();
+	const toggleFollowMutation = useToggleFollow();
 
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -26,21 +26,21 @@ export function useUserProfile(userId: string) {
 		return profiles.find((p) => p.user_id === userId);
 	}, [profiles, userId]);
 
-	const followedArtistIds = useMemo(() => {
-		return getFollowedArtistIds(userId);
-	}, [getFollowedArtistIds, userId]);
-
 	const followedArtists = useMemo(() => {
-		return users
-			.filter((u) => followedArtistIds.includes(u.id))
-			.map((u) => {
-				const prof = profiles.find((p) => p.user_id === u.id);
-				return {
-					...u,
-					profile: prof,
-				};
-			});
-	}, [users, followedArtistIds, profiles]);
+		return rawFollowedArtists.map((artist) => ({
+			id: artist.id,
+			name: artist.name,
+			email: artist.email,
+			profile: artist.profile
+				? {
+						id: artist.profile.id,
+						avatar_url: artist.profile.avatarUrl,
+						bio: artist.profile.bio,
+						is_verified: artist.profile.isVerified,
+					}
+				: undefined,
+		}));
+	}, [rawFollowedArtists]);
 
 	const userCommissions = useMemo(() => {
 		return commissions.filter(
@@ -110,11 +110,7 @@ export function useUserProfile(userId: string) {
 	};
 
 	const handleUnfollowArtist = async (artistId: string) => {
-		unfollowArtist(userId, artistId);
-		addToast({
-			message: "Berhasil berhenti mengikuti artis.",
-			type: "success",
-		});
+		toggleFollowMutation.mutate(artistId);
 	};
 
 	return {

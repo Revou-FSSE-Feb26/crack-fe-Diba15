@@ -44,28 +44,19 @@ export function buildArtworkWithRelations(
 	sourceArtworks: Artwork[] = artworks,
 	sourceArtworkTags: ArtworkTag[] = artworkTags,
 	sourceTags: Tag[] = tags,
-	sourceUsers: User[] = users, // NEW
-	sourceProfiles: Profile[] = profiles, // NEW
+	sourceUsers: User[] = users,
+	sourceProfiles: Profile[] = profiles,
 ): ArtworkWithRelations[] {
 	return sourceArtworks.map((artwork) => {
-		// biome-ignore lint/suspicious/noExplicitAny: backend data normalization check
-		const anyArt = artwork as any;
+		const anyArt = artwork as ArtworkWithRelations;
 
-		// Jika data relasi sudah dipopulasi langsung oleh API backend, gunakan langsung
+		// Data dari backend sudah dinormalisasi oleh mapToFrontendArtwork (snake_case).
+		// Jika artist & tags sudah ada, langsung pakai tanpa transformasi.
 		if (anyArt.artist && Array.isArray(anyArt.tags)) {
-			return {
-				...artwork,
-				artist: anyArt.artist,
-				artist_profile: anyArt.artist_profile || {
-					is_verified: false,
-					is_open_for_commission: false,
-					avatar_url: null,
-					base_price_idr: null,
-				},
-				tags: anyArt.tags,
-			};
+			return artwork as ArtworkWithRelations;
 		}
 
+		// Fallback: rakit dari mock data lokal
 		const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
 		const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
 		const tagIds = sourceArtworkTags
@@ -93,8 +84,8 @@ export function searchArtworks(
 	sourceArtworks?: Artwork[],
 	sourceArtworkTags?: ArtworkTag[],
 	sourceTags?: Tag[],
-	sourceUsers?: User[], // NEW
-	sourceProfiles?: Profile[], // NEW
+	sourceUsers?: User[],
+	sourceProfiles?: Profile[],
 ): ArtworkWithRelations[] {
 	const all = buildArtworkWithRelations(
 		sourceArtworks,

@@ -2,34 +2,17 @@
 
 import { ArrowLeft, Heart } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
 
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
-import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useMounted } from "@/hooks/useMounted";
-import { useFavoriteStore } from "@/store/FavoriteStore";
+import { useUserFavorites } from "@/hooks/useSocialQueries";
 import { useUserStore } from "@/store/UserStore";
 
 export default function FavoriteList() {
 	const { user, isAuthenticated } = useUserStore();
-	const favoritesByUser = useFavoriteStore((state) => state.favoritesByUser);
-	const { data: artworks = [], isLoading } = useArtworks();
+	const { data: favoriteArtworks = [], isLoading } = useUserFavorites();
 	const mounted = useMounted();
-
-	const favoriteArtworks = useMemo(() => {
-		if (!user) return [];
-
-		const favoriteIds = favoritesByUser[user.id] ?? [];
-		const artworkById = new Map(
-			artworks.map((artwork) => [artwork.id, artwork]),
-		);
-
-		return [...favoriteIds]
-			.reverse()
-			.map((id) => artworkById.get(id))
-			.filter((artwork) => artwork !== undefined);
-	}, [user, favoritesByUser, artworks]);
 
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">

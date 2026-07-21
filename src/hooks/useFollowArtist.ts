@@ -1,24 +1,24 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { useFollowStore } from "@/store/FollowStore";
+import { useToggleFollow, useUserFollowingIds } from "@/hooks/useSocialQueries";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 
 /**
  * 🔗 useFollowArtist (Custom Hook)
  * Merangkum seluruh pengecekan, login redirect modal, validasi role,
- * dan sinkronisasi status follow/unfollow artis di berbagai halaman.
+ * dan sinkronisasi status follow/unfollow artis via API Backend.
  */
 export function useFollowArtist(artistId: string) {
 	const router = useRouter();
 	const currentUser = useUserStore((state) => state.user);
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 	const { openModal } = useModalStore();
-	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
 
-	const isArtistFollowed = currentUser
-		? isFollowing(currentUser.id, artistId)
-		: false;
+	const { data: followingIds = [] } = useUserFollowingIds();
+	const toggleFollowMutation = useToggleFollow();
+
+	const isArtistFollowed = followingIds.includes(artistId);
 
 	const handleFollowToggle = useCallback(
 		(e?: React.MouseEvent) => {
@@ -48,19 +48,13 @@ export function useFollowArtist(artistId: string) {
 				return;
 			}
 
-			if (isArtistFollowed) {
-				unfollowArtist(currentUser.id, artistId);
-			} else {
-				followArtist(currentUser.id, artistId);
-			}
+			toggleFollowMutation.mutate(artistId);
 		},
 		[
 			isAuthenticated,
 			currentUser,
-			isArtistFollowed,
 			artistId,
-			followArtist,
-			unfollowArtist,
+			toggleFollowMutation,
 			openModal,
 			router,
 		],
@@ -69,5 +63,6 @@ export function useFollowArtist(artistId: string) {
 	return {
 		isArtistFollowed,
 		handleFollowToggle,
+		isLoading: toggleFollowMutation.isPending,
 	};
 }

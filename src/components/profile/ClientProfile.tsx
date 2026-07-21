@@ -356,6 +356,7 @@ export default function ClientProfile({
 										<AvatarInitials
 											name={artist.name}
 											className="w-12 h-12 text-sm shrink-0"
+											src={artist.profile?.avatar_url}
 										/>
 										<div className="min-w-0">
 											<p className="text-sm font-bold text-content truncate hover:text-primary transition-colors">

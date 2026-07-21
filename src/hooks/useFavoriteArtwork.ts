@@ -1,39 +1,37 @@
-import { useFavoriteStore } from "@/store/FavoriteStore";
+import {
+	useToggleFavorite,
+	useUserFavoriteIds,
+} from "@/hooks/useSocialQueries";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 
 /**
  * ❤️ useFavoriteArtwork (Custom Hook)
- * Merangkum logika penambahan & penghapusan karya dari daftar favorit.
+ * Merangkum logika penambahan & penghapusan karya dari daftar favorit via API Backend.
  */
-export function useFavoriteArtwork(artworkId: string, artworkTitle: string) {
-	const { user, isAuthenticated } = useUserStore();
-	const { isFavorite, toggleFavorite } = useFavoriteStore();
+export function useFavoriteArtwork(artworkId: string, _artworkTitle?: string) {
+	const { isAuthenticated } = useUserStore();
+	const { data: favoriteIds = [] } = useUserFavoriteIds();
+	const toggleFavoriteMutation = useToggleFavorite();
 	const { addToast } = useToastStore();
 
-	const isArtworkFavorite = user ? isFavorite(user.id, artworkId) : false;
+	const isArtworkFavorite = favoriteIds.includes(artworkId);
 
 	const handleFavoriteToggle = () => {
-		if (!isAuthenticated || !user) {
+		if (!isAuthenticated) {
 			addToast({
-				message: "Login terlebih dahulu untuk menambahkan favorite.",
+				message: "Login terlebih dahulu untuk menambahkan ke favorit.",
 				type: "warning",
 			});
 			return;
 		}
 
-		const addedToFavorite = toggleFavorite(user.id, artworkId);
-
-		addToast({
-			message: addedToFavorite
-				? `Berhasil ditambahkan ke favorite: ${artworkTitle}.`
-				: `Dihapus dari favorite: ${artworkTitle}.`,
-			type: addedToFavorite ? "success" : "info",
-		});
+		toggleFavoriteMutation.mutate(artworkId);
 	};
 
 	return {
 		isArtworkFavorite,
 		handleFavoriteToggle,
+		isLoading: toggleFavoriteMutation.isPending,
 	};
 }
