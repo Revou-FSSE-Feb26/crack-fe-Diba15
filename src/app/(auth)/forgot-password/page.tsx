@@ -45,15 +45,15 @@ export default function ForgotPasswordPage() {
 	};
 
 	return (
-		<div className="min-h-screen flex flex-col justify-center items-center p-6 text-content">
+		<div className="auth-page-wrapper">
 			{/* Palette accent dots decorator */}
 			<div className="absolute top-5 right-5 flex gap-1.5">
-				<div className="w-3 h-3 rounded-full bg-[#e8a87c] opacity-70"></div>
-				<div className="w-3 h-3 rounded-full bg-[#88ccdd] opacity-70"></div>
-				<div className="w-3 h-3 rounded-full bg-[#a8d8b0] opacity-70"></div>
+				<div className="deco-dot-warm"></div>
+				<div className="deco-dot-accent"></div>
+				<div className="deco-dot-mint"></div>
 			</div>
 
-			<div className="w-full max-w-md bg-surface border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+			<div className="auth-card">
 				<Link
 					href="/login"
 					className="inline-flex items-center gap-2 text-sm text-content-muted hover:text-primary mb-6 transition-colors"
@@ -91,10 +91,7 @@ export default function ForgotPasswordPage() {
 				) : (
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 						<div>
-							<label
-								htmlFor="email"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
+							<label htmlFor="email" className="form-label">
 								Email Akun
 							</label>
 							<Input
@@ -109,12 +106,10 @@ export default function ForgotPasswordPage() {
 									},
 								})}
 							>
-								<Mail className="h-5 w-5 text-gray-400" />
+								<Mail className="form-input-icon" />
 							</Input>
 							{errors.email && (
-								<p className="text-danger text-xs mt-1">
-									{errors.email.message}
-								</p>
+								<p className="form-error-msg">{errors.email.message}</p>
 							)}
 						</div>
 

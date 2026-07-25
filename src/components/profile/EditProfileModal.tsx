@@ -89,10 +89,7 @@ export default function EditProfileModal({
 		() => (
 			<div className="space-y-4">
 				<div>
-					<label
-						htmlFor="profile-name"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
+					<label htmlFor="profile-name" className="form-label">
 						Nama
 					</label>
 					<Input
@@ -127,7 +124,7 @@ export default function EditProfileModal({
 								? "Ceritakan gaya, medium, dan spesialisasi kamu sebagai artist."
 								: "Tulis bio singkat profil kamu di sini."
 						}
-						className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+						className="form-textarea"
 						{...register("bio", {
 							maxLength: { value: 500, message: "Bio maksimal 500 karakter" },
 						})}

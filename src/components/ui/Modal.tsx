@@ -164,7 +164,7 @@ function ModalContent() {
 		>
 			{/* Backdrop */}
 			<div
-				className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+				className="modal-backdrop"
 				onClick={handleCancel}
 				aria-hidden="true"
 			/>
@@ -175,10 +175,7 @@ function ModalContent() {
 				aria-modal="true"
 				aria-labelledby="modal-title"
 				className={[
-					`relative z-10 w-full ${maxWidthClassName}`,
-					"bg-surface rounded-2xl shadow-2xl border border-content/10 p-6",
-					"max-h-[85vh] flex flex-col",
-					"transition-all duration-200",
+					`modal-card ${maxWidthClassName}`,
 					visible ? "scale-100 translate-y-0" : "scale-95 translate-y-3",
 				].join(" ")}
 			>
@@ -211,21 +208,13 @@ function ModalContent() {
 							formClassName,
 						].join(" ")}
 					>
-						<div className="overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-1 min-h-0 px-1.5 py-2">
-							{bodyContent}
-						</div>
-						<div className="shrink-0 pt-4 border-t border-content/10 mt-2">
-							{actionButtons}
-						</div>
+						<div className="modal-scroll-area">{bodyContent}</div>
+						<div className="modal-footer">{actionButtons}</div>
 					</form>
 				) : (
 					<div className="flex flex-col min-h-0 flex-1 overflow-hidden">
-						<div className="overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-1 min-h-0 px-1.5 py-2">
-							{bodyContent}
-						</div>
-						<div className="shrink-0 pt-4 border-t border-content/10 mt-2">
-							{actionButtons}
-						</div>
+						<div className="modal-scroll-area">{bodyContent}</div>
+						<div className="modal-footer">{actionButtons}</div>
 					</div>
 				)}
 			</div>

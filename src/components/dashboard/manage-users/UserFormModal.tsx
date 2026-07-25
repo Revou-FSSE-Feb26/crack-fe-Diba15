@@ -114,10 +114,7 @@ export default function UserFormModal({
 				</div>
 
 				<div>
-					<label
-						htmlFor="user-email"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
+					<label htmlFor="user-email" className="form-label">
 						Email
 					</label>
 					<Input
@@ -132,10 +129,10 @@ export default function UserFormModal({
 							},
 						})}
 					>
-						<Mail className="h-5 w-5 text-gray-400" />
+						<Mail className="form-input-icon" />
 					</Input>
 					{errors.email && (
-						<p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+						<p className="form-error-msg">{errors.email.message}</p>
 					)}
 				</div>
 

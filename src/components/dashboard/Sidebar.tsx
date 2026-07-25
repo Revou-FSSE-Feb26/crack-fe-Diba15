@@ -93,7 +93,7 @@ export default function DashboardSidebar() {
 						<Link
 							key={item.label}
 							href={item.href}
-							className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+							className={`pill-tab ${
 								isActive
 									? "bg-primary text-white shadow-sm"
 									: "bg-surface border border-content/10 text-content-muted hover:bg-content/5"

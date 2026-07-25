@@ -66,9 +66,9 @@ export default function Login() {
 			<section className="flex flex-1 justify-center relative">
 				{/* Palette accent dots decorator */}
 				<div className="absolute top-5 right-5 flex gap-1.5">
-					<div className="w-3 h-3 rounded-full bg-[#e8a87c] opacity-70"></div>
-					<div className="w-3 h-3 rounded-full bg-[#88ccdd] opacity-70"></div>
-					<div className="w-3 h-3 rounded-full bg-[#a8d8b0] opacity-70"></div>
+					<div className="deco-dot-warm"></div>
+					<div className="deco-dot-accent"></div>
+					<div className="deco-dot-mint"></div>
 				</div>
 
 				<div className="flex flex-col justify-center items-center gap-4 h-screen text-primary p-12">
@@ -86,10 +86,7 @@ export default function Login() {
 					>
 						{/* Email */}
 						<div>
-							<label
-								htmlFor="email"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
+							<label htmlFor="email" className="form-label">
 								Email
 							</label>
 							<Input
@@ -104,21 +101,16 @@ export default function Login() {
 									},
 								})}
 							>
-								<Mail className="h-5 w-5 text-gray-400" />
+								<Mail className="form-input-icon" />
 							</Input>
 							{errors.email && (
-								<p className="text-danger text-xs mt-1">
-									{errors.email.message}
-								</p>
+								<p className="form-error-msg">{errors.email.message}</p>
 							)}
 						</div>
 
 						{/* Password */}
 						<div>
-							<label
-								htmlFor="password"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
+							<label htmlFor="password" className="form-label">
 								Password
 							</label>
 							<Input
@@ -129,12 +121,10 @@ export default function Login() {
 									required: "Password wajib diisi",
 								})}
 							>
-								<Lock className="h-5 w-5 text-gray-400" />
+								<Lock className="form-input-icon" />
 							</Input>
 							{errors.password && (
-								<p className="text-danger text-xs mt-1">
-									{errors.password.message}
-								</p>
+								<p className="form-error-msg">{errors.password.message}</p>
 							)}
 						</div>
 						<div>

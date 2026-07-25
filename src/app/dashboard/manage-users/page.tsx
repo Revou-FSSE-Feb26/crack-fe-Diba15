@@ -139,7 +139,7 @@ export default function ManageUsersPage() {
 							{user.role === "artist" &&
 								artistProfile &&
 								artistProfile.strike_count >= 5 && (
-									<span className="rounded-full bg-danger/10 text-danger px-2 py-0.5 text-[10px] font-bold uppercase shrink-0">
+									<span className="badge-blocked">
 										Blocked ({artistProfile.strike_count}/5)
 									</span>
 								)}

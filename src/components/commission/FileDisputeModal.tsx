@@ -61,17 +61,14 @@ export default function FileDisputeModal({
 				</div>
 
 				<div>
-					<label
-						htmlFor="dispute-reason"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
+					<label htmlFor="dispute-reason" className="form-label">
 						Alasan Detail Dispute
 					</label>
 					<textarea
 						id="dispute-reason"
 						rows={5}
 						placeholder="Jelaskan secara terperinci mengapa Anda mengajukan dispute, bagian mana dari hasil yang tidak sesuai, dan sertakan bukti penunjang (misal: visual tidak sesuai sketch, indikasi AI, dll)."
-						className="w-full resize-none rounded-lg border border-slate-200 bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700"
+						className="form-textarea"
 						{...register("reason", {
 							required: "Alasan dispute wajib diisi",
 							minLength: {
@@ -82,7 +79,7 @@ export default function FileDisputeModal({
 						})}
 					/>
 					{errors.reason && (
-						<p className="mt-1 text-xs text-danger">{errors.reason.message}</p>
+						<p className="form-error-msg">{errors.reason.message}</p>
 					)}
 					<p className="mt-1.5 text-[11px] text-content-muted">
 						Saran: Jelaskan secara terperinci agar Kurator dapat memproses dan

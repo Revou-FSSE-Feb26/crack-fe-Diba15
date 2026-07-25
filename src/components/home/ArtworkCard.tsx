@@ -253,7 +253,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-20 overflow-hidden py-1">
 							<button
 								type="button"
-								className="w-full text-left px-4 py-2.5 text-sm text-content hover:bg-content/5 flex items-center gap-2.5 transition-colors"
+								className="dropdown-item"
 								onClick={() => {
 									handleCopyLink(artwork.id);
 								}}
@@ -263,7 +263,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							</button>
 							<button
 								type="button"
-								className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+								className="dropdown-item-danger"
 								onClick={() => {
 									handleReport();
 									setIsDropdownOpen(false);

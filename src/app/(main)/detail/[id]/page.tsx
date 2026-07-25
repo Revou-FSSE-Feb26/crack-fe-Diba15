@@ -27,8 +27,8 @@ import { useReportStore } from "@/store/ReportStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
+import type { User } from "@/types";
 import { randomKey } from "@/utils";
-import {User} from "@/types";
 
 export default function Detail() {
 	const params = useParams();

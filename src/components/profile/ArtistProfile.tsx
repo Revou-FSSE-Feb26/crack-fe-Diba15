@@ -235,7 +235,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 												}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+												className="social-link-badge"
 											>
 												<Image
 													src={instagramIcon}
@@ -256,7 +256,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 												}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+												className="social-link-badge"
 											>
 												<Image
 													src={xIcon}
@@ -277,7 +277,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 												}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+												className="social-link-badge"
 											>
 												<Image
 													src={pixivIcon}
@@ -298,7 +298,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 												}
 												target="_blank"
 												rel="noopener noreferrer"
-												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+												className="social-link-badge"
 											>
 												<Globe className="w-3.5 h-3.5 text-primary" />
 												Website / Linktree

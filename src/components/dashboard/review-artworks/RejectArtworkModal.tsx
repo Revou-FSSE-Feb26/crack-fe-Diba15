@@ -85,17 +85,14 @@ export default function RejectArtworkModal({
 				</div>
 
 				<div>
-					<label
-						htmlFor="reject-reason"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
+					<label htmlFor="reject-reason" className="form-label">
 						Alasan penolakan
 					</label>
 					<textarea
 						id="reject-reason"
 						rows={4}
 						placeholder="Jelaskan secara spesifik mengapa artwork ditolak, misalnya indikasi AI, WIP tidak valid, atau ketidaksesuaian kebijakan platform."
-						className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+						className="form-textarea"
 						{...register("reason", {
 							required: "Alasan penolakan wajib diisi",
 							minLength: {
@@ -106,7 +103,7 @@ export default function RejectArtworkModal({
 						})}
 					/>
 					{errors.reason && (
-						<p className="mt-1 text-xs text-danger">{errors.reason.message}</p>
+						<p className="form-error-msg">{errors.reason.message}</p>
 					)}
 				</div>
 			</>

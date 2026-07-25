@@ -64,17 +64,14 @@ export default function ReportArtModal({
 				</div>
 
 				<div>
-					<label
-						htmlFor="report-reason"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
+					<label htmlFor="report-reason" className="form-label">
 						Alasan Detail Laporan
 					</label>
 					<textarea
 						id="report-reason"
 						rows={4}
 						placeholder="Jelaskan secara terperinci mengapa Anda melaporkan karya ini..."
-						className="w-full resize-none rounded-lg border border-slate-200 bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary dark:border-slate-700"
+						className="form-textarea"
 						{...register("reason", {
 							required: "Alasan laporan wajib diisi",
 							minLength: {
@@ -85,7 +82,7 @@ export default function ReportArtModal({
 						})}
 					/>
 					{errors.reason && (
-						<p className="mt-1 text-xs text-danger">{errors.reason.message}</p>
+						<p className="form-error-msg">{errors.reason.message}</p>
 					)}
 				</div>
 			</div>
