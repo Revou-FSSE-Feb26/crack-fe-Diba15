@@ -11,7 +11,14 @@ const mapDbUser = (dbUser: DbUserResponse): User => {
 				user_id: dbUser.id,
 				avatar_url: dbUser.profile.avatarUrl ?? null,
 				bio: dbUser.profile.bio ?? null,
-				social_links: dbUser.profile.socialLinks ?? null,
+				social_links: dbUser.profile
+					? (dbUser.profile.socialLinks ?? {
+							instagram: dbUser.profile.instagramUrl || undefined,
+							twitter: dbUser.profile.twitterUrl || undefined,
+							pixiv: dbUser.profile.pixivUrl || undefined,
+							website: dbUser.profile.websiteUrl || undefined,
+						})
+					: null,
 				is_verified: dbUser.profile.isVerified ?? false,
 				approved_portfolio_count: dbUser.profile.approvedPortfolioCount ?? 0,
 				is_open_for_commission: dbUser.profile.isOpenForCommission ?? false,

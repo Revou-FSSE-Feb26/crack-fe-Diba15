@@ -111,13 +111,16 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		const trimmedName = values.name.trim();
 		const nameChanged = trimmedName !== user.name;
 
-		const social_links = {
-			instagram: values.instagram_url?.trim() || undefined,
-			twitter: values.twitter_url?.trim() || undefined,
-			pixiv: values.pixiv_url?.trim() || undefined,
-			website: values.website_url?.trim() || undefined,
-		};
-		const hasSocialLinks = Object.values(social_links).some(Boolean);
+		const social_links: Record<string, string> = {};
+		if (values.instagram_url?.trim())
+			social_links.instagram = values.instagram_url.trim();
+		if (values.twitter_url?.trim())
+			social_links.twitter = values.twitter_url.trim();
+		if (values.pixiv_url?.trim()) social_links.pixiv = values.pixiv_url.trim();
+		if (values.website_url?.trim())
+			social_links.website = values.website_url.trim();
+
+		const hasSocialLinks = Object.keys(social_links).length > 0;
 
 		const nameResult = nameChanged
 			? await updateUserRecord(user.id, { name: trimmedName })

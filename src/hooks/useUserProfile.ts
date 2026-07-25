@@ -57,7 +57,10 @@ export function useUserProfile(userId: string) {
 			await axiosClient.patch("/profile", {
 				avatarUrl: payload.avatar_url,
 				bio: payload.bio,
-				socialLinks: payload.social_links,
+				instagramUrl: payload.social_links?.instagram || null,
+				twitterUrl: payload.social_links?.twitter || null,
+				pixivUrl: payload.social_links?.pixiv || null,
+				websiteUrl: payload.social_links?.website || null,
 				isOpenForCommission: payload.is_open_for_commission,
 				basePriceIdr: payload.base_price_idr,
 			});

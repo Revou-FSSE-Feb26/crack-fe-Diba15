@@ -6,16 +6,12 @@ export async function PATCH(request: Request) {
 	try {
 		const body = await request.json();
 
-		// Petakan properti dari frontend (snake_case) ke backend (camelCase)
-		const mappedBody: Record<string, unknown> = {};
-		if (body.bio !== undefined) mappedBody.bio = body.bio;
-		if (body.avatar_url !== undefined) mappedBody.avatarUrl = body.avatar_url;
-		if (body.is_open_for_commission !== undefined) {
-			mappedBody.isOpenForCommission = body.is_open_for_commission;
-		}
-		if (body.base_price_idr !== undefined) {
-			mappedBody.basePriceIdr = body.base_price_idr;
-		}
+		const mappedBody: Record<string, unknown> = Object.fromEntries(
+			Object.entries(body).map(([key, value]) => [
+				key.replace(/_/g, ""),
+				value,
+			]),
+		);
 
 		const res = await axiosServer.patch("/profile", mappedBody);
 

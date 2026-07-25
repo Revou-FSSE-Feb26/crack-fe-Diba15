@@ -203,6 +203,10 @@ export interface DbUserResponse {
 		avatarUrl?: string | null;
 		bio?: string | null;
 		socialLinks?: SocialLinks | null;
+		instagramUrl?: string | null;
+		twitterUrl?: string | null;
+		pixivUrl?: string | null;
+		websiteUrl?: string | null;
 		isVerified?: boolean;
 		approvedPortfolioCount?: number;
 		isOpenForCommission?: boolean;
