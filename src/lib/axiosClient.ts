@@ -14,7 +14,7 @@ export const axiosClient = axios.create({
 	baseURL: "/api",
 });
 
-// 1. Request Interceptor: Otomatis menyisipkan Bearer token ke setiap request jika ada
+// Request Interceptor: Otomatis menyisipkan Bearer token ke setiap request jika ada
 axiosClient.interceptors.request.use(
 	(config) => {
 		if (accessTokenInMemory) {
@@ -25,7 +25,7 @@ axiosClient.interceptors.request.use(
 	(error) => Promise.reject(error),
 );
 
-// 2. Response Interceptor: Menangani error 401 secara transparan dengan refresh token
+// Response Interceptor: Menangani error 401 secara transparan dengan refresh token
 axiosClient.interceptors.response.use(
 	(response) => response,
 	async (error) => {

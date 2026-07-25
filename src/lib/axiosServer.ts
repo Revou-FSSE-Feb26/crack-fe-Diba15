@@ -8,7 +8,7 @@ export const axiosServer = axios.create({
 	withCredentials: true,
 });
 
-// 1. Request Interceptor: Otomatis menyalin Authorization header dan Cookie dari Next.js ke request NestJS
+// Request Interceptor: Otomatis menyalin Authorization header dan Cookie dari Next.js ke request NestJS
 axiosServer.interceptors.request.use(async (config) => {
 	try {
 		// Ambil headers dari request masuk Next.js, teruskan Authorization
@@ -30,7 +30,7 @@ axiosServer.interceptors.request.use(async (config) => {
 	return config;
 });
 
-// 2. Response Interceptor: Otomatis menangkap Set-Cookie refresh_token dari NestJS dan menyimpannya kembali ke Next.js
+// Response Interceptor: Otomatis menangkap Set-Cookie refresh_token dari NestJS dan menyimpannya kembali ke Next.js
 axiosServer.interceptors.response.use(
 	async (response) => {
 		try {

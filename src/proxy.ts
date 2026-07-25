@@ -1,37 +1,21 @@
 // proxy.ts
+import { jwtDecode } from "jwt-decode";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-// Fungsi pembantu untuk decode payload JWT Base64Url secara aman di Edge
-function safeDecodeJWT(token: string) {
-	try {
-		const payloadPart = token.split(".")[1];
-		if (!payloadPart) return null;
-
-		// Ubah format JWT Base64Url ke Base64 standar agar atob() tidak error
-		const base64 = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
-		const padded = base64.padEnd(
-			base64.length + ((4 - (base64.length % 4)) % 4),
-			"=",
-		);
-
-		return JSON.parse(atob(padded));
-	} catch (e) {
-		console.error("Gagal melakukan dekode token di Proxy:", e);
-		return null;
-	}
+interface DecodedToken {
+  sub: string;
+  role: string;
 }
 
-// Menggunakan nama fungsi `proxy` dan wajib `async` untuk Next.js 16
-export async function proxy(request: NextRequest) {
-	// Di Next.js 16, cookies.get() bersifat async (mengembalikan Promise)
-	const tokenCookie = await request.cookies.get("refresh_token");
+export function proxy(request: NextRequest) {
+	const tokenCookie = request.cookies.get("refresh_token");
 	const refreshToken = tokenCookie?.value;
 	const pathname = request.nextUrl.pathname;
 
 	let role: string | null = null;
 	if (refreshToken) {
-		const decoded = safeDecodeJWT(refreshToken);
+		const decoded = jwtDecode<DecodedToken>(refreshToken);
 		if (decoded) {
 			role = decoded.role;
 		}
