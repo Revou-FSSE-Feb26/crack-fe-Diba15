@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
-import { useCreateArtwork, usePopularTags } from "@/hooks/useArtworkQueries";
+import { useCreateArtwork, useAllTags } from "@/hooks/useArtworkQueries";
 import { axiosClient } from "@/lib/axiosClient";
 import { useModalStore } from "@/store/ModalStore";
 import { useProfileStore } from "@/store/ProfileStore";
@@ -51,7 +51,7 @@ export default function PostArtPage() {
 
 	// Menggunakan TanStack Query v5 untuk membuat karya & mengambil sugesti tag
 	const createMutation = useCreateArtwork();
-	const { data: popularTags = [] } = usePopularTags();
+	const { data: allTags = [] } = useAllTags();
 
 	// File Upload States
 	const [artworkFiles, setArtworkFiles] = useState<File[]>([]);
@@ -91,7 +91,7 @@ export default function PostArtPage() {
 	const selectedTags = splitTags(useWatch({ control, name: "tags" }) ?? "");
 	const normalizedSelectedTags = selectedTags.map((tag) => tag.toLowerCase());
 	const tagQuery = tagInput.trim().toLowerCase();
-	const tagSuggestions = popularTags
+	const tagSuggestions = allTags
 		.filter(
 			(tag) => !normalizedSelectedTags.includes(tag.tag_name.toLowerCase()),
 		)
@@ -602,7 +602,7 @@ export default function PostArtPage() {
 											</button>
 										))}
 										{tagInput.trim() &&
-											!popularTags.some(
+											!allTags.some(
 												(tag) =>
 													tag.tag_name.toLowerCase() ===
 													tagInput.trim().toLowerCase(),
