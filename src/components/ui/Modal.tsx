@@ -111,16 +111,16 @@ function ModalContent() {
 	const bodyContent = content ? (
 		<div
 			className={[
-				"mb-6",
+				"mb-2",
 				type === "form" ? "" : "text-sm text-content-muted",
 			].join(" ")}
 		>
 			{content}
 		</div>
 	) : description ? (
-		<p className="text-sm text-content-muted text-center mb-6">{description}</p>
+		<p className="text-sm text-content-muted text-center mb-2">{description}</p>
 	) : (
-		<div className="mb-4" />
+		<div className="mb-2" />
 	);
 
 	const actionButtons =
@@ -177,6 +177,7 @@ function ModalContent() {
 				className={[
 					`relative z-10 w-full ${maxWidthClassName}`,
 					"bg-surface rounded-2xl shadow-2xl border border-content/10 p-6",
+					"max-h-[85vh] flex flex-col",
 					"transition-all duration-200",
 					visible ? "scale-100 translate-y-0" : "scale-95 translate-y-3",
 				].join(" ")}
@@ -186,32 +187,46 @@ function ModalContent() {
 					type="button"
 					onClick={handleCancel}
 					aria-label="Tutup modal"
-					className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-content/5 transition-colors cursor-pointer"
+					className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-content/5 transition-colors cursor-pointer z-20"
 				>
 					<X size={16} className="text-content-muted" />
 				</button>
 
-				{/* Icon */}
-				<ModalIcon type={type} variant={variant} />
-
-				{/* Title */}
-				<h2
-					id="modal-title"
-					className="text-lg font-bold text-content text-center mb-2"
-				>
-					{title}
-				</h2>
+				{/* Header area (shrink-0) */}
+				<div className="shrink-0">
+					<ModalIcon type={type} variant={variant} />
+					<h2
+						id="modal-title"
+						className="text-lg font-bold text-content text-center mb-2"
+					>
+						{title}
+					</h2>
+				</div>
 
 				{type === "form" ? (
-					<form onSubmit={handleFormSubmit} className={formClassName}>
-						{bodyContent}
-						{actionButtons}
+					<form
+						onSubmit={handleFormSubmit}
+						className={[
+							"flex flex-col min-h-0 flex-1 overflow-hidden",
+							formClassName,
+						].join(" ")}
+					>
+						<div className="overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-1 min-h-0 px-1.5 py-2">
+							{bodyContent}
+						</div>
+						<div className="shrink-0 pt-4 border-t border-content/10 mt-2">
+							{actionButtons}
+						</div>
 					</form>
 				) : (
-					<>
-						{bodyContent}
-						{actionButtons}
-					</>
+					<div className="flex flex-col min-h-0 flex-1 overflow-hidden">
+						<div className="overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-1 min-h-0 px-1.5 py-2">
+							{bodyContent}
+						</div>
+						<div className="shrink-0 pt-4 border-t border-content/10 mt-2">
+							{actionButtons}
+						</div>
+					</div>
 				)}
 			</div>
 		</div>

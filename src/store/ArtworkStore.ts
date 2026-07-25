@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { ArtworkState } from "@/types";
+import type { ArtworkState, ArtworkWithRelations } from "@/types";
 
 /**
  * 🗄️ useArtworkStore (Client State Shell)
@@ -21,8 +21,7 @@ export const useArtworkStore = create<ArtworkState>()(() => ({
 	fetchArtworks: async () => {},
 	fetchPopularTags: async () => [],
 	fetchArtworkById: async () => null,
-	// biome-ignore lint/suspicious/noExplicitAny: shell compatibility
-	createArtwork: async () => ({}) as any,
+	createArtwork: async () => ({}) as unknown as ArtworkWithRelations,
 	approveArtwork: async () => ({ success: true, message: "" }),
 	rejectArtwork: async () => ({ success: true, message: "" }),
 	deleteArtwork: async () => ({ success: true, message: "" }),

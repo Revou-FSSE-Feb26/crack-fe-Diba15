@@ -53,12 +53,22 @@ export interface User {
 	balance: number;
 	created_at: string;
 	updated_at: string;
+	profile?: Profile;
 }
+
+export type SocialLinks = {
+	instagram?: string;
+	twitter?: string;
+	pixiv?: string;
+	website?: string;
+	[key: string]: string | undefined;
+};
 
 export interface Profile {
 	id: string;
 	user_id: string;
 	bio: string | null;
+	social_links?: SocialLinks | null;
 	is_verified: boolean;
 	avatar_url: string | null;
 	approved_portfolio_count: number;
@@ -169,12 +179,37 @@ export interface ArtistDetailResponse {
 	user_id: string;
 	avatar_url: string | null;
 	bio: string | null;
+	social_links?: SocialLinks | null;
 	is_verified: boolean;
 	is_open_for_commission: boolean;
 	base_price_idr: number | null;
 	approved_portfolio_count: number;
 	followersCount: number;
 	user: Pick<User, "id" | "name" | "email" | "role">;
+}
+
+/** Response User dari NestJS Backend (camelCase dari Prisma) */
+export interface DbUserResponse {
+	id: string;
+	name: string;
+	email: string;
+	role: UserRole;
+	balance: number;
+	createdAt: string;
+	updatedAt: string;
+	profile?: {
+		id?: string;
+		userId?: string;
+		avatarUrl?: string | null;
+		bio?: string | null;
+		socialLinks?: SocialLinks | null;
+		isVerified?: boolean;
+		approvedPortfolioCount?: number;
+		isOpenForCommission?: boolean;
+		basePriceIdr?: number | null;
+		strikeCount?: number;
+		updatedAt?: string;
+	} | null;
 }
 
 /** Komisi lengkap dengan semua relasi — untuk commission detail page */

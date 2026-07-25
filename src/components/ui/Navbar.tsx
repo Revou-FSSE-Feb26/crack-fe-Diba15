@@ -17,7 +17,6 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 
 import NavbarBrand from "@/components/ui/brand/NavbarBrand";
 import { useMounted } from "@/hooks/useMounted";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useUserStore } from "@/store/UserStore";
 
 interface NavbarProps {
@@ -29,9 +28,7 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 	const router = useRouter();
 	const { isArtist, isClient, isAdmin, isCurator, logout, user } =
 		useUserStore();
-	const { profiles } = useProfileStore();
-	const userProfile = profiles.find((p) => p.user_id === user?.id);
-	const avatarUrl = userProfile?.avatar_url;
+	const avatarUrl = user?.profile?.avatar_url;
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const mounted = useMounted();
 	const dropdownRef = useRef<HTMLDivElement>(null);

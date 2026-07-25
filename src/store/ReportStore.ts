@@ -3,8 +3,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useArtworkStore } from "@/store/ArtworkStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useUserStore } from "@/store/UserStore";
 import type { Report, ReportState } from "@/types";
 
 // TODO(backend): Store ini masih 100% client-side (Zustand + persist ke localStorage).
@@ -131,14 +131,14 @@ export const useReportStore = create<ReportState>()(
 				}));
 
 				// 3. Increment artist strike count
-				const profileStore = useProfileStore.getState();
-				const artistProfile = profileStore.getProfileByUserId(artistId);
-
-				if (artistProfile) {
-					const currentStrike = artistProfile.strike_count ?? 0;
-					const nextStrike = currentStrike + 1;
-					profileStore.updateProfile(artistId, {
-						strike_count: nextStrike,
+				const userState = useUserStore.getState();
+				if (userState.user?.id === artistId && userState.user.profile) {
+					const currentStrike = userState.user.profile.strike_count ?? 0;
+					userState.updateCurrentUser({
+						profile: {
+							...userState.user.profile,
+							strike_count: currentStrike + 1,
+						},
 					});
 				}
 

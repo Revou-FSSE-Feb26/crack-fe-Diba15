@@ -18,10 +18,9 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
-import { useCreateArtwork, useAllTags } from "@/hooks/useArtworkQueries";
+import { useAllTags, useCreateArtwork } from "@/hooks/useArtworkQueries";
 import { axiosClient } from "@/lib/axiosClient";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { UploadType } from "@/types";
@@ -46,8 +45,7 @@ export default function PostArtPage() {
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
 	const [tagInput, setTagInput] = useState("");
-	const { profiles } = useProfileStore();
-	const profile = profiles.find((item) => item.user_id === user?.id);
+	const profile = user?.profile;
 
 	// Menggunakan TanStack Query v5 untuk membuat karya & mengambil sugesti tag
 	const createMutation = useCreateArtwork();
@@ -403,8 +401,7 @@ export default function PostArtPage() {
 							<div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-3">
 								{artworkFiles.map((file, index) => (
 									<div
-										// biome-ignore lint/suspicious/noArrayIndexKey: simple array render
-										key={index}
+										key={`${file.name}-${file.lastModified}-${file.size}`}
 										className="relative group aspect-square rounded-lg overflow-hidden border border-content/10 bg-content/5"
 									>
 										<Image

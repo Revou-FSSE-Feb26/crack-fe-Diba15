@@ -23,12 +23,11 @@ import { useArtworkDetail } from "@/hooks/useArtworkQueries";
 import { useCopyLink } from "@/hooks/useCopyLink";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useReportStore } from "@/store/ReportStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
-import { randomKey } from "@/utils/index";
+import { randomKey } from "@/utils";
 
 export default function Detail() {
 	const params = useParams();
@@ -37,7 +36,6 @@ export default function Detail() {
 	const { openLightbox } = useLightboxStore();
 	const [showWip, setShowWip] = useState(false);
 	const { users } = useUserManagementStore();
-	const { profiles } = useProfileStore();
 	const { copied, copyPath } = useCopyLink({
 		successMessage: "Link karya berhasil disalin.",
 	});
@@ -123,9 +121,9 @@ export default function Detail() {
 	}
 
 	const artist =
-		users.find((u) => u.id === artwork.artists_id) || artwork.artist;
+		artwork.artist || users.find((u) => u.id === artwork.artists_id);
 	const artistProfile =
-		profiles.find((p) => p.user_id === artist?.id) || artwork.artist_profile;
+		artwork.artist_profile || (artist as Partial<User>)?.profile;
 
 	const handleCopyLink = (id: string) => {
 		copyPath(id);

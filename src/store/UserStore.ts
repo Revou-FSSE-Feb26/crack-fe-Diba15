@@ -1,9 +1,38 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { axiosClient, setAccessToken } from "@/lib/axiosClient";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import type { UserState } from "@/types";
+import type { DbUserResponse, Profile, User, UserState } from "@/types";
+
+const mapDbUser = (dbUser: DbUserResponse): User => {
+	const mappedProfile: Profile | undefined = dbUser.profile
+		? {
+				id: dbUser.profile.id || `p-${dbUser.id}`,
+				user_id: dbUser.id,
+				avatar_url: dbUser.profile.avatarUrl ?? null,
+				bio: dbUser.profile.bio ?? null,
+				social_links: dbUser.profile.socialLinks ?? null,
+				is_verified: dbUser.profile.isVerified ?? false,
+				approved_portfolio_count: dbUser.profile.approvedPortfolioCount ?? 0,
+				is_open_for_commission: dbUser.profile.isOpenForCommission ?? false,
+				base_price_idr: dbUser.profile.basePriceIdr ?? null,
+				strike_count: dbUser.profile.strikeCount ?? 0,
+				updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
+			}
+		: undefined;
+
+	return {
+		id: dbUser.id,
+		name: dbUser.name,
+		email: dbUser.email,
+		password: "",
+		role: dbUser.role,
+		balance: dbUser.balance,
+		created_at: dbUser.createdAt,
+		updated_at: dbUser.updatedAt,
+		profile: mappedProfile,
+	};
+};
 
 export const useUserStore = create<UserState>()(
 	persist(
@@ -14,46 +43,7 @@ export const useUserStore = create<UserState>()(
 			checkAuth: async () => {
 				try {
 					const meRes = await axiosClient.get("/auth/me");
-					const dbUser = meRes.data;
-
-					const safeUser = {
-						id: dbUser.id,
-						name: dbUser.name,
-						email: dbUser.email,
-						role: dbUser.role,
-						balance: dbUser.balance,
-						created_at: dbUser.createdAt,
-						updated_at: dbUser.updatedAt,
-					};
-
-					if (dbUser.profile) {
-						useProfileStore.setState((state) => {
-							const mappedProfile = {
-								id: dbUser.profile.id || `p-${dbUser.id}`,
-								user_id: dbUser.id,
-								avatar_url: dbUser.profile.avatarUrl,
-								bio: dbUser.profile.bio,
-								is_verified: dbUser.profile.isVerified,
-								approved_portfolio_count: dbUser.profile.approvedPortfolioCount,
-								is_open_for_commission: dbUser.profile.isOpenForCommission,
-								base_price_idr: dbUser.profile.basePriceIdr,
-								strike_count: dbUser.profile.strikeCount,
-								updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
-							};
-
-							const exists = state.profiles.some(
-								(p) => p.user_id === dbUser.id,
-							);
-							const nextProfiles = exists
-								? state.profiles.map((p) =>
-										p.user_id === dbUser.id ? mappedProfile : p,
-									)
-								: [mappedProfile, ...state.profiles];
-
-							return { profiles: nextProfiles };
-						});
-					}
-
+					const safeUser = mapDbUser(meRes.data);
 					set({ user: safeUser, isAuthenticated: true });
 				} catch {
 					setAccessToken(null);
@@ -75,47 +65,7 @@ export const useUserStore = create<UserState>()(
 
 					// Ambil data profil dari Route Handler Next.js
 					const meRes = await axiosClient.get("/auth/me");
-					const dbUser = meRes.data;
-
-					// Petakan properti dari backend (camelCase) ke tipe frontend (snake_case)
-					const safeUser = {
-						id: dbUser.id,
-						name: dbUser.name,
-						email: dbUser.email,
-						role: dbUser.role,
-						balance: dbUser.balance,
-						created_at: dbUser.createdAt,
-						updated_at: dbUser.updatedAt,
-					};
-
-					// Jika ada data profile dari backend, simpan ke ProfileStore!
-					if (dbUser.profile) {
-						useProfileStore.setState((state) => {
-							const mappedProfile = {
-								id: dbUser.profile.id || `p-${dbUser.id}`,
-								user_id: dbUser.id,
-								avatar_url: dbUser.profile.avatarUrl,
-								bio: dbUser.profile.bio,
-								is_verified: dbUser.profile.isVerified,
-								approved_portfolio_count: dbUser.profile.approvedPortfolioCount,
-								is_open_for_commission: dbUser.profile.isOpenForCommission,
-								base_price_idr: dbUser.profile.basePriceIdr,
-								strike_count: dbUser.profile.strikeCount,
-								updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
-							};
-
-							const exists = state.profiles.some(
-								(p) => p.user_id === dbUser.id,
-							);
-							const nextProfiles = exists
-								? state.profiles.map((p) =>
-										p.user_id === dbUser.id ? mappedProfile : p,
-									)
-								: [mappedProfile, ...state.profiles];
-
-							return { profiles: nextProfiles };
-						});
-					}
+					const safeUser = mapDbUser(meRes.data);
 
 					set({ user: safeUser, isAuthenticated: true });
 					return { success: true, message: "Login berhasil via API." };
@@ -161,47 +111,7 @@ export const useUserStore = create<UserState>()(
 
 					// Ambil data profil dari Route Handler Next.js
 					const meRes = await axiosClient.get("/auth/me");
-					const dbUser = meRes.data;
-
-					// Petakan properti dari backend (camelCase) ke tipe frontend (snake_case)
-					const safeUser = {
-						id: dbUser.id,
-						name: dbUser.name,
-						email: dbUser.email,
-						role: dbUser.role,
-						balance: dbUser.balance,
-						created_at: dbUser.createdAt,
-						updated_at: dbUser.updatedAt,
-					};
-
-					// Jika ada data profile dari backend, simpan ke ProfileStore!
-					if (dbUser.profile) {
-						useProfileStore.setState((state) => {
-							const mappedProfile = {
-								id: dbUser.profile.id || `p-${dbUser.id}`,
-								user_id: dbUser.id,
-								avatar_url: dbUser.profile.avatarUrl,
-								bio: dbUser.profile.bio,
-								is_verified: dbUser.profile.isVerified,
-								approved_portfolio_count: dbUser.profile.approvedPortfolioCount,
-								is_open_for_commission: dbUser.profile.isOpenForCommission,
-								base_price_idr: dbUser.profile.basePriceIdr,
-								strike_count: dbUser.profile.strikeCount,
-								updated_at: dbUser.profile.updatedAt || dbUser.updatedAt,
-							};
-
-							const exists = state.profiles.some(
-								(p) => p.user_id === dbUser.id,
-							);
-							const nextProfiles = exists
-								? state.profiles.map((p) =>
-										p.user_id === dbUser.id ? mappedProfile : p,
-									)
-								: [mappedProfile, ...state.profiles];
-
-							return { profiles: nextProfiles };
-						});
-					}
+					const safeUser = mapDbUser(meRes.data);
 
 					set({ user: safeUser, isAuthenticated: true });
 					return { success: true, message: "Pendaftaran berhasil via API." };

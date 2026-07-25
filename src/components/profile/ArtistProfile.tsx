@@ -2,6 +2,7 @@ import {
 	BadgeCheck,
 	CalendarDays,
 	Camera,
+	Globe,
 	ImageIcon,
 	Loader2,
 	Palette,
@@ -10,9 +11,13 @@ import {
 	ShieldCheck,
 	UserMinus,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import instagramIcon from "@/assets/instagram.svg";
+import pixivIcon from "@/assets/pixiv.svg";
+import xIcon from "@/assets/x.svg";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
@@ -106,6 +111,14 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		const trimmedName = values.name.trim();
 		const nameChanged = trimmedName !== user.name;
 
+		const social_links = {
+			instagram: values.instagram_url?.trim() || undefined,
+			twitter: values.twitter_url?.trim() || undefined,
+			pixiv: values.pixiv_url?.trim() || undefined,
+			website: values.website_url?.trim() || undefined,
+		};
+		const hasSocialLinks = Object.values(social_links).some(Boolean);
+
 		const nameResult = nameChanged
 			? await updateUserRecord(user.id, { name: trimmedName })
 			: { success: true, message: "" };
@@ -114,6 +127,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 			bio: values.bio.trim() || null,
 			base_price_idr: values.base_price_idr,
 			is_open_for_commission: values.is_open_for_commission,
+			social_links: hasSocialLinks ? social_links : null,
 		});
 
 		if (nameChanged && nameResult.success) {
@@ -208,6 +222,90 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 									{artistArtworks.length} karya di portfolio
 								</Stat>
 							</div>
+
+							{profile?.social_links &&
+								Object.values(profile.social_links).some(Boolean) && (
+									<div className="mt-4 flex flex-wrap items-center gap-2 pt-3 border-t border-content/10">
+										{profile.social_links.instagram && (
+											<Link
+												href={
+													profile.social_links.instagram.startsWith("http")
+														? profile.social_links.instagram
+														: `https://instagram.com/${profile.social_links.instagram.replace(/^@/, "")}`
+												}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+											>
+												<Image
+													src={instagramIcon}
+													alt="Instagram"
+													width={14}
+													height={14}
+													className="w-3.5 h-3.5 object-contain dark:invert"
+												/>
+												Instagram
+											</Link>
+										)}
+										{profile.social_links.twitter && (
+											<Link
+												href={
+													profile.social_links.twitter.startsWith("http")
+														? profile.social_links.twitter
+														: `https://x.com/${profile.social_links.twitter.replace(/^@/, "")}`
+												}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+											>
+												<Image
+													src={xIcon}
+													alt="Twitter / X"
+													width={14}
+													height={14}
+													className="w-3.5 h-3.5 object-contain dark:invert"
+												/>
+												Twitter / X
+											</Link>
+										)}
+										{profile.social_links.pixiv && (
+											<Link
+												href={
+													profile.social_links.pixiv.startsWith("http")
+														? profile.social_links.pixiv
+														: `https://${profile.social_links.pixiv}`
+												}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+											>
+												<Image
+													src={pixivIcon}
+													alt="Pixiv"
+													width={14}
+													height={14}
+													className="w-3.5 h-3.5 object-contain dark:invert"
+												/>
+												Pixiv / Portofolio
+											</Link>
+										)}
+										{profile.social_links.website && (
+											<Link
+												href={
+													profile.social_links.website.startsWith("http")
+														? profile.social_links.website
+														: `https://${profile.social_links.website}`
+												}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center gap-1.5 rounded-lg border border-content/10 bg-content/5 px-2.5 py-1 text-xs font-medium text-content hover:bg-content/10 transition-colors"
+											>
+												<Globe className="w-3.5 h-3.5 text-primary" />
+												Website / Linktree
+											</Link>
+										)}
+									</div>
+								)}
 						</div>
 					</div>
 

@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useProfileStore } from "@/store/ProfileStore";
+import { useUserStore } from "@/store/UserStore";
 
 // TODO(backend): Store ini masih 100% client-side (Zustand + persist ke localStorage).
 // Belum ada Next.js API route / panggilan axiosServer yang menghubungkannya ke backend NestJS.
@@ -100,10 +100,16 @@ export const useAppealStore = create<AppealState>()(
 				}));
 
 				if (approved) {
-					// Reset the artist's strike count to 0 in ProfileStore
-					useProfileStore.getState().updateProfile(target.artist_id, {
-						strike_count: 0,
-					});
+					// Reset the artist's strike count to 0 in UserStore
+					const userState = useUserStore.getState();
+					if (
+						userState.user?.id === target.artist_id &&
+						userState.user.profile
+					) {
+						userState.updateCurrentUser({
+							profile: { ...userState.user.profile, strike_count: 0 },
+						});
+					}
 					return {
 						success: true,
 						message:

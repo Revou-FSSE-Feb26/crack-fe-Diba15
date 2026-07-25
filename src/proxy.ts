@@ -4,8 +4,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 interface DecodedToken {
-  sub: string;
-  role: string;
+	sub: string;
+	role: string;
 }
 
 export function proxy(request: NextRequest) {

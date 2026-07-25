@@ -110,8 +110,9 @@ export default function ReviewArtworksPage() {
 						type: "success",
 					});
 				} catch (error: unknown) {
-					// biome-ignore lint/suspicious/noExplicitAny: error proxy casting
-					const err = error as any;
+					const err = error as {
+						response?: { data?: { message?: string } };
+					};
 					addToast({
 						message: err.response?.data?.message || "Gagal menyetujui artwork.",
 						type: "error",
@@ -139,8 +140,9 @@ export default function ReviewArtworksPage() {
 			});
 			setRejectTarget(null);
 		} catch (error: unknown) {
-			// biome-ignore lint/suspicious/noExplicitAny: error proxy casting
-			const err = error as any;
+			const err = error as {
+				response?: { data?: { message?: string } };
+			};
 			addToast({
 				message: err.response?.data?.message || "Gagal menolak artwork.",
 				type: "error",

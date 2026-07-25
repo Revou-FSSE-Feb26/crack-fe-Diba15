@@ -26,11 +26,10 @@ import { useCopyLink } from "@/hooks/useCopyLink";
 import { useFavoriteArtwork } from "@/hooks/useFavoriteArtwork";
 import { useFollowArtist } from "@/hooks/useFollowArtist";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useReportStore } from "@/store/ReportStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import type { ArtworkWithRelations } from "@/types";
+import type { ArtworkWithRelations, User } from "@/types";
 import { randomKey } from "@/utils";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
@@ -44,11 +43,11 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		artwork.id,
 		artwork.title,
 	);
-	const { profiles } = useProfileStore();
 
 	const { isArtistFollowed, handleFollowToggle } = useFollowArtist(artist.id);
 	const basePrice =
-		profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ??
+		artist_profile?.base_price_idr ??
+		(artist as Partial<User>)?.profile?.base_price_idr ??
 		null;
 
 	const images = artwork.images_url || [

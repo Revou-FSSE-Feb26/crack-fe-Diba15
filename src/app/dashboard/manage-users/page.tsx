@@ -17,7 +17,6 @@ import DataTable from "@/components/ui/data-table/DataTable";
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { type Appeal, useAppealStore } from "@/store/AppealStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
@@ -121,7 +120,6 @@ export default function ManageUsersPage() {
 	}, []);
 
 	const { appeals, resolveAppeal } = useAppealStore();
-	const { profiles } = useProfileStore();
 	const [reviewAppeal, setReviewAppeal] = useState<Appeal | null>(null);
 
 	const columns = useMemo(
@@ -131,7 +129,7 @@ export default function ManageUsersPage() {
 				onEdit: handleEditOpen,
 				onDelete: handleDelete,
 				renderActions: (user) => {
-					const artistProfile = profiles.find((p) => p.user_id === user.id);
+					const artistProfile = user.profile;
 					const pendingAppeal = appeals.find(
 						(a) => a.artist_id === user.id && a.status === "pending",
 					);
@@ -173,7 +171,7 @@ export default function ManageUsersPage() {
 					);
 				},
 			}),
-		[currentUser?.id, handleDelete, handleEditOpen, appeals, profiles],
+		[currentUser?.id, handleDelete, handleEditOpen, appeals],
 	);
 
 	const openCreateForm = () => {

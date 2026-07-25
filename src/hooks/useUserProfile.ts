@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
+import { useArtistDetail } from "@/hooks/useArtworkQueries";
 import { useToggleFollow, useUserFollowing } from "@/hooks/useSocialQueries";
 import { axiosClient } from "@/lib/axiosClient";
 import { useCommissionStore } from "@/store/CommissionStore";
-import { useProfileStore } from "@/store/ProfileStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
+import type { Profile } from "@/types";
 
 /**
  * 👤 useUserProfile (Custom Hook)
@@ -12,19 +13,73 @@ import { useUserStore } from "@/store/UserStore";
  * upload avatar (dengan validasi tipe & ukuran berkas), serta aksi unfollow via API Backend.
  */
 export function useUserProfile(userId: string) {
-	const { profiles, updateProfile } = useProfileStore();
-	const { updateCurrentUser } = useUserStore();
+	const { user, updateCurrentUser } = useUserStore();
 	const { addToast } = useToastStore();
 	const { commissions } = useCommissionStore();
 
 	const { data: rawFollowedArtists = [] } = useUserFollowing();
 	const toggleFollowMutation = useToggleFollow();
 
+	const isSelf = user?.id === userId;
+	const { data: artistDetail } = useArtistDetail(isSelf ? "" : userId);
+
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
 	const profile = useMemo(() => {
-		return profiles.find((p) => p.user_id === userId);
-	}, [profiles, userId]);
+		if (isSelf) {
+			return user?.profile;
+		}
+
+		if (artistDetail) {
+			return {
+				id: artistDetail.id,
+				user_id: artistDetail.user_id || artistDetail.id,
+				avatar_url: artistDetail.avatar_url ?? null,
+				bio: artistDetail.bio ?? null,
+				social_links: artistDetail.social_links ?? null,
+				is_verified: artistDetail.is_verified ?? false,
+				approved_portfolio_count: artistDetail.approved_portfolio_count ?? 0,
+				is_open_for_commission: artistDetail.is_open_for_commission ?? false,
+				base_price_idr: artistDetail.base_price_idr ?? null,
+				strike_count: 0,
+				updated_at: new Date().toISOString(),
+			} as Profile;
+		}
+
+		return undefined;
+	}, [isSelf, user?.profile, artistDetail]);
+
+	const updateProfile = async (
+		targetUserId: string,
+		payload: Partial<Profile>,
+	) => {
+		try {
+			await axiosClient.patch("/profile", {
+				avatarUrl: payload.avatar_url,
+				bio: payload.bio,
+				socialLinks: payload.social_links,
+				isOpenForCommission: payload.is_open_for_commission,
+				basePriceIdr: payload.base_price_idr,
+			});
+
+			if (user?.id === targetUserId && user.profile) {
+				updateCurrentUser({
+					profile: {
+						...user.profile,
+						...payload,
+					},
+				});
+			}
+
+			return { success: true, message: "Profil berhasil diperbarui." };
+		} catch (error) {
+			const err = error as { response?: { data?: { message?: string } } };
+			return {
+				success: false,
+				message: err.response?.data?.message || "Gagal memperbarui profil.",
+			};
+		}
+	};
 
 	const followedArtists = useMemo(() => {
 		return rawFollowedArtists.map((artist) => ({

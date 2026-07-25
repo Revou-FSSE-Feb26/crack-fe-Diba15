@@ -1,4 +1,4 @@
-import { useProfileStore } from "@/store/ProfileStore";
+import { useUserStore } from "@/store/UserStore";
 import type { Artwork } from "@/types";
 
 /**
@@ -75,8 +75,14 @@ export function syncVerificationAfterReview(
 	);
 	const { isEligible, approved } = evaluateVerification(artistArtworks);
 
-	useProfileStore.getState().updateProfile(artistId, {
-		is_verified: isEligible,
-		approved_portfolio_count: approved,
-	});
+	const userState = useUserStore.getState();
+	if (userState.user?.id === artistId && userState.user.profile) {
+		userState.updateCurrentUser({
+			profile: {
+				...userState.user.profile,
+				is_verified: isEligible,
+				approved_portfolio_count: approved,
+			},
+		});
+	}
 }

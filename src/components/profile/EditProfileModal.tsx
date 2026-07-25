@@ -1,9 +1,13 @@
 "use client";
 
-import { ShieldCheck, User, Wallet } from "lucide-react";
+import { Globe, ShieldCheck, User, Wallet } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 
+import instagramIcon from "@/assets/instagram.svg";
+import pixivIcon from "@/assets/pixiv.svg";
+import xIcon from "@/assets/x.svg";
 import Input from "@/components/ui/form/Input";
 import { useModalStore } from "@/store/ModalStore";
 import type { Profile } from "@/types";
@@ -13,6 +17,10 @@ export interface EditProfileFormValues {
 	bio: string;
 	base_price_idr: number;
 	is_open_for_commission: boolean;
+	instagram_url?: string;
+	twitter_url?: string;
+	pixiv_url?: string;
+	website_url?: string;
 }
 
 interface EditProfileModalProps {
@@ -48,6 +56,10 @@ export default function EditProfileModal({
 		bio: profile?.bio ?? "",
 		base_price_idr: profile?.base_price_idr ?? 0,
 		is_open_for_commission: profile?.is_open_for_commission ?? false,
+		instagram_url: profile?.social_links?.instagram ?? "",
+		twitter_url: profile?.social_links?.twitter ?? "",
+		pixiv_url: profile?.social_links?.pixiv ?? "",
+		website_url: profile?.social_links?.website ?? "",
 	};
 
 	const {
@@ -66,6 +78,10 @@ export default function EditProfileModal({
 			bio: profile?.bio ?? "",
 			base_price_idr: profile?.base_price_idr ?? 0,
 			is_open_for_commission: profile?.is_open_for_commission ?? false,
+			instagram_url: profile?.social_links?.instagram ?? "",
+			twitter_url: profile?.social_links?.twitter ?? "",
+			pixiv_url: profile?.social_links?.pixiv ?? "",
+			website_url: profile?.social_links?.website ?? "",
 		});
 	}, [isOpen, profile, userName, reset]);
 
@@ -168,6 +184,70 @@ export default function EditProfileModal({
 								</span>
 							</span>
 						</label>
+
+						<div className="space-y-3 pt-2 border-t border-content/10">
+							<span className="block text-sm font-semibold text-content">
+								Link Media Sosial & Portofolio
+							</span>
+
+							<div>
+								<Input
+									id="profile-instagram"
+									placeholder="https://instagram.com/username"
+									{...register("instagram_url")}
+								>
+									<Image
+										src={instagramIcon}
+										alt="Instagram"
+										width={18}
+										height={18}
+										className="w-4.5 h-4.5 object-contain opacity-60 dark:invert"
+									/>
+								</Input>
+							</div>
+
+							<div>
+								<Input
+									id="profile-twitter"
+									placeholder="https://x.com/username"
+									{...register("twitter_url")}
+								>
+									<Image
+										src={xIcon}
+										alt="Twitter / X"
+										width={18}
+										height={18}
+										className="w-4.5 h-4.5 object-contain opacity-60 dark:invert"
+									/>
+								</Input>
+							</div>
+
+							<div>
+								<Input
+									id="profile-pixiv"
+									placeholder="https://pixiv.net/users/id (Pixiv)"
+									{...register("pixiv_url")}
+								>
+									<Image
+										src={pixivIcon}
+										alt="Pixiv"
+										width={18}
+										height={18}
+										className="w-4.5 h-4.5 object-contain opacity-60 dark:invert"
+									/>
+								</Input>
+							</div>
+
+							<div>
+								<Input
+									id="profile-website"
+									placeholder="https://username.carrd.co (Website/Linktree)"
+									{...register("website_url")}
+								>
+									<Globe className="h-5 w-5 text-gray-400" />
+								</Input>
+							</div>
+						</div>
 					</>
 				)}
 			</div>
@@ -191,7 +271,7 @@ export default function EditProfileModal({
 					? "Perbarui bio, harga, dan status ketersediaan komisi kamu."
 					: "Perbarui bio dan nama profil kamu.",
 				content,
-				maxWidthClassName: "max-w-lg",
+				maxWidthClassName: "max-w-xl",
 				formClassName: "space-y-4",
 				confirmLabel: "Simpan Perubahan",
 				cancelLabel: "Batal",
