@@ -146,14 +146,6 @@ export default function CommissionDetailContent({
 		Boolean(progressItem?.final_artwork_url) &&
 		commission.status !== "completed" &&
 		!commissionDispute;
-	const canPay =
-		!isArtistView &&
-		commission.payment_status === "unpaid" &&
-		["accepted", "in_progress", "revision"].includes(commission.status);
-	const canUploadResult =
-		isArtistView &&
-		commission.payment_status === "paid" &&
-		["accepted", "in_progress", "revision"].includes(commission.status);
 	const counterpartName = isArtistView
 		? (client?.name ?? "Client")
 		: (artist?.name ?? "Artist");
@@ -274,105 +266,159 @@ export default function CommissionDetailContent({
 							/>
 						</div>
 
-						{/*Button Section*/}
-						<div className="space-y-2">
-							{!isArtistView && commission.status === "pending" && (
-								<p className="rounded-lg bg-content/5 px-3 py-2 text-xs text-content-muted">
-									Menunggu artist menerima pengajuan. Diskusikan harga dan
-									detail lewat komentar sebelum pembayaran.
-								</p>
-							)}
-
-							{canPay && (
-								<Button
-									className="flex gap-1 items-center w-full justify-center text-sm"
-									onClick={() => setIsPaymentOpen(true)}
+						{/*Step Progress Timeline Indicator*/}
+						<div className="p-4 bg-content/5 rounded-xl border border-content/10 space-y-3">
+							<h3 className="text-xs font-bold uppercase tracking-wider text-content-muted">
+								Alur Progres Komisi
+							</h3>
+							<div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+								<div
+									className={`p-2.5 rounded-lg border ${commission.status === "pending" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
-									<CreditCard className="w-4 h-4" />
-									Bayar Uang Muka
-								</Button>
-							)}
+									1. Dipesan (Escrow)
+								</div>
+								<div
+									className={`p-2.5 rounded-lg border ${["accepted", "in_progress", "revision"].includes(commission.status) ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+								>
+									2. Dikerjakan Artis
+								</div>
+								<div
+									className={`p-2.5 rounded-lg border ${progressItem?.final_artwork_url ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+								>
+									3. Peninjauan Hasil
+								</div>
+								<div
+									className={`p-2.5 rounded-lg border ${commission.status === "completed" ? "bg-success/10 border-success text-success font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+								>
+									4. Selesai (Dana Dilepas)
+								</div>
+							</div>
+						</div>
 
+						{/*Button & Action Section*/}
+						<div className="space-y-3">
+							{/* Artist Actions: Respond to Pending Order */}
 							{isArtistView && commission.status === "pending" && (
-								<>
-									<Button
-										className="flex items-center gap-1 w-full justify-center text-sm"
-										onClick={() =>
-											confirmStatus(
-												commission,
-												"accepted",
-												"Terima commission?",
-											)
-										}
-									>
-										<CheckCircle2 className="w-4 h-4" />
-										Terima
-									</Button>
-									<Button
-										variant="danger"
-										className="flex items-center gap-1 w-full justify-center text-sm"
-										onClick={() =>
-											confirmStatus(commission, "declined", "Tolak commission?")
-										}
-									>
-										<XCircle className="w-4 h-4" />
-										Tolak
-									</Button>
-								</>
+								<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
+									<p className="text-sm font-semibold text-content">
+										Client telah mengajukan komisi & dana sebesar{" "}
+										{formatPrice(commission.price)} telah diamankan di Escrow.
+									</p>
+									<div className="flex gap-2">
+										<Button
+											className="flex items-center gap-1 flex-1 justify-center text-sm"
+											onClick={() =>
+												confirmStatus(commission, "accepted", "Terima komisi?")
+											}
+										>
+											<CheckCircle2 className="w-4 h-4" />
+											Terima Pesanan
+										</Button>
+										<Button
+											variant="danger"
+											className="flex items-center gap-1 flex-1 justify-center text-sm"
+											onClick={() =>
+												confirmStatus(commission, "declined", "Tolak komisi?")
+											}
+										>
+											<XCircle className="w-4 h-4" />
+											Tolak Pesanan
+										</Button>
+									</div>
+								</div>
 							)}
 
-							{canUploadResult && (
-								<Button
-									variant="secondary"
-									className="flex items-center gap-1 w-full justify-center text-sm"
-									onClick={() =>
-										updateProgressMutation.mutate({
-											id: commission.id,
-											sketchUrl:
-												"https://picsum.photos/seed/commission-sketch-1/900/650",
-											finalArtworkUrl:
-												"https://picsum.photos/seed/commission-final-1/900/650",
-										})
-									}
-								>
-									<Upload className="w-4 h-4" />
-									Upload Hasil Karya
-								</Button>
+							{/* Client Actions: Pending Banner */}
+							{!isArtistView && commission.status === "pending" && (
+								<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-2">
+									<p className="text-sm text-content font-medium">
+										Pesanan komisi Anda telah terbuat & saldo sebesar{" "}
+										{formatPrice(commission.price)} telah diamankan di Escrow.
+									</p>
+									<p className="text-xs text-content-muted">
+										Menunggu artist meninjau & menerima pesanan. Anda dapat
+										berdiskusi melalui kolom revisi/komentar di bawah.
+									</p>
+								</div>
 							)}
 
+							{/* Artist Actions: Upload WIP / Final Artwork */}
+							{isArtistView &&
+								["accepted", "in_progress", "revision"].includes(
+									commission.status,
+								) && (
+									<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-3">
+										<p className="text-sm font-semibold text-content">
+											Unggah Progress Komisi
+										</p>
+										<p className="text-xs text-content-muted">
+											Unggah bukti sketsa WIP atau hasil akhir karya agar client
+											dapat meninjau.
+										</p>
+										<Button
+											variant="secondary"
+											className="flex items-center gap-2 w-full justify-center text-sm"
+											onClick={() =>
+												updateProgressMutation.mutate({
+													id: commission.id,
+													sketchUrl:
+														"https://picsum.photos/seed/commission-sketch-1/900/650",
+													finalArtworkUrl:
+														"https://picsum.photos/seed/commission-final-1/900/650",
+												})
+											}
+										>
+											<Upload className="w-4 h-4" />
+											Upload Progress Sketsa & Hasil Akhir
+										</Button>
+									</div>
+								)}
+
+							{/* Client Actions: Approve Final Artwork */}
 							{!isArtistView && canApprove && (
-								<>
-									<Button
-										className="flex gap-1 items-center w-full justify-center text-sm"
-										onClick={() => {
-											openModal({
-												title: "Approve hasil?",
-												description: `Dengan menyetujui hasil, dana sebesar ${formatPrice(commission.price)} akan dilepaskan ke wallet artist.`,
-												type: "confirm",
-												confirmLabel: "Approve",
-												onConfirm: () => {
-													approveStepMutation.mutate({
-														id: commission.id,
-														step: "final",
-													});
-												},
-											});
-										}}
-									>
-										<CheckCircle2 className="w-4 h-4" />
-										Approve Hasil
-									</Button>
-									<Button
-										variant="danger"
-										className="flex gap-1 items-center w-full justify-center text-sm"
-										onClick={() => setIsDisputeOpen(true)}
-									>
-										<AlertTriangle className="w-4 h-4" />
-										Ajukan Dispute
-									</Button>
-								</>
+								<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
+									<p className="text-sm font-semibold text-content">
+										Artist telah mengunggah Karya Akhir
+									</p>
+									<p className="text-xs text-content-muted">
+										Tinjau karya akhir di atas. Jika sudah sesuai, setujui hasil
+										karya untuk melepaskan dana Escrow sebesar{" "}
+										{formatPrice(commission.price)} ke E-Wallet artist.
+									</p>
+									<div className="flex gap-2">
+										<Button
+											className="flex gap-1 items-center flex-1 justify-center text-sm"
+											onClick={() => {
+												openModal({
+													title: "Approve hasil?",
+													description: `Dengan menyetujui hasil, dana sebesar ${formatPrice(commission.price)} akan dilepaskan ke wallet artist.`,
+													type: "confirm",
+													confirmLabel: "Approve Hasil",
+													onConfirm: () => {
+														approveStepMutation.mutate({
+															id: commission.id,
+															step: "final",
+														});
+													},
+												});
+											}}
+										>
+											<CheckCircle2 className="w-4 h-4" />
+											Approve Hasil Akhir
+										</Button>
+										<Button
+											variant="danger"
+											className="flex gap-1 items-center justify-center text-sm"
+											onClick={() => setIsDisputeOpen(true)}
+										>
+											<AlertTriangle className="w-4 h-4" />
+											Ajukan Dispute
+										</Button>
+									</div>
+								</div>
 							)}
 
+							{/* Client Actions: Cancel Commission */}
 							{!isArtistView && canCancel && (
 								<Button
 									variant="secondary"
@@ -380,7 +426,7 @@ export default function CommissionDetailContent({
 									onClick={() => {
 										openModal({
 											title: "Batalkan commission?",
-											description: `Apakah Anda yakin ingin membatalkan pesanan "${commission.commission_title}"? Dana akan di-refund ke e-wallet Anda.`,
+											description: `Apakah Anda yakin ingin membatalkan pesanan "${commission.commission_title}"? Dana sebesar ${formatPrice(commission.price)} akan di-refund ke e-wallet Anda.`,
 											type: "confirm",
 											variant: "danger",
 											confirmLabel: "Ya, Batalkan",
@@ -389,7 +435,7 @@ export default function CommissionDetailContent({
 										});
 									}}
 								>
-									Batalkan Commission
+									Batalkan Commission (Refund)
 								</Button>
 							)}
 
