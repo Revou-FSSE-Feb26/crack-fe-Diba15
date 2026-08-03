@@ -73,22 +73,22 @@ export default function TopUpModal({
 	};
 
 	return (
-		<div className="fixed inset-0 z-9998 flex items-center justify-center p-4">
+		<div className="modal modal-open z-9998 flex items-center justify-center p-4">
 			{/* Backdrop */}
 			<button
 				type="button"
 				onClick={handleClose}
-				className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer"
+				className="modal-backdrop bg-black/60 cursor-pointer"
 				aria-label="Tutup modal"
 			/>
 
 			{/* Dialog Card */}
-			<div className="relative z-10 w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-content/10 p-6 space-y-5">
+			<div className="modal-box relative z-10 w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-content/10 p-6 space-y-5">
 				{/* Close Button */}
 				<button
 					type="button"
 					onClick={handleClose}
-					className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-content/5 transition-colors cursor-pointer"
+					className="btn btn-ghost btn-xs btn-square absolute top-4 right-4"
 					aria-label="Tutup"
 				>
 					<X size={16} className="text-content-muted" />
@@ -104,7 +104,7 @@ export default function TopUpModal({
 					</p>
 				</div>
 
-				<hr className="border-content/5" />
+				<div className="divider my-1" />
 
 				{/* Nominal Selection Grid */}
 				<div className="space-y-2">

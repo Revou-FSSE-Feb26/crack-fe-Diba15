@@ -38,7 +38,7 @@ export default function ClientProfile({
 	user: initialUser,
 }: ClientProfileProps) {
 	const { updateUser } = useUserManagementStore();
-	const { user: currentUser } = useUserStore();
+	const { user: currentUser, topUp } = useUserStore();
 
 	const [activeTab, setActiveTab] = useState<
 		"commissions" | "following" | "transactions"
@@ -76,8 +76,7 @@ export default function ClientProfile({
 	};
 
 	const handleTopUpSuccess = async (amount: number) => {
-		const nextBalance = (user.balance ?? 0) + amount;
-		const res = await updateUser(user.id, { balance: nextBalance });
+		const res = await topUp(amount);
 
 		if (!res.success) {
 			addToast({
@@ -85,10 +84,6 @@ export default function ClientProfile({
 				type: "error",
 			});
 			return;
-		}
-
-		if (currentUser?.id === user.id) {
-			updateCurrentUser({ balance: nextBalance });
 		}
 
 		// Log transaction

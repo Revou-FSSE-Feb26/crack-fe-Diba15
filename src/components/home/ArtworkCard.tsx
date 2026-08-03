@@ -239,40 +239,44 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 				)}
 
 				{/* Dropdown Container */}
-				<div className="relative" ref={dropdownRef}>
+				<div className="dropdown dropdown-end" ref={dropdownRef}>
 					<button
 						type="button"
 						title="More"
 						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-						className={`p-2 rounded-full transition-colors duration-150 -mr-1 cursor-pointer ${isDropdownOpen ? "bg-content/5" : "hover:bg-content/5"}`}
+						className={`btn btn-ghost btn-circle btn-xs -mr-1 ${isDropdownOpen ? "bg-content/5" : ""}`}
 					>
 						<MoreHorizontal size={18} className="text-content-muted" />
 					</button>
 
 					{isDropdownOpen && (
-						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-20 overflow-hidden py-1">
-							<button
-								type="button"
-								className="dropdown-item"
-								onClick={() => {
-									handleCopyLink(artwork.id);
-								}}
-							>
-								<LinkIcon size={16} className="text-content-muted" />
-								Salin Tautan
-							</button>
-							<button
-								type="button"
-								className="dropdown-item-danger"
-								onClick={() => {
-									handleReport();
-									setIsDropdownOpen(false);
-								}}
-							>
-								<Flag size={16} />
-								Laporkan
-							</button>
-						</div>
+						<ul className="dropdown-content menu p-1 shadow-lg bg-surface rounded-box w-40 border border-content/10 z-20 mt-1">
+							<li>
+								<button
+									type="button"
+									className="flex items-center gap-2 text-xs text-content"
+									onClick={() => {
+										handleCopyLink(artwork.id);
+									}}
+								>
+									<LinkIcon size={15} className="text-content-muted" />
+									Salin Tautan
+								</button>
+							</li>
+							<li>
+								<button
+									type="button"
+									className="flex items-center gap-2 text-xs text-error"
+									onClick={() => {
+										handleReport();
+										setIsDropdownOpen(false);
+									}}
+								>
+									<Flag size={15} />
+									Laporkan
+								</button>
+							</li>
+						</ul>
 					)}
 				</div>
 			</div>
@@ -305,7 +309,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 				</Link>
 
 				{artwork.curation_status === "approved" && (
-					<div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full pointer-events-none">
+					<div className="absolute top-2 left-2 z-10 badge badge-success badge-sm gap-1 text-white backdrop-blur-sm pointer-events-none">
 						<ShieldCheck className="w-3 h-3" />
 						Terkurasi
 					</div>

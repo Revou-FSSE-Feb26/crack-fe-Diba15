@@ -40,7 +40,7 @@ export default function DataTablePagination({
 						onChange={(event) =>
 							onPerPageChange(Number(event.target.value) as 5 | 10)
 						}
-						className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm text-content outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+						className="select select-bordered select-xs text-content font-medium"
 					>
 						{PAGE_SIZE_OPTIONS.map((size) => (
 							<option key={size} value={size}>
@@ -50,24 +50,24 @@ export default function DataTablePagination({
 					</select>
 				</label>
 
-				<div className="flex items-center gap-2">
+				<div className="join items-center">
 					<button
 						type="button"
 						onClick={() => onPageChange(page - 1)}
 						disabled={page <= 1}
-						className="inline-flex items-center gap-1 rounded-lg border border-content/10 px-3 py-1.5 text-xs font-medium text-content transition-colors hover:bg-content/5 disabled:cursor-not-allowed disabled:opacity-40"
+						className="join-item btn btn-outline btn-xs gap-1"
 					>
 						<ChevronLeft className="h-3.5 w-3.5" />
 						Sebelumnya
 					</button>
-					<span className="min-w-[72px] text-center text-xs font-medium text-content-muted">
+					<span className="join-item btn btn-xs btn-ghost no-animation cursor-default min-w-[72px] text-xs font-medium text-content-muted">
 						{page} / {totalPages}
 					</span>
 					<button
 						type="button"
 						onClick={() => onPageChange(page + 1)}
 						disabled={page >= totalPages}
-						className="inline-flex items-center gap-1 rounded-lg border border-content/10 px-3 py-1.5 text-xs font-medium text-content transition-colors hover:bg-content/5 disabled:cursor-not-allowed disabled:opacity-40"
+						className="join-item btn btn-outline btn-xs gap-1"
 					>
 						Berikutnya
 						<ChevronRight className="h-3.5 w-3.5" />

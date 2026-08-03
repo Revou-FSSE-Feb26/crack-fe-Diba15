@@ -48,19 +48,21 @@ export default function Stat({
 	if (variant === "card") {
 		return (
 			<div
-				className={`rounded-2xl border border-content/10 bg-surface p-4 ${className}`}
+				className={`stats shadow bg-surface border border-content/10 w-full ${className}`}
 			>
-				<div className="flex items-center justify-between gap-3">
-					<div>
-						{label && (
-							<p className="text-xs font-medium text-content-muted">{label}</p>
-						)}
-						<p className="mt-1 font-display text-2xl font-bold text-content">
-							{displayValue}
-						</p>
+				<div className="stat p-4">
+					<div className="stat-figure text-primary">
+						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+							<Icon className="h-5 w-5" />
+						</div>
 					</div>
-					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-						<Icon className="h-5 w-5" />
+					{label && (
+						<div className="stat-title text-xs font-medium text-content-muted">
+							{label}
+						</div>
+					)}
+					<div className="stat-value font-display text-2xl font-bold text-content">
+						{displayValue}
 					</div>
 				</div>
 			</div>

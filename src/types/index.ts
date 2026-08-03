@@ -476,7 +476,8 @@ export interface UserState {
 	checkAuth: () => Promise<void>;
 	login: (email: string, password: string) => Promise<ActionResult>;
 	register: (payload: UserPayload) => Promise<ActionResult>;
-	logout: () => void;
+	logout: () => Promise<void>;
+	topUp: (amount: number) => Promise<ActionResult>;
 	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 	hasRole: (role: UserRole) => boolean;
 	isArtist: () => boolean;

@@ -1,3 +1,9 @@
-export default function Divider() {
-	return <hr className="border-content/10 my-4" />;
+export default function Divider({
+	children,
+	className = "",
+}: {
+	children?: React.ReactNode;
+	className?: string;
+}) {
+	return <div className={`divider my-4 ${className}`}>{children}</div>;
 }

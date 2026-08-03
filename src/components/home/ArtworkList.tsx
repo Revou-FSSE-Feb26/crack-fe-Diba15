@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useArtworks } from "@/hooks/useArtworkQueries";
-import { useFollowStore } from "@/store/FollowStore";
+import { useUserFollowingIds } from "@/hooks/useSocialQueries";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { buildArtworkWithRelations } from "@/utils/search";
@@ -16,7 +16,7 @@ export default function ArtworkList() {
 	const { data: artworks = [], isLoading, refetch } = useArtworks();
 	const { users } = useUserManagementStore();
 	const { user, isAuthenticated } = useUserStore();
-	const { getFollowedArtistIds } = useFollowStore();
+	const { data: followedArtistIds = [] } = useUserFollowingIds();
 
 	const [feedType, setFeedType] = useState<"all" | "followed">("all");
 	const [isReloading, setIsReloading] = useState(false);
@@ -34,8 +34,6 @@ export default function ArtworkList() {
 			(item) => item.is_visible_on_feed,
 		);
 	}, [artworks, users]);
-
-	const followedArtistIds = getFollowedArtistIds(user?.id ?? "");
 
 	const filteredArtworks = useMemo(() => {
 		if (feedType === "followed") {

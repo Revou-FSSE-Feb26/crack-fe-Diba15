@@ -44,8 +44,8 @@ export default function Navbar() {
 			document.removeEventListener("mousedown", handleClickDropdownOutside);
 	}, [isDropdownOpen]);
 
-	const handleLogout = () => {
-		logout();
+	const handleLogout = async () => {
+		await logout();
 		router.push("/login");
 		setIsDropdownOpen(false);
 	};
