@@ -10,7 +10,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 	try {
 		const { id } = await params;
 		const body = await request.json();
-		const res = await axiosServer.patch(`/artwork/${id}/curate`, body);
+		const res = await axiosServer.patch(`/artworks/${id}/curate`, body);
 		return NextResponse.json(res.data);
 	} catch (error) {
 		return handleApiError(error, "PATCH /api/artwork/[id]/curate");

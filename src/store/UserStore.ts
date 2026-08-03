@@ -145,6 +145,26 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			topUp: async (amount) => {
+				try {
+					const res = await axiosClient.post("/user/topup", { amount });
+					const newBalance = res.data.user?.balance ?? res.data.balance;
+					set((state) =>
+						state.user
+							? { user: { ...state.user, balance: newBalance } }
+							: state,
+					);
+					return { success: true, message: "Top up berhasil." };
+				} catch (error) {
+					const err = error as {
+						response?: { data?: { message?: string } };
+					};
+					const msg =
+						err.response?.data?.message ?? "Gagal melakukan top up saldo.";
+					return { success: false, message: msg };
+				}
+			},
+
 			updateCurrentUser: (payload) =>
 				set((state) =>
 					state.user ? { user: { ...state.user, ...payload } } : state,

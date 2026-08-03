@@ -13,7 +13,7 @@ export async function PATCH(request: Request) {
 			]),
 		);
 
-		const res = await axiosServer.patch("/profile", mappedBody);
+		const res = await axiosServer.patch("/profiles", mappedBody);
 
 		return NextResponse.json(res.data);
 	} catch (error) {

@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/apiError";
 import { axiosServer } from "@/lib/axiosServer";
 
-export async function GET() {
+export async function POST(request: Request) {
 	try {
-		const res = await axiosServer.get("/artworks/artists/popular");
+		const body = await request.json();
+		const res = await axiosServer.post("/users/topup", body);
 		return NextResponse.json(res.data);
 	} catch (error) {
-		return handleApiError(error, "GET /api/artwork/artists/popular");
+		return handleApiError(error, "POST /api/user/topup");
 	}
 }

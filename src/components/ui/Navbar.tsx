@@ -59,8 +59,8 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 			document.removeEventListener("mousedown", handleClickDropdownOutside);
 	}, [isDropdownOpen]);
 
-	const handleLogout = () => {
-		logout();
+	const handleLogout = async () => {
+		await logout();
 		router.push("/login");
 		setIsDropdownOpen(false);
 	};
@@ -122,52 +122,54 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 				<div className="flex justify-end items-center gap-3">
 					{mounted && (isArtist() || isClient() || isAdmin() || isCurator()) ? (
 						<div className="hidden md:flex">
-							<div className="relative" ref={dropdownRef}>
+							<div className="dropdown dropdown-end" ref={dropdownRef}>
 								<button
 									type="button"
 									onClick={() => setIsDropdownOpen((prev) => !prev)}
-									className="flex items-center gap-2 rounded-full px-3 py-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+									className="btn btn-ghost hover:bg-content/5 rounded-full flex items-center gap-2 px-3 py-2 text-content cursor-pointer normal-case h-auto min-h-0"
 								>
 									<AvatarInitials
 										className="w-9 h-9"
 										name={user?.name || ""}
 										src={avatarUrl}
 									/>
-									<div className="flex flex-col items-start gap-0">
-										<span className="text-sm font-medium text-primary">
+									<div className="flex flex-col items-start text-left">
+										<span className="text-sm font-medium text-primary leading-tight">
 											{user?.name}
 										</span>
-										<span className={`text-xs font-medium text-warm`}>
+										<span className="text-xs font-medium text-warm leading-tight">
 											{userRole}
 										</span>
 									</div>
-									<span className="text-sm font-medium text-primary">
-										<ChevronDown
-											className={`h-5 w-5 transition-all duration-200 group-hover:text-primary ${isDropdownOpen ? "rotate-180" : ""}`}
-										/>
-									</span>
+									<ChevronDown
+										className={`h-4 w-4 transition-transform duration-200 text-primary ${isDropdownOpen ? "rotate-180" : ""}`}
+									/>
 								</button>
 
 								{isDropdownOpen && (
-									<div className="absolute right-0 mt-2 w-40 rounded-xl bg-background shadow-lg border border-slate-100 dark:border-slate-700 z-50 overflow-hidden flex flex-col">
-										<Link
-											href="/profile"
-											onClick={() => setIsDropdownOpen(false)}
-											className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-content hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
-										>
-											<User className="w-5 h-5 text-content-muted" />
-											<span className="text-sm font-medium">Profil Saya</span>
-										</Link>
-										<div className="border-t border-slate-100 dark:border-slate-800" />
-										<button
-											type="button"
-											onClick={handleLogout}
-											className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-b-xl transition-colors duration-200 cursor-pointer"
-										>
-											<LogOut className="w-5 h-5" />
-											<span className="text-sm font-medium">Logout</span>
-										</button>
-									</div>
+									<ul className="dropdown-content menu p-2 shadow-lg bg-surface rounded-box w-48 border border-content/10 z-50 mt-2">
+										<li>
+											<Link
+												href="/profile"
+												onClick={() => setIsDropdownOpen(false)}
+												className="flex items-center gap-2 px-3 py-2 text-sm text-content"
+											>
+												<User className="w-4 h-4 text-content-muted" />
+												<span className="font-medium">Profil Saya</span>
+											</Link>
+										</li>
+										<div className="divider my-1" />
+										<li>
+											<button
+												type="button"
+												onClick={handleLogout}
+												className="flex items-center gap-2 px-3 py-2 text-sm text-error"
+											>
+												<LogOut className="w-4 h-4" />
+												<span className="font-medium">Logout</span>
+											</button>
+										</li>
+									</ul>
 								)}
 							</div>
 						</div>

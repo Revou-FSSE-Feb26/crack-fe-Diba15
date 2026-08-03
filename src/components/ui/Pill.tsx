@@ -8,8 +8,8 @@ interface PillProps {
 	link?: string;
 }
 
-export default function Pill({ children, className, link }: PillProps) {
-	const base = `text-xs px-2 py-1 rounded-full bg-primary/10 text-primary${className ? ` ${className}` : ""}`;
+export default function Pill({ children, className = "", link }: PillProps) {
+	const base = `badge badge-outline badge-primary ${className}`;
 
 	if (link) {
 		return (

@@ -90,22 +90,23 @@ export default function Sidebar({ onClose }: SidebarProps) {
 					</button>
 				</div>
 
-				<nav className="space-y-2">
+				<ul className="menu w-full p-0 space-y-1">
 					{menu.map((item) => {
 						const Icon = item.icon;
 						return (
-							<Link
-								key={item.label}
-								href={item.href}
-								onClick={onClose}
-								className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-							>
-								<Icon className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
-								{item.label}
-							</Link>
+							<li key={item.label}>
+								<Link
+									href={item.href}
+									onClick={onClose}
+									className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary active:bg-primary/20"
+								>
+									<Icon className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
+									{item.label}
+								</Link>
+							</li>
 						);
 					})}
-				</nav>
+				</ul>
 			</div>
 
 			{/* Bagian Bawah: Toggle Tema & Footer */}

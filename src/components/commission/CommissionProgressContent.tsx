@@ -167,10 +167,10 @@ export default function CommissionProgressContent() {
 								<div className="mt-4 flex justify-end">
 									<Link
 										href={`/commissions/${commission.id}`}
-										className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-background shadow-sm transition-colors hover:bg-primary-hover"
+										className="btn btn-primary btn-sm gap-2"
 									>
 										<Eye className="w-4 h-4" />
-										Detail
+										Buka Detail & Manage Progress
 									</Link>
 								</div>
 							</article>

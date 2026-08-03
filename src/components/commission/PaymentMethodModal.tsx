@@ -7,7 +7,6 @@ import TopUpModal from "@/components/profile/TopUpModal";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useTransactionStore } from "@/store/TransactionStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 import {
@@ -46,8 +45,7 @@ export default function PaymentMethodModal({
 }: PaymentMethodModalProps) {
 	const modalId = "payment-method-modal";
 	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
-	const { user, updateCurrentUser } = useUserStore();
-	const { updateUser } = useUserManagementStore();
+	const { user } = useUserStore();
 	const { addToast } = useToastStore();
 
 	const onCloseRef = useRef(onClose);
@@ -89,11 +87,17 @@ export default function PaymentMethodModal({
 	const isBalanceSufficient = balance >= price;
 
 	const handleTopUpSuccess = useCallback(
-		(amount: number) => {
+		async (amount: number) => {
 			if (!user) return;
-			const nextBalance = balance + amount;
-			updateUser(user.id, { balance: nextBalance });
-			updateCurrentUser({ balance: nextBalance });
+			const res = await useUserStore.getState().topUp(amount);
+
+			if (!res.success) {
+				addToast({
+					message: res.message,
+					type: "error",
+				});
+				return;
+			}
 
 			// Log transaction
 			useTransactionStore.getState().addTransaction({
@@ -104,12 +108,12 @@ export default function PaymentMethodModal({
 			});
 
 			addToast({
-				message: `Berhasil Top Up ${formatPrice(amount)}. Saldo Anda sekarang ${formatPrice(nextBalance)}.`,
+				message: `Berhasil Top Up ${formatPrice(amount)}.`,
 				type: "success",
 			});
 			setIsTopUpOpen(false);
 		},
-		[user, balance, updateUser, updateCurrentUser, addToast],
+		[user, addToast],
 	);
 
 	const onWalletPay = useCallback(() => {
