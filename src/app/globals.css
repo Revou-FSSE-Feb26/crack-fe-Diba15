@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+	themes:
+		light --default,
+		dark --prefersdark;
+}
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -27,6 +32,24 @@
 	--status-verified: #10b981;
 	--status-premium: #f6ae2d;
 	--status-danger: #f26419;
+
+	/* daisyUI Theme Overrides (Light Mode) */
+	--color-primary: var(--brand-primary);
+	--color-primary-content: #ffffff;
+	--color-secondary: var(--brand-warm);
+	--color-secondary-content: #2f4858;
+	--color-accent: var(--brand-accent);
+	--color-accent-content: #2f4858;
+	--color-neutral: var(--bg-surface);
+	--color-neutral-content: var(--text-main);
+	--color-base-100: var(--bg-surface);
+	--color-base-200: #f1f5f9;
+	--color-base-300: #e2e8f0;
+	--color-base-content: var(--text-main);
+	--color-info: var(--brand-accent);
+	--color-success: var(--status-verified);
+	--color-warning: var(--status-premium);
+	--color-error: var(--status-danger);
 }
 
 .dark {
@@ -48,6 +71,24 @@
 	--status-verified: #34d399;
 	--status-premium: #f6ae2d;
 	--status-danger: #f26419;
+
+	/* daisyUI Theme Overrides (Dark Mode) */
+	--color-primary: var(--brand-primary);
+	--color-primary-content: #0f172a;
+	--color-secondary: var(--brand-warm);
+	--color-secondary-content: #0f172a;
+	--color-accent: var(--brand-accent);
+	--color-accent-content: #0f172a;
+	--color-neutral: var(--bg-surface);
+	--color-neutral-content: var(--text-main);
+	--color-base-100: var(--bg-main);
+	--color-base-200: var(--bg-surface);
+	--color-base-300: #1e293b;
+	--color-base-content: var(--text-main);
+	--color-info: var(--brand-accent);
+	--color-success: var(--status-verified);
+	--color-warning: var(--status-premium);
+	--color-error: var(--status-danger);
 }
 
 @theme {

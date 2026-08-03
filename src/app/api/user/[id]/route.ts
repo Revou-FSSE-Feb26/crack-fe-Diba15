@@ -10,7 +10,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 	try {
 		const { id } = await params;
 		// Interceptor axiosServer otomatis meneruskan Authorization header jika ada
-		const res = await axiosServer.get(`/user/${id}`);
+		const res = await axiosServer.get(`/users/${id}`);
 		return NextResponse.json(res.data);
 	} catch (error) {
 		return handleApiError(error, "GET /api/user/[id]");
@@ -22,7 +22,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 		const { id } = await params;
 		const body = await request.json();
 		// Interceptor axiosServer otomatis meneruskan Authorization header jika ada
-		const res = await axiosServer.patch(`/user/${id}`, body);
+		const res = await axiosServer.patch(`/users/${id}`, body);
 		return NextResponse.json(res.data);
 	} catch (error) {
 		return handleApiError(error, "PATCH /api/user/[id]");
@@ -33,7 +33,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 	try {
 		const { id } = await params;
 		// Interceptor axiosServer otomatis meneruskan Authorization header jika ada
-		const res = await axiosServer.delete(`/user/${id}`);
+		const res = await axiosServer.delete(`/users/${id}`);
 		return NextResponse.json(res.data);
 	} catch (error) {
 		return handleApiError(error, "DELETE /api/user/[id]");

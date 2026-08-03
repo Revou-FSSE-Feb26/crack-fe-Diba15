@@ -9,30 +9,25 @@ import type { Toast, ToastType } from "@/types";
 
 type TypeConfig = {
 	Icon: React.ElementType;
-	borderClass: string;
-	iconClass: string;
+	alertClass: string;
 };
 
 const TYPE_CONFIG: Record<ToastType, TypeConfig> = {
 	success: {
 		Icon: CheckCircle,
-		borderClass: "border-l-verified",
-		iconClass: "text-verified",
+		alertClass: "alert-success",
 	},
 	error: {
 		Icon: XCircle,
-		borderClass: "border-l-danger",
-		iconClass: "text-danger",
+		alertClass: "alert-error",
 	},
 	warning: {
 		Icon: AlertTriangle,
-		borderClass: "border-l-premium",
-		iconClass: "text-premium",
+		alertClass: "alert-warning",
 	},
 	info: {
 		Icon: Info,
-		borderClass: "border-l-primary",
-		iconClass: "text-primary",
+		alertClass: "alert-info",
 	},
 };
 
@@ -43,7 +38,7 @@ function ToastItem({ toast }: { toast: Toast }) {
 	const [isVisible, setIsVisible] = useState(false);
 	const [isLeaving, setIsLeaving] = useState(false);
 
-	const { Icon, borderClass, iconClass } = TYPE_CONFIG[toast.type];
+	const { Icon, alertClass } = TYPE_CONFIG[toast.type];
 
 	const dismiss = useCallback(() => {
 		setIsLeaving(true);
@@ -71,25 +66,22 @@ function ToastItem({ toast }: { toast: Toast }) {
 			role="alert"
 			aria-live="polite"
 			className={[
-				"flex items-start gap-3 w-72",
-				"bg-surface border border-content/10 border-l-4",
-				borderClass,
-				"rounded-lg shadow-lg px-4 py-3",
-				"transition-all duration-300 ease-out",
+				"alert shadow-lg w-72 flex items-start gap-2.5 transition-all duration-300 ease-out",
+				alertClass,
 				shown ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8",
 			].join(" ")}
 		>
-			<Icon size={17} className={`${iconClass} shrink-0 mt-0.5`} />
-			<p className="flex-1 text-sm text-content leading-snug wrap-break-word">
+			<Icon size={18} className="shrink-0 mt-0.5" />
+			<span className="flex-1 text-sm font-medium leading-snug wrap-break-word">
 				{toast.message}
-			</p>
+			</span>
 			<button
 				type="button"
 				onClick={dismiss}
 				aria-label="Tutup notifikasi"
-				className="shrink-0 p-0.5 rounded hover:bg-content/10 transition-colors cursor-pointer"
+				className="btn btn-ghost btn-xs btn-square p-0"
 			>
-				<X size={14} className="text-content-muted" />
+				<X size={14} />
 			</button>
 		</div>
 	);
@@ -101,7 +93,7 @@ export default function ToastContainer() {
 	const { toasts } = useToastStore();
 
 	return (
-		<div className="fixed bottom-6 right-6 z-9999 flex flex-col gap-2 pointer-events-none">
+		<div className="toast toast-end toast-bottom z-9999 pointer-events-none">
 			{toasts.map((toast) => (
 				<div key={toast.id} className="pointer-events-auto">
 					<ToastItem toast={toast} />

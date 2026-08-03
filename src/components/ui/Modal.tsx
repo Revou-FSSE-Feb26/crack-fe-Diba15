@@ -157,14 +157,14 @@ function ModalContent() {
 	return (
 		<div
 			className={[
-				"fixed inset-0 z-9998 flex items-center justify-center p-4",
+				"modal modal-open z-9998 flex items-center justify-center p-4",
 				"transition-opacity duration-200",
 				visible ? "opacity-100" : "opacity-0",
 			].join(" ")}
 		>
 			{/* Backdrop */}
 			<div
-				className="modal-backdrop"
+				className="modal-backdrop bg-black/50"
 				onClick={handleCancel}
 				aria-hidden="true"
 			/>
@@ -175,7 +175,7 @@ function ModalContent() {
 				aria-modal="true"
 				aria-labelledby="modal-title"
 				className={[
-					`modal-card ${maxWidthClassName}`,
+					`modal-box relative max-h-[85vh] flex flex-col bg-surface border border-content/10 rounded-2xl p-6 shadow-xl ${maxWidthClassName}`,
 					visible ? "scale-100 translate-y-0" : "scale-95 translate-y-3",
 				].join(" ")}
 			>

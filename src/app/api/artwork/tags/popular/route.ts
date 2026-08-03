@@ -4,7 +4,7 @@ import { axiosServer } from "@/lib/axiosServer";
 
 export async function GET() {
 	try {
-		const res = await axiosServer.get("/artwork/tags/popular");
+		const res = await axiosServer.get("/artworks/tags/popular");
 		return NextResponse.json(res.data);
 	} catch (error) {
 		return handleApiError(error, "GET /api/artwork/tags/popular");
