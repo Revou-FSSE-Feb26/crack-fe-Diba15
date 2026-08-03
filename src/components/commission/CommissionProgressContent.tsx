@@ -7,30 +7,25 @@ import { useMemo } from "react";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Stat from "@/components/ui/Stat";
 import users from "@/data/users";
+import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useMounted } from "@/hooks/useMounted";
-import { useCommissionStore } from "@/store/CommissionStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatDate, formatPrice } from "@/utils";
 import { commissionStatusConfig } from "@/utils/commissionStatus";
 
 export default function CommissionProgressContent() {
 	const { user, isAuthenticated } = useUserStore();
-	const { commissions } = useCommissionStore();
+	const roleFilter = user?.role === "artist" ? "artist" : "client";
+	const { data: commissions = [], isLoading } = useUserCommissions(roleFilter);
 	const mounted = useMounted();
 
 	const visibleCommissions = useMemo(() => {
 		if (!user) return [];
 
-		return commissions
-			.filter((commission) =>
-				user.role === "artist"
-					? commission.artists_id === user.id
-					: commission.client_id === user.id,
-			)
-			.sort(
-				(a, b) =>
-					new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
-			);
+		return [...commissions].sort(
+			(a, b) =>
+				new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+		);
 	}, [commissions, user]);
 
 	if (!mounted) {

@@ -117,6 +117,9 @@ export interface Commission {
 	card_last_four?: string;
 	created_at: string;
 	updated_at: string;
+	progress?: CommissionProgress | null;
+	revisions?: Revision[];
+	disputes?: DisputeLog[];
 }
 
 export interface CommissionProgress {

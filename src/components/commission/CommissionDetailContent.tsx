@@ -12,7 +12,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import FileDisputeModal from "@/components/commission/FileDisputeModal";
 import PaymentMethodModal from "@/components/commission/PaymentMethodModal";
 import ProofPreview from "@/components/commission/ProofPreview";
@@ -20,8 +20,16 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import users from "@/data/users";
+import {
+	useAddRevision,
+	useApproveStep,
+	useCancelCommission,
+	useCommissionDetail,
+	useRespondCommission,
+	useUpdateProgress,
+} from "@/hooks/useCommissionQueries";
+import { useCreateDispute } from "@/hooks/useDisputeQueries";
 import { useMounted } from "@/hooks/useMounted";
-import { useCommissionStore } from "@/store/CommissionStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
@@ -39,32 +47,19 @@ export default function CommissionDetailContent({
 	const { user, isAuthenticated } = useUserStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
-	const {
-		commissions,
-		progress,
-		revisions,
-		disputes,
-		setCommissionStatus,
-		setPaymentStatus,
-		uploadDummyResult,
-		approveResult,
-		addRevision,
-		fileDispute,
-	} = useCommissionStore();
+	const { data: commission, isLoading } = useCommissionDetail(commissionId);
+
+	const respondMutation = useRespondCommission();
+	const updateProgressMutation = useUpdateProgress();
+	const approveStepMutation = useApproveStep();
+	const addRevisionMutation = useAddRevision();
+	const cancelMutation = useCancelCommission();
+	const createDisputeMutation = useCreateDispute();
+
 	const mounted = useMounted();
 	const [comment, setComment] = useState("");
 	const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 	const [isDisputeOpen, setIsDisputeOpen] = useState(false);
-
-	const commission = useMemo(
-		() => commissions.find((item) => item.id === commissionId),
-		[commissionId, commissions],
-	);
-
-	const commissionDispute = useMemo(
-		() => disputes?.find((d) => d.commission_id === commissionId),
-		[commissionId, disputes],
-	);
 
 	if (!mounted) {
 		return (
@@ -140,12 +135,9 @@ export default function CommissionDetailContent({
 
 	const artist = users.find((item) => item.id === commission.artists_id);
 	const client = users.find((item) => item.id === commission.client_id);
-	const progressItem = progress.find(
-		(item) => item.commission_id === commission.id,
-	);
-	const thread = revisions.filter(
-		(item) => item.commission_id === commission.id,
-	);
+	const progressItem = commission.progress ?? null;
+	const thread = commission.revisions ?? [];
+	const commissionDispute = commission.disputes?.[0] ?? null;
 	const status = commissionStatusConfig[commission.status];
 	const canCancel =
 		!["completed", "cancelled", "disputed"].includes(commission.status) &&
@@ -168,19 +160,20 @@ export default function CommissionDetailContent({
 
 	const confirmStatus = (
 		selectedCommission: Commission,
-		statusValue: Commission["status"],
+		statusValue: "accepted" | "declined",
 		title: string,
 	) => {
 		openModal({
 			title,
-			description: `Status "${selectedCommission.commission_title}" akan diubah menjadi ${commissionStatusConfig[statusValue].label}.`,
+			description: `Status "${selectedCommission.commission_title}" akan diubah menjadi ${statusValue === "accepted" ? "Diterima" : "Ditolak"}.`,
 			type: "confirm",
-			variant:
-				statusValue === "cancelled" || statusValue === "disputed"
-					? "danger"
-					: "default",
+			variant: statusValue === "declined" ? "danger" : "default",
 			confirmLabel: "Konfirmasi",
-			onConfirm: () => setCommissionStatus(selectedCommission.id, statusValue),
+			onConfirm: () =>
+				respondMutation.mutate({
+					id: selectedCommission.id,
+					status: statusValue,
+				}),
 		});
 	};
 
@@ -319,11 +312,7 @@ export default function CommissionDetailContent({
 										variant="danger"
 										className="flex items-center gap-1 w-full justify-center text-sm"
 										onClick={() =>
-											confirmStatus(
-												commission,
-												"cancelled",
-												"Tolak commission?",
-											)
+											confirmStatus(commission, "declined", "Tolak commission?")
 										}
 									>
 										<XCircle className="w-4 h-4" />
@@ -332,36 +321,22 @@ export default function CommissionDetailContent({
 								</>
 							)}
 
-							{isArtistView &&
-								commission.status === "accepted" &&
-								commission.payment_status === "paid" && (
-									<Button
-										className="flex items-center gap-1 w-full justify-center text-sm"
-										onClick={() =>
-											setCommissionStatus(commission.id, "in_progress")
-										}
-									>
-										Mulai Kerjakan
-									</Button>
-								)}
-
-							{isArtistView &&
-								commission.status === "accepted" &&
-								commission.payment_status === "unpaid" && (
-									<p className="rounded-lg bg-content/5 px-3 py-2 text-xs text-content-muted">
-										Menunggu client membayar uang muka sebelum artist bisa mulai
-										kerja atau upload hasil.
-									</p>
-								)}
-
 							{canUploadResult && (
 								<Button
 									variant="secondary"
 									className="flex items-center gap-1 w-full justify-center text-sm"
-									onClick={() => uploadDummyResult(commission.id)}
+									onClick={() =>
+										updateProgressMutation.mutate({
+											id: commission.id,
+											sketchUrl:
+												"https://picsum.photos/seed/commission-sketch-1/900/650",
+											finalArtworkUrl:
+												"https://picsum.photos/seed/commission-final-1/900/650",
+										})
+									}
 								>
 									<Upload className="w-4 h-4" />
-									Upload Hasil Dummy
+									Upload Hasil Karya
 								</Button>
 							)}
 
@@ -376,10 +351,9 @@ export default function CommissionDetailContent({
 												type: "confirm",
 												confirmLabel: "Approve",
 												onConfirm: () => {
-													approveResult(commission.id);
-													addToast({
-														message: "Hasil komisi disetujui.",
-														type: "success",
+													approveStepMutation.mutate({
+														id: commission.id,
+														step: "final",
 													});
 												},
 											});
@@ -403,13 +377,17 @@ export default function CommissionDetailContent({
 								<Button
 									variant="secondary"
 									className="flex gap-1 items-center w-full justify-center text-sm"
-									onClick={() =>
-										confirmStatus(
-											commission,
-											"cancelled",
-											"Batalkan commission?",
-										)
-									}
+									onClick={() => {
+										openModal({
+											title: "Batalkan commission?",
+											description: `Apakah Anda yakin ingin membatalkan pesanan "${commission.commission_title}"? Dana akan di-refund ke e-wallet Anda.`,
+											type: "confirm",
+											variant: "danger",
+											confirmLabel: "Ya, Batalkan",
+											cancelLabel: "Batal",
+											onConfirm: () => cancelMutation.mutate(commission.id),
+										});
+									}}
 								>
 									Batalkan Commission
 								</Button>
@@ -499,7 +477,11 @@ export default function CommissionDetailContent({
 								className="mt-3 flex flex-col gap-2 sm:flex-row"
 								onSubmit={(event) => {
 									event.preventDefault();
-									addRevision(commission.id, user.id, comment);
+									if (!comment.trim()) return;
+									addRevisionMutation.mutate({
+										id: commission.id,
+										comment: comment.trim(),
+									});
 									setComment("");
 								}}
 							>
@@ -525,13 +507,7 @@ export default function CommissionDetailContent({
 				price={commission.price}
 				isOpen={isPaymentOpen}
 				onClose={() => setIsPaymentOpen(false)}
-				onSubmitSuccess={(method, lastFour) => {
-					const res = setPaymentStatus(commission.id, "paid", method, lastFour);
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+				onSubmitSuccess={() => {
 					setIsPaymentOpen(false);
 				}}
 			/>
@@ -541,12 +517,10 @@ export default function CommissionDetailContent({
 				isOpen={isDisputeOpen}
 				onClose={() => setIsDisputeOpen(false)}
 				onSubmit={(reason) => {
-					const res = fileDispute(commission.id, reason);
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+					createDisputeMutation.mutate({
+						commission_id: commission.id,
+						reason,
+					});
 					setIsDisputeOpen(false);
 				}}
 			/>

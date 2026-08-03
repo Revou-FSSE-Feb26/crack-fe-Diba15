@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
-import { useCommissionStore } from "@/store/CommissionStore";
+import { useCreateCommission } from "@/hooks/useCommissionQueries";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
@@ -38,7 +38,7 @@ export default function CommissionButton({
 }: CommissionButtonProps) {
 	const router = useRouter();
 	const { user, isAuthenticated } = useUserStore();
-	const { createCommission } = useCommissionStore();
+	const createCommissionMutation = useCreateCommission();
 	const { openModal } = useModalStore();
 	const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -106,24 +106,31 @@ export default function CommissionButton({
 	const onSubmit = (data: CommissionForm) => {
 		if (user?.role !== "client") return;
 
-		const commission = createCommission({
-			artists_id: artistId,
-			client_id: user.id,
-			commission_title: data.title.trim(),
-			description: data.description.trim(),
-			price: data.price,
-		});
-
-		closeForm();
-		openModal({
-			title: "Commission dibuat",
-			description:
-				"Order sudah masuk. Lanjutkan ke halaman progress untuk pembayaran uang muka dan pelacakan status.",
-			type: "confirm",
-			confirmLabel: "Lihat Progress",
-			cancelLabel: "Tetap di sini",
-			onConfirm: () => router.push(`/commissions/${commission.id}`),
-		});
+		createCommissionMutation.mutate(
+			{
+				artist_id: artistId,
+				commission_title: data.title.trim(),
+				description: data.description.trim(),
+				price: data.price,
+				deadline_days: 7,
+			},
+			{
+				onSuccess: (resData) => {
+					closeForm();
+					const newId = resData.id || resData.commission?.id;
+					openModal({
+						title: "Commission dibuat",
+						description:
+							"Order sudah masuk. Lanjutkan ke halaman progress untuk pembayaran uang muka dan pelacakan status.",
+						type: "confirm",
+						confirmLabel: "Lihat Progress",
+						cancelLabel: "Tetap di sini",
+						onConfirm: () =>
+							router.push(newId ? `/commissions/${newId}` : "/commissions"),
+					});
+				},
+			},
+		);
 	};
 
 	return (

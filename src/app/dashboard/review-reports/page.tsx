@@ -6,22 +6,20 @@ import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { usePagination } from "@/hooks/usePagination";
+import { useResolveReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useReportStore } from "@/store/ReportStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import { useUserStore } from "@/store/UserStore";
 import type { JoinedReport } from "@/types";
 import { createReportsTableColumns } from "@/utils/dashboard/review-reports/reportsTableColumns";
 
 export default function ReviewReportsPage() {
-	const { user: curator } = useUserStore();
 	const { users } = useUserManagementStore();
 	const { data: artworks = [] } = useArtworks();
-	const { reports, resolveReport, dismissReport } = useReportStore();
+	const { reports } = useReportStore();
+	const resolveReportMutation = useResolveReport();
 	const { openModal } = useModalStore();
-	const { addToast } = useToastStore();
 	const { openLightbox } = useLightboxStore();
 
 	const { pending, resolved, dismissed } = useMemo(() => {
@@ -90,19 +88,14 @@ export default function ReviewReportsPage() {
 				confirmLabel: approved ? "Setujui" : "Tolak",
 				cancelLabel: "Batal",
 				onConfirm: () => {
-					const res = approved
-						? resolveReport(report.id, curator?.id || "u-008")
-						: dismissReport(report.id, curator?.id || "u-008");
-
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+					resolveReportMutation.mutate({
+						id: report.id,
+						status: approved ? "reviewed" : "rejected",
+					});
 				},
 			});
 		},
-		[curator?.id, openModal, resolveReport, dismissReport, addToast],
+		[openModal, resolveReportMutation],
 	);
 
 	const columns = useMemo(

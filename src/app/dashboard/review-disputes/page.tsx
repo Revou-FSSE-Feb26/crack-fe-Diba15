@@ -4,24 +4,21 @@ import { AlertCircle, CheckCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
+import { useResolveDispute } from "@/hooks/useDisputeQueries";
 import { usePagination } from "@/hooks/usePagination";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import { useUserStore } from "@/store/UserStore";
 import type { JoinedDispute } from "@/types";
 import { formatPrice } from "@/utils";
 import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/disputesTableColumns";
 
 export default function ReviewDisputesPage() {
-	const { user: curator } = useUserStore();
 	const { users } = useUserManagementStore();
-	const { disputes, commissions, progress, resolveDispute } =
-		useCommissionStore();
+	const { disputes, commissions, progress } = useCommissionStore();
+	const resolveDisputeMutation = useResolveDispute();
 	const { openModal } = useModalStore();
-	const { addToast } = useToastStore();
 	const { openLightbox } = useLightboxStore();
 
 	const { pending, disputed, rejected } = useMemo(() => {
@@ -96,20 +93,14 @@ export default function ReviewDisputesPage() {
 				confirmLabel: approved ? "Setujui" : "Tolak",
 				cancelLabel: "Batal",
 				onConfirm: () => {
-					const res = resolveDispute(
-						dispute.commission_id,
-						approved,
-						curator?.id || "u-008",
-					);
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+					resolveDisputeMutation.mutate({
+						id: dispute.id,
+						status: approved ? "approved" : "rejected",
+					});
 				},
 			});
 		},
-		[curator?.id, openModal, resolveDispute, addToast],
+		[openModal, resolveDisputeMutation],
 	);
 
 	const columns = useMemo(
