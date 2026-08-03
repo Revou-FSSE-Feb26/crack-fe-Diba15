@@ -25,6 +25,7 @@ import {
 	useApproveStep,
 	useCancelCommission,
 	useCommissionDetail,
+	usePayCommission,
 	useRespondCommission,
 	useUpdateProgress,
 } from "@/hooks/useCommissionQueries";
@@ -50,6 +51,7 @@ export default function CommissionDetailContent({
 	const { data: commission, isLoading } = useCommissionDetail(commissionId);
 
 	const respondMutation = useRespondCommission();
+	const payMutation = usePayCommission();
 	const updateProgressMutation = useUpdateProgress();
 	const approveStepMutation = useApproveStep();
 	const addRevisionMutation = useAddRevision();
@@ -271,26 +273,31 @@ export default function CommissionDetailContent({
 							<h3 className="text-xs font-bold uppercase tracking-wider text-content-muted">
 								Alur Progres Komisi
 							</h3>
-							<div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+							<div className="grid grid-cols-1 sm:grid-cols-5 gap-1.5 text-xs">
 								<div
-									className={`p-2.5 rounded-lg border ${commission.status === "pending" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${commission.status === "pending" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
-									1. Dipesan (Escrow)
+									1. Diajukan
 								</div>
 								<div
-									className={`p-2.5 rounded-lg border ${["accepted", "in_progress", "revision"].includes(commission.status) ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${commission.status === "accepted" && commission.payment_status === "unpaid" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
-									2. Dikerjakan Artis
+									2. Diterima Artis
 								</div>
 								<div
-									className={`p-2.5 rounded-lg border ${progressItem?.final_artwork_url ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${commission.payment_status === "paid" && commission.status !== "completed" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
-									3. Peninjauan Hasil
+									3. Dibayar (Escrow)
 								</div>
 								<div
-									className={`p-2.5 rounded-lg border ${commission.status === "completed" ? "bg-success/10 border-success text-success font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${progressItem?.final_artwork_url && commission.status !== "completed" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
-									4. Selesai (Dana Dilepas)
+									4. Review Hasil
+								</div>
+								<div
+									className={`p-2 rounded-lg border text-center ${commission.status === "completed" ? "bg-success/10 border-success text-success font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+								>
+									5. Selesai
 								</div>
 							</div>
 						</div>
@@ -301,8 +308,12 @@ export default function CommissionDetailContent({
 							{isArtistView && commission.status === "pending" && (
 								<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
 									<p className="text-sm font-semibold text-content">
-										Client telah mengajukan komisi & dana sebesar{" "}
-										{formatPrice(commission.price)} telah diamankan di Escrow.
+										Client mengajukan komisi sebesar{" "}
+										{formatPrice(commission.price)}.
+									</p>
+									<p className="text-xs text-content-muted">
+										Saldo Client belum dipotong. Terima pesanan ini untuk
+										mengizinkan Client melakukan pembayaran.
 									</p>
 									<div className="flex gap-2">
 										<Button
@@ -332,24 +343,64 @@ export default function CommissionDetailContent({
 							{!isArtistView && commission.status === "pending" && (
 								<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-2">
 									<p className="text-sm text-content font-medium">
-										Pesanan komisi Anda telah terbuat & saldo sebesar{" "}
-										{formatPrice(commission.price)} telah diamankan di Escrow.
+										Pesanan komisi Anda sebesar {formatPrice(commission.price)}{" "}
+										telah diajukan ke Artis.
 									</p>
 									<p className="text-xs text-content-muted">
-										Menunggu artist meninjau & menerima pesanan. Anda dapat
-										berdiskusi melalui kolom revisi/komentar di bawah.
+										Saldo Anda belum dipotong. Menunggu Artis meninjau &
+										menerima pesanan sebelum Anda melakukan pembayaran.
 									</p>
 								</div>
 							)}
 
-							{/* Artist Actions: Upload WIP / Final Artwork */}
+							{/* Client Actions: Pay for Accepted Commission */}
+							{!isArtistView &&
+								commission.status === "accepted" &&
+								commission.payment_status === "unpaid" && (
+									<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
+										<p className="text-sm font-semibold text-content">
+											Artis telah menerima pesanan komisi Anda! 🎉
+										</p>
+										<p className="text-xs text-content-muted">
+											Silakan lakukan pembayaran sebesar{" "}
+											{formatPrice(commission.price)} (via E-Wallet / Kartu
+											Kredit) untuk memulai pengerjaan karya. Dana Anda akan
+											diamankan di Escrow.
+										</p>
+										<Button
+											className="flex items-center gap-2 w-full justify-center text-sm font-semibold"
+											onClick={() => setIsPaymentOpen(true)}
+										>
+											<CreditCard className="w-4 h-4" />
+											Bayar Komisi ({formatPrice(commission.price)})
+										</Button>
+									</div>
+								)}
+
+							{/* Artist Actions: Accepted but Unpaid Banner */}
 							{isArtistView &&
-								["accepted", "in_progress", "revision"].includes(
-									commission.status,
-								) && (
+								commission.status === "accepted" &&
+								commission.payment_status === "unpaid" && (
+									<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-2">
+										<p className="text-sm text-content font-medium">
+											Anda telah menerima pesanan komisi ini.
+										</p>
+										<p className="text-xs text-content-muted">
+											Menunggu Client menyelesaikan pembayaran sebesar{" "}
+											{formatPrice(commission.price)} sebelum Anda dapat
+											mengunggah progress karya.
+										</p>
+									</div>
+								)}
+
+							{/* Artist Actions: Upload WIP / Final Artwork (Paid) */}
+							{isArtistView &&
+								commission.payment_status === "paid" &&
+								["in_progress", "revision"].includes(commission.status) && (
 									<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-3">
 										<p className="text-sm font-semibold text-content">
-											Unggah Progress Komisi
+											Pembayaran Escrow Terkonfirmasi! Silakan Unggah Progress
+											Komisi
 										</p>
 										<p className="text-xs text-content-muted">
 											Unggah bukti sketsa WIP atau hasil akhir karya agar client
@@ -553,7 +604,12 @@ export default function CommissionDetailContent({
 				price={commission.price}
 				isOpen={isPaymentOpen}
 				onClose={() => setIsPaymentOpen(false)}
-				onSubmitSuccess={() => {
+				onSubmitSuccess={(method, lastFour) => {
+					payMutation.mutate({
+						id: commission.id,
+						paymentMethod: method,
+						cardLastFour: lastFour,
+					});
 					setIsPaymentOpen(false);
 				}}
 			/>

@@ -228,3 +228,42 @@ export function useCancelCommission() {
 		},
 	});
 }
+
+// Pay commission
+export function usePayCommission() {
+	const queryClient = useQueryClient();
+	const { addToast } = useToastStore();
+
+	return useMutation({
+		mutationFn: async ({
+			id,
+			paymentMethod,
+			cardLastFour,
+		}: {
+			id: string;
+			paymentMethod: "wallet" | "credit_card";
+			cardLastFour?: string;
+		}) => {
+			const res = await axiosClient.patch(`/commissions/${id}/pay`, {
+				paymentMethod,
+				cardLastFour,
+			});
+			return res.data;
+		},
+		onSuccess: (data, { id }) => {
+			queryClient.invalidateQueries({ queryKey: ["commissions"] });
+			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+			addToast({
+				message: data.message || "Pembayaran komisi berhasil.",
+				type: "success",
+			});
+		},
+		onError: (error: unknown) => {
+			const err = error as { response?: { data?: { message?: string } } };
+			const msg =
+				err.response?.data?.message || "Gagal melakukan pembayaran komisi.";
+			addToast({ message: msg, type: "error" });
+		},
+	});
+}
