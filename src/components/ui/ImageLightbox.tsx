@@ -9,7 +9,8 @@ import {
 	ZoomOut,
 } from "lucide-react";
 import Image from "next/image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useLightboxStore } from "@/store/LightboxStore";
 import { randomKey } from "@/utils";

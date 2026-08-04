@@ -22,6 +22,7 @@ import {
 	Wifi,
 } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 /* ─── SEO Metadata ───────────────────────────────────────────────────────── */
 
@@ -361,13 +362,13 @@ export default function CareersPage() {
 
 												{/* CTA */}
 												<div className="shrink-0 self-start sm:self-center">
-													<a
+													<Link
 														href="#apply"
 														className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-background bg-primary hover:bg-primary-hover transition-colors shadow-sm whitespace-nowrap"
 													>
 														Lamar Sekarang
 														<ArrowRight className="w-3.5 h-3.5" />
-													</a>
+													</Link>
 												</div>
 											</div>
 										),
@@ -516,13 +517,13 @@ export default function CareersPage() {
 							Tim Rekrutmen TruBrush
 						</p>
 					</div>
-					<a
+					<Link
 						href="mailto:careers@trubrush.id"
 						className="inline-flex items-center gap-2 text-primary font-semibold text-lg hover:underline underline-offset-4 transition-colors mb-1"
 					>
 						careers@trubrush.id
 						<ArrowRight className="w-4 h-4" />
-					</a>
+					</Link>
 					<p className="text-sm text-content-muted mt-1">
 						Jam respons: Senin–Jumat, 09.00–17.00 WIB · Respons rata-rata: 3–5
 						hari kerja

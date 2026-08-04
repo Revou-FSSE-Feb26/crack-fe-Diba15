@@ -355,7 +355,7 @@ export default function CommissionDetailContent({
 													</p>
 												</div>
 											</div>
-											<a
+											<Link
 												href={
 													progressItem?.final_file_url ||
 													progressItem?.final_artwork_url ||
@@ -368,7 +368,7 @@ export default function CommissionDetailContent({
 											>
 												<Download className="w-4 h-4" />
 												Unduh Berkas Akhir
-											</a>
+											</Link>
 										</div>
 									</div>
 								)}

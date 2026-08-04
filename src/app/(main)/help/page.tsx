@@ -14,6 +14,7 @@ import {
 	UserPlus,
 } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
 	title: "Pusat Bantuan",
@@ -193,7 +194,7 @@ export default function HelpPage() {
 			{/* ── Quick Links ─────────────────────────────────────────────────── */}
 			<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
 				{quickLinks.map(({ icon: Icon, title, description, href }) => (
-					<a
+					<Link
 						key={title}
 						href={href}
 						className="group flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
@@ -211,7 +212,7 @@ export default function HelpPage() {
 							<span>Lihat panduan</span>
 							<ChevronRight className="w-3.5 h-3.5" />
 						</div>
-					</a>
+					</Link>
 				))}
 			</div>
 
@@ -269,12 +270,12 @@ export default function HelpPage() {
 						</h2>
 						<p className="text-sm text-content-muted leading-relaxed">
 							Tim support kami siap membantu Anda. Kirim email ke{" "}
-							<a
+							<Link
 								href="mailto:support@trubrush.id"
 								className="text-primary font-medium hover:underline underline-offset-2"
 							>
 								support@trubrush.id
-							</a>{" "}
+							</Link>{" "}
 							dengan deskripsi masalah Anda, dan kami akan merespons secepatnya.
 						</p>
 					</div>
@@ -300,24 +301,24 @@ export default function HelpPage() {
 
 					<div>
 						<p className="font-medium text-content mb-0.5">Email Support</p>
-						<a
+						<Link
 							href="mailto:support@trubrush.id"
 							className="text-primary hover:underline underline-offset-2"
 						>
 							support@trubrush.id
-						</a>
+						</Link>
 					</div>
 
 					<div className="hidden sm:block w-px bg-primary/15" />
 
 					<div>
 						<p className="font-medium text-content mb-0.5">Dispute & Mediasi</p>
-						<a
+						<Link
 							href="mailto:dispute@trubrush.id"
 							className="text-primary hover:underline underline-offset-2"
 						>
 							dispute@trubrush.id
-						</a>
+						</Link>
 					</div>
 				</div>
 			</div>

@@ -304,12 +304,12 @@ const sections: Section[] = [
 					</p>
 					<p className="text-content-muted">
 						Email:{" "}
-						<a
+						<Link
 							href="mailto:privacy@trubrush.id"
 							className="text-primary hover:underline underline-offset-2"
 						>
 							privacy@trubrush.id
-						</a>
+						</Link>
 					</p>
 					<p className="text-content-muted">
 						Jam Operasional: Senin–Jumat, 09.00–17.00 WIB
@@ -378,7 +378,7 @@ export default function PrivacyPage() {
 				<ol className="space-y-1.5">
 					{sections.map((section, index) => (
 						<li key={section.id}>
-							<a
+							<Link
 								href={`#${section.id}`}
 								className="flex items-center gap-2 text-sm text-content-muted hover:text-primary transition-colors"
 							>
@@ -386,7 +386,7 @@ export default function PrivacyPage() {
 									{index + 1}.
 								</span>
 								{section.title}
-							</a>
+							</Link>
 						</li>
 					))}
 				</ol>
