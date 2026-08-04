@@ -7,6 +7,7 @@ import {
 	CheckCircle2,
 	Clock3,
 	CreditCard,
+	Download,
 	MessageSquare,
 	Upload,
 	XCircle,
@@ -25,12 +26,14 @@ import {
 	useApproveStep,
 	useCancelCommission,
 	useCommissionDetail,
+	useCompleteCommission,
 	usePayCommission,
 	useRespondCommission,
 	useUpdateProgress,
 } from "@/hooks/useCommissionQueries";
 import { useCreateDispute } from "@/hooks/useDisputeQueries";
 import { useMounted } from "@/hooks/useMounted";
+import { axiosClient } from "@/lib/axiosClient";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
@@ -48,7 +51,7 @@ export default function CommissionDetailContent({
 	const { user, isAuthenticated } = useUserStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
-	const { data: commission, isLoading } = useCommissionDetail(commissionId);
+	const { data: commission } = useCommissionDetail(commissionId);
 
 	const respondMutation = useRespondCommission();
 	const payMutation = usePayCommission();
@@ -57,11 +60,16 @@ export default function CommissionDetailContent({
 	const addRevisionMutation = useAddRevision();
 	const cancelMutation = useCancelCommission();
 	const createDisputeMutation = useCreateDispute();
+	const completeMutation = useCompleteCommission();
 
 	const mounted = useMounted();
 	const [comment, setComment] = useState("");
 	const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 	const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+	const [isUploading, setIsUploading] = useState(false);
+	const [sketchFile, setSketchFile] = useState<File | null>(null);
+	const [previewFile, setPreviewFile] = useState<File | null>(null);
+	const [deliverableFile, setDeliverableFile] = useState<File | null>(null);
 
 	if (!mounted) {
 		return (
@@ -141,13 +149,35 @@ export default function CommissionDetailContent({
 	const thread = commission.revisions ?? [];
 	const commissionDispute = commission.disputes?.[0] ?? null;
 	const status = commissionStatusConfig[commission.status];
+
 	const canCancel =
-		!["completed", "cancelled", "disputed"].includes(commission.status) &&
+		!isArtistView &&
+		["pending", "accepted"].includes(commission.status) &&
+		commission.payment_status === "unpaid" &&
 		!commissionDispute;
-	const canApprove =
+
+	const canDispute =
+		!isArtistView &&
+		Boolean(progressItem?.sketch_url) &&
 		Boolean(progressItem?.final_artwork_url) &&
 		commission.status !== "completed" &&
+		commission.status !== "disputed" &&
 		!commissionDispute;
+
+	const canApprove =
+		!isArtistView &&
+		Boolean(progressItem?.final_artwork_url) &&
+		!progressItem?.final_artwork_approved &&
+		commission.status !== "completed" &&
+		commission.status !== "disputed" &&
+		!commissionDispute;
+
+	const canUploadFinalDeliverable =
+		isArtistView &&
+		Boolean(progressItem?.final_artwork_approved) &&
+		commission.status !== "completed" &&
+		!commissionDispute;
+
 	const counterpartName = isArtistView
 		? (client?.name ?? "Client")
 		: (artist?.name ?? "Artist");
@@ -190,7 +220,7 @@ export default function CommissionDetailContent({
 						/>
 						<div className="min-w-0 flex-1">
 							<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-								<h1 className="font-heading text-xl sm:text-2xl font-bold text-content break-words min-w-0">
+								<h1 className="font-heading text-xl sm:text-2xl font-bold text-content wrap-break-word min-w-0">
 									{commission.commission_title}
 								</h1>
 								<span
@@ -205,7 +235,7 @@ export default function CommissionDetailContent({
 									: `Artist: ${counterpartName}`}
 							</p>
 							{commission.description && (
-								<p className="mt-3 text-xs sm:text-sm leading-relaxed text-content-muted break-words">
+								<p className="mt-3 text-xs sm:text-sm leading-relaxed text-content-muted wrap-break-word">
 									{commission.description}
 								</p>
 							)}
@@ -304,6 +334,45 @@ export default function CommissionDetailContent({
 
 						{/*Button & Action Section*/}
 						<div className="space-y-3">
+							{/* Completed Commission: Final Deliverable Download Card */}
+							{commission.status === "completed" &&
+								(progressItem?.final_file_url ||
+									progressItem?.final_artwork_url) && (
+									<div className="p-4 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl border border-emerald-500/30 space-y-3">
+										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+											<div className="flex items-center gap-3">
+												<div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+													<Download className="w-5 h-5" />
+												</div>
+												<div>
+													<p className="font-bold text-sm text-content">
+														Berkas Karya Asli (Deliverable Final)
+													</p>
+													<p className="text-xs text-content-muted">
+														Komisi ini telah selesai dan saldo Escrow sebesar{" "}
+														{formatPrice(commission.price)} telah dicairkan ke
+														Artis. Berkas mentah/arsip hasil karya siap diunduh.
+													</p>
+												</div>
+											</div>
+											<a
+												href={
+													progressItem?.final_file_url ||
+													progressItem?.final_artwork_url ||
+													"#"
+												}
+												target="_blank"
+												rel="noopener noreferrer"
+												download
+												className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
+											>
+												<Download className="w-4 h-4" />
+												Unduh Berkas Akhir
+											</a>
+										</div>
+									</div>
+								)}
+
 							{/* Artist Actions: Respond to Pending Order */}
 							{isArtistView && commission.status === "pending" && (
 								<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
@@ -393,58 +462,237 @@ export default function CommissionDetailContent({
 									</div>
 								)}
 
-							{/* Artist Actions: Upload WIP / Final Artwork (Paid) */}
+							{/* Artist Actions: Upload Real WIP / Preview Final (Paid) */}
 							{isArtistView &&
 								commission.payment_status === "paid" &&
-								["in_progress", "revision"].includes(commission.status) && (
-									<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-3">
-										<p className="text-sm font-semibold text-content">
-											Pembayaran Escrow Terkonfirmasi! Silakan Unggah Progress
-											Komisi
-										</p>
-										<p className="text-xs text-content-muted">
-											Unggah bukti sketsa WIP atau hasil akhir karya agar client
-											dapat meninjau.
-										</p>
-										<Button
-											variant="secondary"
-											className="flex items-center gap-2 w-full justify-center text-sm"
-											onClick={() =>
-												updateProgressMutation.mutate({
-													id: commission.id,
-													sketchUrl:
-														"https://picsum.photos/seed/commission-sketch-1/900/650",
-													finalArtworkUrl:
-														"https://picsum.photos/seed/commission-final-1/900/650",
-												})
-											}
-										>
-											<Upload className="w-4 h-4" />
-											Upload Progress Sketsa & Hasil Akhir
-										</Button>
+								["accepted", "in_progress", "revision"].includes(
+									commission.status,
+								) && (
+									<div className="p-4 bg-surface rounded-xl border border-content/10 space-y-4">
+										<div className="space-y-1">
+											<p className="text-sm font-semibold text-content">
+												Pembayaran Escrow Terkonfirmasi! Unggah Progress Komisi
+											</p>
+											<p className="text-xs text-content-muted">
+												Pilih dan unggah berkas gambar nyata untuk WIP Proof
+												(Sketsa) atau Preview Final agar Client dapat meninjau.
+											</p>
+										</div>
+
+										<div className="grid gap-3 sm:grid-cols-2 text-xs">
+											{/* WIP Proof Upload Input */}
+											<div className="p-3 rounded-lg border border-content/10 bg-content/5 space-y-2">
+												<label
+													htmlFor="wip-file-input"
+													className="font-semibold block text-content"
+												>
+													1. Unggah Sketsa / Video WIP Proof
+												</label>
+												<input
+													id="wip-file-input"
+													type="file"
+													accept="image/png,image/jpeg,image/webp,image/jpg,image/gif,video/mp4,video/quicktime,video/webm,.gif,.mp4,.mov,.webm"
+													onChange={(e) =>
+														setSketchFile(e.target.files?.[0] || null)
+													}
+													className="w-full text-xs text-content file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-background hover:file:bg-primary-hover cursor-pointer"
+												/>
+												{sketchFile && (
+													<Button
+														type="button"
+														disabled={isUploading}
+														className="w-full text-xs py-1.5 justify-center"
+														onClick={async () => {
+															try {
+																setIsUploading(true);
+																const formData = new FormData();
+																formData.append("file", sketchFile);
+																const res = await axiosClient.post(
+																	`/upload/commissions/${commission.id}/preview`,
+																	formData,
+																	{
+																		headers: {
+																			"Content-Type": "multipart/form-data",
+																		},
+																	},
+																);
+																await updateProgressMutation.mutateAsync({
+																	id: commission.id,
+																	sketch_url: res.data.url,
+																});
+																setSketchFile(null);
+															} catch (error: unknown) {
+																const err = error as {
+																	response?: { data?: { message?: string } };
+																};
+																addToast({
+																	message:
+																		err.response?.data?.message ||
+																		"Gagal mengunggah WIP proof.",
+																	type: "error",
+																});
+															} finally {
+																setIsUploading(false);
+															}
+														}}
+													>
+														<Upload className="w-3.5 h-3.5 mr-1" />
+														Submit WIP Proof
+													</Button>
+												)}
+											</div>
+
+											{/* Preview Final Upload Input */}
+											<div className="p-3 rounded-lg border border-content/10 bg-content/5 space-y-2">
+												<label
+													htmlFor="preview-file-input"
+													className="font-semibold block text-content"
+												>
+													2. Unggah Preview Final
+												</label>
+												<input
+													id="preview-file-input"
+													type="file"
+													accept="image/png,image/jpeg,image/webp,image/jpg,image/gif,.gif"
+													onChange={(e) =>
+														setPreviewFile(e.target.files?.[0] || null)
+													}
+													className="w-full text-xs text-content file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-background hover:file:bg-primary-hover cursor-pointer"
+												/>
+												{previewFile && (
+													<Button
+														type="button"
+														disabled={isUploading}
+														className="w-full text-xs py-1.5 justify-center"
+														onClick={async () => {
+															try {
+																setIsUploading(true);
+																const formData = new FormData();
+																formData.append("file", previewFile);
+																const res = await axiosClient.post(
+																	`/upload/commissions/${commission.id}/preview`,
+																	formData,
+																	{
+																		headers: {
+																			"Content-Type": "multipart/form-data",
+																		},
+																	},
+																);
+																await updateProgressMutation.mutateAsync({
+																	id: commission.id,
+																	final_artwork_url: res.data.url,
+																});
+																setPreviewFile(null);
+															} catch (error: unknown) {
+																const err = error as {
+																	response?: { data?: { message?: string } };
+																};
+																addToast({
+																	message:
+																		err.response?.data?.message ||
+																		"Gagal mengunggah preview final.",
+																	type: "error",
+																});
+															} finally {
+																setIsUploading(false);
+															}
+														}}
+													>
+														<Upload className="w-3.5 h-3.5 mr-1" />
+														Submit Preview Final
+													</Button>
+												)}
+											</div>
+										</div>
 									</div>
 								)}
 
-							{/* Client Actions: Approve Final Artwork */}
+							{/* Artist Actions: Final Deliverable File Upload (Step 5) */}
+							{canUploadFinalDeliverable && (
+								<div className="p-4 bg-success/10 rounded-xl border border-success/30 space-y-3">
+									<p className="text-sm font-semibold text-content">
+										Client Telah Menyutujui Preview Final! 🎉
+									</p>
+									<p className="text-xs text-content-muted">
+										Silakan unggah berkas karya asli/arsip (.zip, .rar, .psd,
+										.pdf, .png hingga 100MB) untuk menyelesaikan komisi dan
+										mencairkan dana Escrow sebesar{" "}
+										{formatPrice(commission.price)} ke E-Wallet Anda.
+									</p>
+									<div className="space-y-2">
+										<input
+											type="file"
+											accept=".zip,.rar,.psd,.pdf,.png,.jpg,.jpeg"
+											onChange={(e) =>
+												setDeliverableFile(e.target.files?.[0] || null)
+											}
+											className="w-full text-xs text-content file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-success file:text-white hover:file:bg-success-hover cursor-pointer"
+										/>
+										{deliverableFile && (
+											<Button
+												type="button"
+												disabled={isUploading}
+												className="w-full text-sm py-2 justify-center bg-success hover:bg-success-hover text-white font-semibold"
+												onClick={async () => {
+													try {
+														setIsUploading(true);
+														const formData = new FormData();
+														formData.append("file", deliverableFile);
+														await axiosClient.post(
+															`/upload/commissions/${commission.id}/final`,
+															formData,
+															{
+																headers: {
+																	"Content-Type": "multipart/form-data",
+																},
+															},
+														);
+														await completeMutation.mutateAsync(commission.id);
+														setDeliverableFile(null);
+													} catch (error: unknown) {
+														const err = error as {
+															response?: { data?: { message?: string } };
+														};
+														addToast({
+															message:
+																err.response?.data?.message ||
+																"Gagal mengunggah berkas hasil akhir.",
+															type: "error",
+														});
+													} finally {
+														setIsUploading(false);
+													}
+												}}
+											>
+												<CheckCircle2 className="w-4 h-4 mr-1.5" />
+												Kirim Berkas Akhir & Cairkan Escrow (
+												{formatPrice(commission.price)})
+											</Button>
+										)}
+									</div>
+								</div>
+							)}
+
+							{/* Client Actions: Approve Final Artwork & Dispute */}
 							{!isArtistView && canApprove && (
 								<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
 									<p className="text-sm font-semibold text-content">
-										Artist telah mengunggah Karya Akhir
+										Artist telah mengunggah Preview Final
 									</p>
 									<p className="text-xs text-content-muted">
-										Tinjau karya akhir di atas. Jika sudah sesuai, setujui hasil
-										karya untuk melepaskan dana Escrow sebesar{" "}
-										{formatPrice(commission.price)} ke E-Wallet artist.
+										Tinjau karya akhir di atas. Jika sudah sesuai, setujui
+										pratinjau agar Artist dapat mengunggah berkas karya asli dan
+										menerima pembayaran.
 									</p>
 									<div className="flex gap-2">
 										<Button
-											className="flex gap-1 items-center flex-1 justify-center text-sm"
+											className="flex gap-1 items-center flex-1 justify-center text-sm font-semibold"
 											onClick={() => {
 												openModal({
-													title: "Approve hasil?",
-													description: `Dengan menyetujui hasil, dana sebesar ${formatPrice(commission.price)} akan dilepaskan ke wallet artist.`,
+													title: "Approve Pratinjau Final?",
+													description: `Apakah Anda menyetujui pratinjau hasil karya untuk "${commission.commission_title}"? Artist akan diizinkan mengirimkan berkas asli dan dana sebesar ${formatPrice(commission.price)} akan dilepaskan setelah pengiriman berkas.`,
 													type: "confirm",
-													confirmLabel: "Approve Hasil",
+													confirmLabel: "Approve Pratinjau",
 													onConfirm: () => {
 														approveStepMutation.mutate({
 															id: commission.id,
@@ -457,19 +705,33 @@ export default function CommissionDetailContent({
 											<CheckCircle2 className="w-4 h-4" />
 											Approve Hasil Akhir
 										</Button>
-										<Button
-											variant="danger"
-											className="flex gap-1 items-center justify-center text-sm"
-											onClick={() => setIsDisputeOpen(true)}
-										>
-											<AlertTriangle className="w-4 h-4" />
-											Ajukan Dispute
-										</Button>
+										{canDispute && (
+											<Button
+												variant="danger"
+												className="flex gap-1 items-center justify-center text-sm"
+												onClick={() => setIsDisputeOpen(true)}
+											>
+												<AlertTriangle className="w-4 h-4" />
+												Ajukan Dispute
+											</Button>
+										)}
 									</div>
 								</div>
 							)}
 
-							{/* Client Actions: Cancel Commission */}
+							{/* Client Actions: Dispute Button when not approving */}
+							{!isArtistView && !canApprove && canDispute && (
+								<Button
+									variant="danger"
+									className="flex gap-1 items-center w-full justify-center text-sm"
+									onClick={() => setIsDisputeOpen(true)}
+								>
+									<AlertTriangle className="w-4 h-4" />
+									Ajukan Dispute Komisi
+								</Button>
+							)}
+
+							{/* Client Actions: Cancel Commission (Pending/Accepted Unpaid only) */}
 							{!isArtistView && canCancel && (
 								<Button
 									variant="secondary"
@@ -477,7 +739,7 @@ export default function CommissionDetailContent({
 									onClick={() => {
 										openModal({
 											title: "Batalkan commission?",
-											description: `Apakah Anda yakin ingin membatalkan pesanan "${commission.commission_title}"? Dana sebesar ${formatPrice(commission.price)} akan di-refund ke e-wallet Anda.`,
+											description: `Apakah Anda yakin ingin membatalkan pesanan "${commission.commission_title}"?`,
 											type: "confirm",
 											variant: "danger",
 											confirmLabel: "Ya, Batalkan",
@@ -486,7 +748,7 @@ export default function CommissionDetailContent({
 										});
 									}}
 								>
-									Batalkan Commission (Refund)
+									Batalkan Commission
 								</Button>
 							)}
 

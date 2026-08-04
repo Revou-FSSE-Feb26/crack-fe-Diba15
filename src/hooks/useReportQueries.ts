@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import type { Report } from "@/types";
+import type { JoinedReport } from "@/types";
 
 export function useReports(status?: string) {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
-	return useQuery<Report[]>({
+	return useQuery<JoinedReport[]>({
 		queryKey: ["reports", status],
 		queryFn: async () => {
 			const res = await axiosClient.get("/reports", {

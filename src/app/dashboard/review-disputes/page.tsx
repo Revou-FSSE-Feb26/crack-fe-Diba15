@@ -4,7 +4,7 @@ import { AlertCircle, CheckCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
-import { useResolveDispute } from "@/hooks/useDisputeQueries";
+import { useDisputes, useResolveDispute } from "@/hooks/useDisputeQueries";
 import { usePagination } from "@/hooks/usePagination";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useLightboxStore } from "@/store/LightboxStore";
@@ -16,17 +16,24 @@ import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/di
 
 export default function ReviewDisputesPage() {
 	const { users } = useUserManagementStore();
-	const { disputes, commissions, progress } = useCommissionStore();
+	const { data: realDisputes = [] } = useDisputes();
+	const {
+		disputes: mockDisputes,
+		commissions,
+		progress,
+	} = useCommissionStore();
 	const resolveDisputeMutation = useResolveDispute();
 	const { openModal } = useModalStore();
 	const { openLightbox } = useLightboxStore();
 
+	const disputesList = realDisputes.length > 0 ? realDisputes : mockDisputes;
+
 	const { pending, disputed, rejected } = useMemo(() => {
-		const pending = disputes.filter((d) => d.status === "pending");
-		const disputed = disputes.filter((d) => d.status === "approved");
-		const rejected = disputes.filter((d) => d.status === "rejected");
+		const pending = disputesList.filter((d) => d.status === "pending");
+		const disputed = disputesList.filter((d) => d.status === "approved");
+		const rejected = disputesList.filter((d) => d.status === "rejected");
 		return { pending, disputed, rejected };
-	}, [disputes]);
+	}, [disputesList]);
 
 	const { setPage, setPerPage, paginate } = usePagination({
 		initialPerPage: 5,
@@ -34,21 +41,28 @@ export default function ReviewDisputesPage() {
 
 	// Join dispute with commission, progress, client, artist
 	const joinedDisputes = useMemo(() => {
-		return disputes
+		return disputesList
 			.map((dispute) => {
-				const commission = commissions.find(
-					(c) => c.id === dispute.commission_id,
-				);
+				const commission =
+					dispute.commission ??
+					commissions.find((c) => c.id === dispute.commission_id);
 				const comProgress = progress.find(
 					(p) => p.commission_id === dispute.commission_id,
 				);
-				const clientUser = users.find((u) => u.id === commission?.client_id);
-				const artistUser = users.find((u) => u.id === commission?.artists_id);
+				const clientUser =
+					dispute.commission?.client ??
+					users.find((u) => u.id === commission?.client_id);
+				const artistUser =
+					dispute.commission?.artist ??
+					users.find((u) => u.id === commission?.artists_id);
+
+				const finalProgress =
+					dispute.progress ?? dispute.commission?.progress ?? comProgress;
 
 				return {
 					...dispute,
 					commission,
-					progress: comProgress,
+					progress: finalProgress,
 					client: clientUser,
 					artist: artistUser,
 				};
@@ -57,7 +71,7 @@ export default function ReviewDisputesPage() {
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [disputes, commissions, progress, users]);
+	}, [disputesList, commissions, progress, users]);
 
 	const [search, setSearch] = useState("");
 

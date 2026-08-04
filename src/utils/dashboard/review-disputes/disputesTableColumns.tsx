@@ -45,66 +45,77 @@ export function createDisputesTableColumns({
 			key: "artwork_previews",
 			header: "WIP / Preview",
 			cellClassName: "align-top",
-			cell: (row) => (
-				<div className="flex gap-2 py-1 select-none">
-					<div className="space-y-1">
-						<p className="text-[10px] font-bold text-content-muted">
-							WIP Proof
-						</p>
-						{row.progress?.sketch_url ? (
-							<button
-								type="button"
-								onClick={() =>
-									openLightbox(
-										[row.progress?.sketch_url ?? ""],
-										0,
-										`WIP Proof - ${row.commission?.commission_title}`,
-									)
-								}
-								className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
-							>
-								<Image
-									src={row.progress.sketch_url}
-									alt="WIP Sketch"
-									fill
-									sizes="64px"
-									className="object-cover group-hover:scale-105 transition-transform"
-								/>
-							</button>
-						) : (
-							<p className="text-[10px] text-content-muted italic">Tidak ada</p>
-						)}
+			cell: (row) => {
+				const sketchUrl = row.progress?.sketch_url;
+				const finalArtworkUrl = row.progress?.final_artwork_url;
+
+				return (
+					<div className="flex gap-2 py-1 select-none">
+						<div className="space-y-1">
+							<p className="text-[10px] font-bold text-content-muted">
+								WIP Proof
+							</p>
+							{sketchUrl ? (
+								<button
+									type="button"
+									onClick={() =>
+										openLightbox(
+											[sketchUrl],
+											0,
+											`WIP Proof - ${row.commission?.commission_title}`,
+										)
+									}
+									className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
+								>
+									<Image
+										src={sketchUrl}
+										alt="WIP Sketch"
+										fill
+										unoptimized
+										sizes="64px"
+										className="object-cover group-hover:scale-105 transition-transform"
+									/>
+								</button>
+							) : (
+								<p className="text-[10px] text-content-muted italic">
+									Tidak ada
+								</p>
+							)}
+						</div>
+						<div className="space-y-1">
+							<p className="text-[10px] font-bold text-content-muted">
+								Final Art
+							</p>
+							{finalArtworkUrl ? (
+								<button
+									type="button"
+									onClick={() =>
+										openLightbox(
+											[finalArtworkUrl],
+											0,
+											`Final Art - ${row.commission?.commission_title}`,
+										)
+									}
+									className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
+								>
+									<Image
+										src={finalArtworkUrl}
+										alt="Final Artwork"
+										fill
+										unoptimized
+										sizes="64px"
+										className="object-cover group-hover:scale-105 transition-transform"
+									/>
+								</button>
+							) : (
+								<p className="text-[10px] text-content-muted italic">
+									Tidak ada
+								</p>
+							)}
+						</div>
 					</div>
-					<div className="space-y-1">
-						<p className="text-[10px] font-bold text-content-muted">
-							Final Art
-						</p>
-						{row.progress?.final_artwork_url ? (
-							<button
-								type="button"
-								onClick={() =>
-									openLightbox(
-										[row.progress?.final_artwork_url ?? ""],
-										0,
-										`Final Art - ${row.commission?.commission_title}`,
-									)
-								}
-								className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
-							>
-								<Image
-									src={row.progress.final_artwork_url}
-									alt="Final Artwork"
-									fill
-									sizes="64px"
-									className="object-cover group-hover:scale-105 transition-transform"
-								/>
-							</button>
-						) : (
-							<p className="text-[10px] text-content-muted italic">Tidak ada</p>
-						)}
-					</div>
-				</div>
-			),
+				);
+			},
 		},
 		{
 			key: "dispute_reason",

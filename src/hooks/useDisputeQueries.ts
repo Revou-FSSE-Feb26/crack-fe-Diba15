@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import type { DisputeLog } from "@/types";
+import type { JoinedDispute } from "@/types";
 
 export function useDisputes(status?: string) {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
-	return useQuery<DisputeLog[]>({
+	return useQuery<JoinedDispute[]>({
 		queryKey: ["disputes", status],
 		queryFn: async () => {
 			const res = await axiosClient.get("/disputes", {

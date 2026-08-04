@@ -16,7 +16,7 @@ import { commissionStatusConfig } from "@/utils/commissionStatus";
 export default function CommissionProgressContent() {
 	const { user, isAuthenticated } = useUserStore();
 	const roleFilter = user?.role === "artist" ? "artist" : "client";
-	const { data: commissions = [], isLoading } = useUserCommissions(roleFilter);
+	const { data: commissions = [] } = useUserCommissions(roleFilter);
 	const mounted = useMounted();
 
 	const visibleCommissions = useMemo(() => {

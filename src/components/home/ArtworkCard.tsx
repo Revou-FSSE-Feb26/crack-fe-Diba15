@@ -27,7 +27,6 @@ import { useFavoriteArtwork } from "@/hooks/useFavoriteArtwork";
 import { useFollowArtist } from "@/hooks/useFollowArtist";
 import { useCreateReport } from "@/hooks/useReportQueries";
 import { useModalStore } from "@/store/ModalStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations, User } from "@/types";
 import { randomKey } from "@/utils";
@@ -36,7 +35,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
 	const router = useRouter();
 	const { copyPath } = useCopyLink();
-	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
 	const { user, isAuthenticated } = useUserStore();
 	const { isArtworkFavorite, handleFavoriteToggle } = useFavoriteArtwork(

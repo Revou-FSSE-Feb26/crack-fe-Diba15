@@ -6,7 +6,7 @@ import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { usePagination } from "@/hooks/usePagination";
-import { useResolveReport } from "@/hooks/useReportQueries";
+import { useReports, useResolveReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useReportStore } from "@/store/ReportStore";
@@ -17,17 +17,20 @@ import { createReportsTableColumns } from "@/utils/dashboard/review-reports/repo
 export default function ReviewReportsPage() {
 	const { users } = useUserManagementStore();
 	const { data: artworks = [] } = useArtworks();
-	const { reports } = useReportStore();
+	const { data: realReports = [] } = useReports();
+	const { reports: mockReports } = useReportStore();
 	const resolveReportMutation = useResolveReport();
 	const { openModal } = useModalStore();
 	const { openLightbox } = useLightboxStore();
 
+	const reportsList = realReports.length > 0 ? realReports : mockReports;
+
 	const { pending, resolved, dismissed } = useMemo(() => {
-		const pending = reports.filter((r) => r.status === "pending");
-		const resolved = reports.filter((r) => r.status === "resolved");
-		const dismissed = reports.filter((r) => r.status === "dismissed");
+		const pending = reportsList.filter((r) => r.status === "pending");
+		const resolved = reportsList.filter((r) => r.status === "resolved");
+		const dismissed = reportsList.filter((r) => r.status === "dismissed");
 		return { pending, resolved, dismissed };
-	}, [reports]);
+	}, [reportsList]);
 
 	const { setPage, setPerPage, paginate } = usePagination({
 		initialPerPage: 5,
@@ -35,11 +38,15 @@ export default function ReviewReportsPage() {
 
 	// Join reports with artwork, reporter, artist
 	const joinedReports = useMemo(() => {
-		return reports
+		return reportsList
 			.map((report) => {
-				const artwork = artworks.find((a) => a.id === report.target_id);
-				const reporter = users.find((u) => u.id === report.reporter_id);
-				const artist = users.find((u) => u.id === artwork?.artists_id);
+				const artwork =
+					report.artwork ?? artworks.find((a) => a.id === report.target_id);
+				const reporter =
+					report.reporter ?? users.find((u) => u.id === report.reporter_id);
+				const artist =
+					report.artwork?.artist ??
+					users.find((u) => u.id === artwork?.artists_id);
 
 				return {
 					...report,
@@ -52,7 +59,7 @@ export default function ReviewReportsPage() {
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [reports, artworks, users]);
+	}, [reportsList, artworks, users]);
 
 	const [search, setSearch] = useState("");
 

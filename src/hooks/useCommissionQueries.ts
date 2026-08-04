@@ -103,7 +103,7 @@ export function useRespondCommission() {
 	});
 }
 
-// Update progress (sketchUrl / finalArtworkUrl)
+// Update progress (sketch_url / final_artwork_url)
 export function useUpdateProgress() {
 	const queryClient = useQueryClient();
 	const { addToast } = useToastStore();
@@ -111,16 +111,16 @@ export function useUpdateProgress() {
 	return useMutation({
 		mutationFn: async ({
 			id,
-			sketchUrl,
-			finalArtworkUrl,
+			sketch_url,
+			final_artwork_url,
 		}: {
 			id: string;
-			sketchUrl?: string;
-			finalArtworkUrl?: string;
+			sketch_url?: string;
+			final_artwork_url?: string;
 		}) => {
 			const res = await axiosClient.patch(`/commissions/${id}/progress`, {
-				sketchUrl,
-				finalArtworkUrl,
+				sketch_url,
+				final_artwork_url,
 			});
 			return res.data;
 		},
@@ -263,6 +263,35 @@ export function usePayCommission() {
 			const err = error as { response?: { data?: { message?: string } } };
 			const msg =
 				err.response?.data?.message || "Gagal melakukan pembayaran komisi.";
+			addToast({ message: msg, type: "error" });
+		},
+	});
+}
+
+// Complete commission after final deliverable file upload
+export function useCompleteCommission() {
+	const queryClient = useQueryClient();
+	const { addToast } = useToastStore();
+
+	return useMutation({
+		mutationFn: async (id: string) => {
+			const res = await axiosClient.patch(`/commissions/${id}/complete`);
+			return res.data;
+		},
+		onSuccess: (data, id) => {
+			queryClient.invalidateQueries({ queryKey: ["commissions"] });
+			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+			addToast({
+				message:
+					data.message ||
+					"Komisi telah berhasil diselesaikan & dana escrow dicairkan ke wallet Anda! 🎉",
+				type: "success",
+			});
+		},
+		onError: (error: unknown) => {
+			const err = error as { response?: { data?: { message?: string } } };
+			const msg = err.response?.data?.message || "Gagal menyelesaikan komisi.";
 			addToast({ message: msg, type: "error" });
 		},
 	});
