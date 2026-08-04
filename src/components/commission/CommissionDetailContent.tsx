@@ -45,6 +45,29 @@ interface CommissionDetailContentProps {
 	commissionId: string;
 }
 
+// Payment status badge config — adjust the keys to match your Commission["payment_status"] union exactly.
+const paymentStatusConfig: Record<
+	string,
+	{ label: string; className: string }
+> = {
+	unpaid: {
+		label: "Belum Dibayar",
+		className: "bg-slate-500/10 text-slate-500 border-slate-500/30",
+	},
+	paid: {
+		label: "Escrow Aktif",
+		className: "bg-primary/10 text-primary border-primary/30",
+	},
+	refunded: {
+		label: "Direfund",
+		className: "bg-danger/10 text-danger border-danger/30",
+	},
+	released: {
+		label: "Dana Dicairkan",
+		className: "bg-success/10 text-success border-success/30",
+	},
+};
+
 export default function CommissionDetailContent({
 	commissionId,
 }: CommissionDetailContentProps) {
@@ -149,6 +172,10 @@ export default function CommissionDetailContent({
 	const thread = commission.revisions ?? [];
 	const commissionDispute = commission.disputes?.[0] ?? null;
 	const status = commissionStatusConfig[commission.status];
+	const paymentBadge = paymentStatusConfig[commission.payment_status] ?? {
+		label: commission.payment_status,
+		className: "bg-content/5 text-content-muted border-content/10",
+	};
 
 	const canCancel =
 		!isArtistView &&
@@ -202,7 +229,7 @@ export default function CommissionDetailContent({
 	};
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+		<div className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
 			<Link
 				href="/commissions"
 				className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover"
@@ -212,7 +239,7 @@ export default function CommissionDetailContent({
 			</Link>
 
 			<article className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 xs:p-4 sm:p-5">
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between w-full">
+				<div className="flex flex-col gap-4 w-full">
 					<div className="flex items-start gap-2.5 sm:gap-3 min-w-0 w-full">
 						<AvatarInitials
 							name={counterpartName}
@@ -228,6 +255,11 @@ export default function CommissionDetailContent({
 								>
 									{status.label}
 								</span>
+								<span
+									className={`rounded-full border px-2 py-0.5 text-xs font-medium shrink-0 ${paymentBadge.className}`}
+								>
+									{paymentBadge.label}
+								</span>
 							</div>
 							<p className="mt-1 text-xs sm:text-sm text-content-muted">
 								{isArtistView
@@ -242,12 +274,8 @@ export default function CommissionDetailContent({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-1.5 xs:gap-2 sm:grid-cols-4 lg:w-107.5 w-full">
-						<Stat
-							icon={CreditCard}
-							label="Bayar"
-							value={commission.payment_status}
-						/>
+					{/* Stat row — full width, no truncation */}
+					<div className="grid grid-cols-3 gap-2 sm:gap-3">
 						<Stat
 							icon={Clock3}
 							label="Update"
@@ -266,7 +294,7 @@ export default function CommissionDetailContent({
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-5">
+				<div className="flex flex-col gap-5 mt-5">
 					<div className="space-y-3">
 						{/*Artwork Preview Section*/}
 						<div className="grid gap-3 sm:grid-cols-2">
