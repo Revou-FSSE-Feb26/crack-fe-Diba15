@@ -58,7 +58,7 @@ export function useResolveReport() {
 			notes,
 		}: {
 			id: string;
-			status: "reviewed" | "rejected";
+			status: "resolved" | "dismissed";
 			notes?: string;
 		}) => {
 			const res = await axiosClient.patch(`/reports/${id}/resolve`, {
@@ -69,6 +69,7 @@ export function useResolveReport() {
 		},
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["reports"] });
+			queryClient.invalidateQueries({ queryKey: ["artworks"] });
 			addToast({
 				message: data.message || "Laporan berhasil diproses.",
 				type: "success",

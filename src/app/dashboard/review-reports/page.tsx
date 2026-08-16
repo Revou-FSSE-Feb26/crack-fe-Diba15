@@ -97,7 +97,7 @@ export default function ReviewReportsPage() {
 				onConfirm: () => {
 					resolveReportMutation.mutate({
 						id: report.id,
-						status: approved ? "reviewed" : "rejected",
+						status: approved ? "resolved" : "dismissed",
 					});
 				},
 			});
