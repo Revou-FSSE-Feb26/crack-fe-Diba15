@@ -119,6 +119,7 @@ export interface Commission {
 	updated_at: string;
 	progress?: CommissionProgress | null;
 	revisions?: Revision[];
+	dispute?: DisputeLog | null;
 	disputes?: DisputeLog[];
 }
 

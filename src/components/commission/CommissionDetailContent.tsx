@@ -68,7 +68,7 @@ const paymentStatusConfig: Record<
 	},
 };
 
-export default function CommissionDetailContent({
+export function CommissionDetailContent({
 	commissionId,
 }: CommissionDetailContentProps) {
 	const { user, isAuthenticated } = useUserStore();
@@ -94,6 +94,7 @@ export default function CommissionDetailContent({
 	const [previewFile, setPreviewFile] = useState<File | null>(null);
 	const [deliverableFile, setDeliverableFile] = useState<File | null>(null);
 
+	// Cek apakah sudah masuk atau belum
 	if (!mounted) {
 		return (
 			<div className="max-w-6xl mx-auto px-4 py-8">
@@ -104,6 +105,7 @@ export default function CommissionDetailContent({
 		);
 	}
 
+	// Cek apakah user sudah login atau belum
 	if (!isAuthenticated || !user) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
@@ -121,6 +123,7 @@ export default function CommissionDetailContent({
 		);
 	}
 
+	// Cek apakah commission kosong atau tidak
 	if (!commission) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
@@ -149,6 +152,7 @@ export default function CommissionDetailContent({
 		? commission.artists_id === user.id
 		: commission.client_id === user.id;
 
+	// Cek apakah user yang mengakses halaman detail commission ini adalah user yang memiliki commission tersebut
 	if (!hasAccess) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
@@ -170,12 +174,19 @@ export default function CommissionDetailContent({
 	const client = users.find((item) => item.id === commission.client_id);
 	const progressItem = commission.progress ?? null;
 	const thread = commission.revisions ?? [];
-	const commissionDispute = commission.disputes?.[0] ?? null;
+	const commissionDispute =
+		commission.disputes?.[0] ?? commission.dispute ?? null;
 	const status = commissionStatusConfig[commission.status];
 	const paymentBadge = paymentStatusConfig[commission.payment_status] ?? {
 		label: commission.payment_status,
 		className: "bg-content/5 text-content-muted border-content/10",
 	};
+
+	// Transaksi komisi masih aktif (belum selesai, batal, sengketa pending, atau sengketa disetujui)
+	const isCommissionActive =
+		!["completed", "cancelled", "disputed"].includes(commission.status) &&
+		commission.payment_status === "paid" &&
+		commissionDispute?.status !== "approved";
 
 	const canCancel =
 		!isArtistView &&
@@ -185,25 +196,23 @@ export default function CommissionDetailContent({
 
 	const canDispute =
 		!isArtistView &&
+		isCommissionActive &&
 		Boolean(progressItem?.sketch_url) &&
 		Boolean(progressItem?.final_artwork_url) &&
-		commission.status !== "completed" &&
-		commission.status !== "disputed" &&
+		!progressItem?.final_artwork_approved &&
 		!commissionDispute;
 
 	const canApprove =
 		!isArtistView &&
+		isCommissionActive &&
 		Boolean(progressItem?.final_artwork_url) &&
 		!progressItem?.final_artwork_approved &&
-		commission.status !== "completed" &&
-		commission.status !== "disputed" &&
-		!commissionDispute;
+		(!commissionDispute || commissionDispute.status === "rejected");
 
 	const canUploadFinalDeliverable =
 		isArtistView &&
-		Boolean(progressItem?.final_artwork_approved) &&
-		commission.status !== "completed" &&
-		!commissionDispute;
+		isCommissionActive &&
+		Boolean(progressItem?.final_artwork_approved);
 
 	const counterpartName = isArtistView
 		? (client?.name ?? "Client")
@@ -211,14 +220,14 @@ export default function CommissionDetailContent({
 
 	const confirmStatus = (
 		selectedCommission: Commission,
-		statusValue: "accepted" | "declined",
+		statusValue: "accepted" | "cancelled",
 		title: string,
 	) => {
 		openModal({
 			title,
 			description: `Status "${selectedCommission.commission_title}" akan diubah menjadi ${statusValue === "accepted" ? "Diterima" : "Ditolak"}.`,
 			type: "confirm",
-			variant: statusValue === "declined" ? "danger" : "default",
+			variant: statusValue === "cancelled" ? "danger" : "default",
 			confirmLabel: "Konfirmasi",
 			onConfirm: () =>
 				respondMutation.mutate({
@@ -343,19 +352,27 @@ export default function CommissionDetailContent({
 									2. Diterima Artis
 								</div>
 								<div
-									className={`p-2 rounded-lg border text-center ${commission.payment_status === "paid" && commission.status !== "completed" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${commission.payment_status === "paid" && commission.status !== "completed" && commission.status !== "cancelled" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
 									3. Dibayar (Escrow)
 								</div>
 								<div
-									className={`p-2 rounded-lg border text-center ${progressItem?.final_artwork_url && commission.status !== "completed" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${progressItem?.final_artwork_url && commission.status !== "completed" && commission.status !== "cancelled" ? "bg-primary/10 border-primary text-primary font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
 								>
 									4. Review Hasil
 								</div>
 								<div
-									className={`p-2 rounded-lg border text-center ${commission.status === "completed" ? "bg-success/10 border-success text-success font-semibold" : "bg-surface border-content/10 text-content-muted"}`}
+									className={`p-2 rounded-lg border text-center ${
+										commission.status === "completed"
+											? "bg-success/10 border-success text-success font-semibold"
+											: commission.status === "cancelled"
+												? "bg-danger/10 border-danger text-danger font-semibold"
+												: "bg-surface border-content/10 text-content-muted"
+									}`}
 								>
-									5. Selesai
+									{commission.status === "cancelled"
+										? "5. Dibatalkan"
+										: "5. Selesai"}
 								</div>
 							</div>
 						</div>
@@ -426,7 +443,7 @@ export default function CommissionDetailContent({
 											variant="danger"
 											className="flex items-center gap-1 flex-1 justify-center text-sm"
 											onClick={() =>
-												confirmStatus(commission, "declined", "Tolak komisi?")
+												confirmStatus(commission, "cancelled", "Tolak komisi?")
 											}
 										>
 											<XCircle className="w-4 h-4" />
@@ -493,6 +510,7 @@ export default function CommissionDetailContent({
 							{/* Artist Actions: Upload Real WIP / Preview Final (Paid) */}
 							{isArtistView &&
 								commission.payment_status === "paid" &&
+								!progressItem?.final_artwork_approved &&
 								["accepted", "in_progress", "revision"].includes(
 									commission.status,
 								) && (
@@ -820,6 +838,21 @@ export default function CommissionDetailContent({
 											(isArtistView
 												? `Dana sebesar ${formatPrice(commission.price)} telah dilepaskan ke dompet E-Wallet Anda karena dispute ditolak.`
 												: `Dana sebesar ${formatPrice(commission.price)} telah dilepaskan ke dompet Artist karena dispute ditolak.`)}
+									</p>
+								</div>
+							)}
+
+							{/* Cancelled without dispute banner */}
+							{commission.status === "cancelled" && !commissionDispute && (
+								<div className="p-4 bg-danger/10 rounded-xl border border-danger/20 space-y-1">
+									<div className="flex items-center gap-1.5 font-bold text-xs text-danger">
+										<XCircle className="w-4 h-4 shrink-0" />
+										<span>Pesanan Komisi Dibatalkan</span>
+									</div>
+									<p className="text-xs text-content-muted">
+										{isArtistView
+											? "Pesanan komisi ini telah dibatalkan."
+											: "Pesanan komisi ini telah dibatalkan."}
 									</p>
 								</div>
 							)}

@@ -79,7 +79,7 @@ export function useRespondCommission() {
 			status,
 		}: {
 			id: string;
-			status: "accepted" | "declined";
+			status: "accepted" | "cancelled";
 		}) => {
 			const res = await axiosClient.patch(`/commissions/${id}/respond`, {
 				status,

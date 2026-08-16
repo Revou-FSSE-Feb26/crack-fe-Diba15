@@ -31,6 +31,7 @@ export function useCreateDispute() {
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["disputes"] });
 			queryClient.invalidateQueries({ queryKey: ["commissions"] });
+			queryClient.invalidateQueries({ queryKey: ["commission"] });
 			addToast({
 				message: data.message || "Sengketa komisi berhasil diajukan.",
 				type: "success",
@@ -68,6 +69,8 @@ export function useResolveDispute() {
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["disputes"] });
 			queryClient.invalidateQueries({ queryKey: ["commissions"] });
+			queryClient.invalidateQueries({ queryKey: ["commission"] });
+			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
 			addToast({
 				message: data.message || "Sengketa komisi berhasil diputuskan.",
 				type: "success",
