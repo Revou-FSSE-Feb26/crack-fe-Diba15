@@ -4,32 +4,36 @@ import { AlertCircle, CheckCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
+import { useDisputes, useResolveDispute } from "@/hooks/useDisputeQueries";
 import { usePagination } from "@/hooks/usePagination";
 import { useCommissionStore } from "@/store/CommissionStore";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import { useUserStore } from "@/store/UserStore";
 import type { JoinedDispute } from "@/types";
 import { formatPrice } from "@/utils";
 import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/disputesTableColumns";
 
 export default function ReviewDisputesPage() {
-	const { user: curator } = useUserStore();
 	const { users } = useUserManagementStore();
-	const { disputes, commissions, progress, resolveDispute } =
-		useCommissionStore();
+	const { data: realDisputes = [] } = useDisputes();
+	const {
+		disputes: mockDisputes,
+		commissions,
+		progress,
+	} = useCommissionStore();
+	const resolveDisputeMutation = useResolveDispute();
 	const { openModal } = useModalStore();
-	const { addToast } = useToastStore();
 	const { openLightbox } = useLightboxStore();
 
+	const disputesList = realDisputes.length > 0 ? realDisputes : mockDisputes;
+
 	const { pending, disputed, rejected } = useMemo(() => {
-		const pending = disputes.filter((d) => d.status === "pending");
-		const disputed = disputes.filter((d) => d.status === "approved");
-		const rejected = disputes.filter((d) => d.status === "rejected");
+		const pending = disputesList.filter((d) => d.status === "pending");
+		const disputed = disputesList.filter((d) => d.status === "approved");
+		const rejected = disputesList.filter((d) => d.status === "rejected");
 		return { pending, disputed, rejected };
-	}, [disputes]);
+	}, [disputesList]);
 
 	const { setPage, setPerPage, paginate } = usePagination({
 		initialPerPage: 5,
@@ -37,21 +41,28 @@ export default function ReviewDisputesPage() {
 
 	// Join dispute with commission, progress, client, artist
 	const joinedDisputes = useMemo(() => {
-		return disputes
+		return disputesList
 			.map((dispute) => {
-				const commission = commissions.find(
-					(c) => c.id === dispute.commission_id,
-				);
+				const commission =
+					dispute.commission ??
+					commissions.find((c) => c.id === dispute.commission_id);
 				const comProgress = progress.find(
 					(p) => p.commission_id === dispute.commission_id,
 				);
-				const clientUser = users.find((u) => u.id === commission?.client_id);
-				const artistUser = users.find((u) => u.id === commission?.artists_id);
+				const clientUser =
+					dispute.commission?.client ??
+					users.find((u) => u.id === commission?.client_id);
+				const artistUser =
+					dispute.commission?.artist ??
+					users.find((u) => u.id === commission?.artists_id);
+
+				const finalProgress =
+					dispute.progress ?? dispute.commission?.progress ?? comProgress;
 
 				return {
 					...dispute,
 					commission,
-					progress: comProgress,
+					progress: finalProgress,
 					client: clientUser,
 					artist: artistUser,
 				};
@@ -60,7 +71,7 @@ export default function ReviewDisputesPage() {
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [disputes, commissions, progress, users]);
+	}, [disputesList, commissions, progress, users]);
 
 	const [search, setSearch] = useState("");
 
@@ -96,20 +107,14 @@ export default function ReviewDisputesPage() {
 				confirmLabel: approved ? "Setujui" : "Tolak",
 				cancelLabel: "Batal",
 				onConfirm: () => {
-					const res = resolveDispute(
-						dispute.commission_id,
-						approved,
-						curator?.id || "u-008",
-					);
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+					resolveDisputeMutation.mutate({
+						id: dispute.id,
+						status: approved ? "approved" : "rejected",
+					});
 				},
 			});
 		},
-		[curator?.id, openModal, resolveDispute, addToast],
+		[openModal, resolveDisputeMutation],
 	);
 
 	const columns = useMemo(

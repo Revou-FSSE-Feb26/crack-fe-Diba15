@@ -9,10 +9,11 @@ import {
 	ZoomOut,
 } from "lucide-react";
 import Image from "next/image";
+import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useLightboxStore } from "@/store/LightboxStore";
-import { randomKey } from "@/utils/index";
+import { randomKey } from "@/utils";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -87,28 +88,28 @@ function LightboxContent() {
 	}, [hasMultiple, zoomIn, goNext, zoomOut, goPrev, closeLightbox]);
 
 	// Wheel to zoom
-	const handleWheel = (e: React.WheelEvent) => {
+	const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		if (e.deltaY < 0) zoomIn();
 		else zoomOut();
 	};
 
 	// Drag to pan when zoomed in
-	const handleMouseDown = (e: React.MouseEvent) => {
+	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (scale <= 1) return;
 		setIsDragging(true);
 		dragStart.current = { x: e.clientX, y: e.clientY };
 		posStart.current = position;
 	};
 
-	const handleMouseMove = (e: React.MouseEvent) => {
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (!isDragging) return;
 		const dx = e.clientX - dragStart.current.x;
 		const dy = e.clientY - dragStart.current.y;
 		setPosition({ x: posStart.current.x + dx, y: posStart.current.y + dy });
 	};
 
-	const handleTouchStart = (e: React.TouchEvent) => {
+	const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
 		if (scale <= 1) return;
 		setIsDragging(true);
 		const touch = e.touches[0];
@@ -116,7 +117,7 @@ function LightboxContent() {
 		posStart.current = position;
 	};
 
-	const handleTouchMove = (e: React.TouchEvent) => {
+	const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
 		if (!isDragging) return;
 		const touch = e.touches[0];
 		const dx = touch.clientX - dragStart.current.x;
@@ -236,10 +237,15 @@ function LightboxContent() {
 					</button>
 				)}
 
-				<div
+				<section
+					aria-label="Area pratinjau gambar"
 					className="relative h-full w-full select-none"
+					onContextMenu={(e) => e.preventDefault()}
+					onDragStart={(e) => e.preventDefault()}
 					style={{
 						cursor: scale > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+						WebkitTouchCallout: "none",
+						userSelect: "none",
 					}}
 				>
 					{currentImage && (
@@ -247,15 +253,18 @@ function LightboxContent() {
 							src={currentImage}
 							alt={title ?? `Gambar ${index + 1}`}
 							fill
-							sizes="100vw"
+							sizes="(max-width: 768px) 100vw, 600px"
 							draggable={false}
-							className="object-contain transition-transform duration-150 ease-out"
+							onContextMenu={(e) => e.preventDefault()}
+							className="object-contain transition-transform duration-150 ease-out pointer-events-none"
 							style={{
 								transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
 							}}
 						/>
 					)}
-				</div>
+					{/* Transparent cover overlay for anti-right click & anti-touch save */}
+					<div className="absolute inset-0 z-10 bg-transparent pointer-events-none" />
+				</section>
 
 				{hasMultiple && (
 					<button

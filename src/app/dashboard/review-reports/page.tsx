@@ -6,30 +6,31 @@ import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { usePagination } from "@/hooks/usePagination";
+import { useReports, useResolveReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useReportStore } from "@/store/ReportStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
-import { useUserStore } from "@/store/UserStore";
 import type { JoinedReport } from "@/types";
 import { createReportsTableColumns } from "@/utils/dashboard/review-reports/reportsTableColumns";
 
 export default function ReviewReportsPage() {
-	const { user: curator } = useUserStore();
 	const { users } = useUserManagementStore();
 	const { data: artworks = [] } = useArtworks();
-	const { reports, resolveReport, dismissReport } = useReportStore();
+	const { data: realReports = [] } = useReports();
+	const { reports: mockReports } = useReportStore();
+	const resolveReportMutation = useResolveReport();
 	const { openModal } = useModalStore();
-	const { addToast } = useToastStore();
 	const { openLightbox } = useLightboxStore();
 
+	const reportsList = realReports.length > 0 ? realReports : mockReports;
+
 	const { pending, resolved, dismissed } = useMemo(() => {
-		const pending = reports.filter((r) => r.status === "pending");
-		const resolved = reports.filter((r) => r.status === "resolved");
-		const dismissed = reports.filter((r) => r.status === "dismissed");
+		const pending = reportsList.filter((r) => r.status === "pending");
+		const resolved = reportsList.filter((r) => r.status === "resolved");
+		const dismissed = reportsList.filter((r) => r.status === "dismissed");
 		return { pending, resolved, dismissed };
-	}, [reports]);
+	}, [reportsList]);
 
 	const { setPage, setPerPage, paginate } = usePagination({
 		initialPerPage: 5,
@@ -37,11 +38,15 @@ export default function ReviewReportsPage() {
 
 	// Join reports with artwork, reporter, artist
 	const joinedReports = useMemo(() => {
-		return reports
+		return reportsList
 			.map((report) => {
-				const artwork = artworks.find((a) => a.id === report.target_id);
-				const reporter = users.find((u) => u.id === report.reporter_id);
-				const artist = users.find((u) => u.id === artwork?.artists_id);
+				const artwork =
+					report.artwork ?? artworks.find((a) => a.id === report.target_id);
+				const reporter =
+					report.reporter ?? users.find((u) => u.id === report.reporter_id);
+				const artist =
+					report.artwork?.artist ??
+					users.find((u) => u.id === artwork?.artists_id);
 
 				return {
 					...report,
@@ -54,7 +59,7 @@ export default function ReviewReportsPage() {
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [reports, artworks, users]);
+	}, [reportsList, artworks, users]);
 
 	const [search, setSearch] = useState("");
 
@@ -90,19 +95,14 @@ export default function ReviewReportsPage() {
 				confirmLabel: approved ? "Setujui" : "Tolak",
 				cancelLabel: "Batal",
 				onConfirm: () => {
-					const res = approved
-						? resolveReport(report.id, curator?.id || "u-008")
-						: dismissReport(report.id, curator?.id || "u-008");
-
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+					resolveReportMutation.mutate({
+						id: report.id,
+						status: approved ? "resolved" : "dismissed",
+					});
 				},
 			});
 		},
-		[curator?.id, openModal, resolveReport, dismissReport, addToast],
+		[openModal, resolveReportMutation],
 	);
 
 	const columns = useMemo(

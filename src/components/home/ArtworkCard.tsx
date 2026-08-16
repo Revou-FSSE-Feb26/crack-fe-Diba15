@@ -25,9 +25,8 @@ import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
 import { useFavoriteArtwork } from "@/hooks/useFavoriteArtwork";
 import { useFollowArtist } from "@/hooks/useFollowArtist";
+import { useCreateReport } from "@/hooks/useReportQueries";
 import { useModalStore } from "@/store/ModalStore";
-import { useReportStore } from "@/store/ReportStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations, User } from "@/types";
 import { randomKey } from "@/utils";
@@ -36,7 +35,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
 	const router = useRouter();
 	const { copyPath } = useCopyLink();
-	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
 	const { user, isAuthenticated } = useUserStore();
 	const { isArtworkFavorite, handleFavoriteToggle } = useFavoriteArtwork(
@@ -45,6 +43,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	);
 
 	const { isArtistFollowed, handleFollowToggle } = useFollowArtist(artist.id);
+	const createReportMutation = useCreateReport();
 	const basePrice =
 		artist_profile?.base_price_idr ??
 		(artist as Partial<User>)?.profile?.base_price_idr ??
@@ -58,7 +57,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [isReportOpen, setIsReportOpen] = useState(false);
-	const { createReport } = useReportStore();
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
 	const [touchEndX, setTouchEndX] = useState<number | null>(null);
@@ -96,48 +94,39 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		setTouchEndX(e.targetTouches[0].clientX);
 	};
 
-	const handleTouchEnd = (e: React.TouchEvent) => {
+	const handleTouchEnd = (_e: React.TouchEvent) => {
 		if (!touchStartX || !touchEndX) return;
 		const distance = touchStartX - touchEndX;
 		const isLeftSwipe = distance > minSwipeDistance;
 		const isRightSwipe = distance < -minSwipeDistance;
 
-		if (isLeftSwipe || isRightSwipe) {
-			// Prevent navigation on swipe gesture
-			if (e.cancelable) {
-				e.preventDefault();
-			}
-			// Prevent event propagation to avoid closing the dropdown prematurely
-			e.stopPropagation();
-
-			if (isLeftSwipe && currentImageIndex < imageCount - 1) {
-				setCurrentImageIndex((prev) => prev + 1);
-			} else if (isRightSwipe && currentImageIndex > 0) {
-				setCurrentImageIndex((prev) => prev - 1);
-			}
+		if (isLeftSwipe && currentImageIndex < imageCount - 1) {
+			setCurrentImageIndex((prev) => prev + 1);
+		}
+		if (isRightSwipe && currentImageIndex > 0) {
+			setCurrentImageIndex((prev) => prev - 1);
 		}
 	};
 
 	useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
+		const handleClickOutside = (event: MouseEvent) => {
 			if (
 				dropdownRef.current &&
 				!dropdownRef.current.contains(event.target as Node)
 			) {
 				setIsDropdownOpen(false);
 			}
-		}
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
 		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
 
 	const handleReport = () => {
 		if (!isAuthenticated || !user) {
 			openModal({
 				title: "Login diperlukan",
-				description: "Silakan login terlebih dahulu untuk melaporkan karya.",
+				description:
+					"Silakan login terlebih dahulu untuk melaporkan karya ini.",
 				type: "confirm",
 				confirmLabel: "Login",
 				cancelLabel: "Batal",
@@ -145,11 +134,11 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 			});
 			return;
 		}
+
 		if (user.role !== "artist" && user.role !== "client") {
 			openModal({
-				title: "Hanya client dan artist yang bisa melapor",
-				description:
-					"Akun dengan peran curator atau admin tidak diperbolehkan melaporkan karya.",
+				title: "Akses Terbatas",
+				description: "Hanya client dan artist yang bisa melapor",
 			});
 			return;
 		}
@@ -163,20 +152,14 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const handleReportSubmit = useCallback(
 		(reason: string) => {
 			if (!user) return;
-			const res = createReport({
-				reporter_id: user.id,
+			createReportMutation.mutate({
 				target_type: "artwork",
 				target_id: artwork.id,
 				reason,
 			});
-			if (res.success) {
-				addToast({ message: res.message, type: "success" });
-			} else {
-				addToast({ message: res.message, type: "error" });
-			}
 			setIsReportOpen(false);
 		},
-		[user, artwork.id, createReport, addToast],
+		[user, artwork.id, createReportMutation],
 	);
 
 	const handleCopyLink = (id: string) => {

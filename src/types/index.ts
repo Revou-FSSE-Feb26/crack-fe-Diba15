@@ -117,6 +117,10 @@ export interface Commission {
 	card_last_four?: string;
 	created_at: string;
 	updated_at: string;
+	progress?: CommissionProgress | null;
+	revisions?: Revision[];
+	dispute?: DisputeLog | null;
+	disputes?: DisputeLog[];
 }
 
 export interface CommissionProgress {
@@ -126,6 +130,7 @@ export interface CommissionProgress {
 	sketch_approved: boolean;
 	final_artwork_url: string | null;
 	final_artwork_approved: boolean;
+	final_file_url?: string | null;
 	updated_at: string;
 }
 
@@ -145,6 +150,14 @@ export interface DisputeLog {
 	status: "pending" | "approved" | "rejected";
 	mediator_id: string | null;
 	created_at: string;
+	commission?:
+		| (Commission & {
+				client?: Partial<User> | null;
+				artist?: Partial<User> | null;
+				progress?: CommissionProgress | null;
+		  })
+		| null;
+	progress?: CommissionProgress | null;
 }
 
 export interface Report {
@@ -155,6 +168,12 @@ export interface Report {
 	reason: string;
 	status: ReportStatus;
 	created_at: string;
+	artwork?:
+		| (Artwork & {
+				artist?: Partial<User> | null;
+		  })
+		| null;
+	reporter?: User | Partial<User> | null;
 }
 
 // ── Relational / Joined Entities ─────────────────────────────────────────────
@@ -227,17 +246,27 @@ export interface CommissionWithRelations extends Commission {
 
 /** Sengketa lengkap dengan komisi, progress, client, dan artist — untuk tabel sengketa */
 export interface JoinedDispute extends DisputeLog {
-	commission?: Commission;
-	progress?: CommissionProgress;
-	client?: User;
-	artist?: User;
+	commission?:
+		| (Commission & {
+				client?: Partial<User> | null;
+				artist?: Partial<User> | null;
+				progress?: CommissionProgress | null;
+		  })
+		| null;
+	progress?: CommissionProgress | null;
+	client?: User | Partial<User> | null;
+	artist?: User | Partial<User> | null;
 }
 
 /** Laporan lengkap dengan artwork, pelapor, dan artist — untuk tabel review laporan */
 export interface JoinedReport extends Report {
-	artwork?: Artwork;
-	reporter?: User;
-	artist?: User;
+	artwork?:
+		| (Artwork & {
+				artist?: Partial<User> | null;
+		  })
+		| null;
+	reporter?: User | Partial<User> | null;
+	artist?: User | Partial<User> | null;
 }
 
 // =============================================================================

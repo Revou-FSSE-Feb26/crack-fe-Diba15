@@ -1,4 +1,4 @@
-import CommissionDetailContent from "@/components/commission/CommissionDetailContent";
+import { CommissionDetailContent } from "@/components/commission/CommissionDetailContent";
 
 interface CommissionDetailPageProps {
 	params: Promise<{
