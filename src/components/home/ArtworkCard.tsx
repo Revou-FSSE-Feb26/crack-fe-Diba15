@@ -192,75 +192,77 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</div>
 				</Link>
 
-				{/* Follow Button */}
-				{(!user || user.id !== artist.id) && (
-					<button
-						type="button"
-						onClick={handleFollowToggle}
-						className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-							isArtistFollowed
-								? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
-								: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
-						}`}
-					>
-						{isArtistFollowed ? (
-							<>
-								<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
-								<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
-								<span className="group-hover:hidden">Mengikuti</span>
-								<span className="hidden group-hover:inline text-red-500">
-									Batal Ikuti
-								</span>
-							</>
-						) : (
-							<>
-								<UserPlus className="w-3.5 h-3.5" />
-								<span>Ikuti</span>
-							</>
-						)}
-					</button>
-				)}
-
-				{/* Dropdown Container */}
-				<div className="dropdown dropdown-end" ref={dropdownRef}>
-					<button
-						type="button"
-						title="More"
-						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-						className={`btn btn-ghost btn-circle btn-xs -mr-1 ${isDropdownOpen ? "bg-content/5" : ""}`}
-					>
-						<MoreHorizontal size={18} className="text-content-muted" />
-					</button>
-
-					{isDropdownOpen && (
-						<ul className="dropdown-content menu p-1 shadow-lg bg-surface rounded-box w-40 border border-content/10 z-20 mt-1">
-							<li>
-								<button
-									type="button"
-									className="flex items-center gap-2 text-xs text-content"
-									onClick={() => {
-										handleCopyLink(artwork.id);
-									}}
-								>
-									<LinkIcon size={15} className="text-content-muted" />
-									Salin Tautan
-								</button>
-							</li>
-							<li>
-								<button
-									type="button"
-									className="flex items-center gap-2 text-xs text-error"
-									onClick={() => {
-										handleReport();
-										setIsDropdownOpen(false);
-									}}
-								>
-									<Flag size={15} />
-									Laporkan
-								</button>
-							</li>
-						</ul>
+				<div className="flex items-center gap-2 shrink-0">
+					{/* Follow Button */}
+					{(!user || user.id !== artist.id) && (
+						<button
+							type="button"
+							onClick={handleFollowToggle}
+							className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+								isArtistFollowed
+									? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+									: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
+							}`}
+						>
+							{isArtistFollowed ? (
+								<>
+									<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
+									<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
+									<span className="group-hover:hidden">Mengikuti</span>
+									<span className="hidden group-hover:inline text-red-500">
+										Batal Ikuti
+									</span>
+								</>
+							) : (
+								<>
+									<UserPlus className="w-3.5 h-3.5" />
+									<span>Ikuti</span>
+								</>
+							)}
+						</button>
 					)}
+
+					{/* Dropdown Container */}
+					<div className="dropdown dropdown-end" ref={dropdownRef}>
+						<button
+							type="button"
+							title="More"
+							onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+							className={`btn btn-ghost btn-circle btn-xs -mr-1 ${isDropdownOpen ? "bg-content/5" : ""}`}
+						>
+							<MoreHorizontal size={18} className="text-content-muted" />
+						</button>
+
+						{isDropdownOpen && (
+							<ul className="dropdown-content menu p-1 shadow-lg bg-surface rounded-box w-40 border border-content/10 z-20 mt-1">
+								<li>
+									<button
+										type="button"
+										className="flex items-center gap-2 text-xs text-content"
+										onClick={() => {
+											handleCopyLink(artwork.id);
+										}}
+									>
+										<LinkIcon size={15} className="text-content-muted" />
+										Salin Tautan
+									</button>
+								</li>
+								<li>
+									<button
+										type="button"
+										className="flex items-center gap-2 text-xs text-error"
+										onClick={() => {
+											handleReport();
+											setIsDropdownOpen(false);
+										}}
+									>
+										<Flag size={15} />
+										Laporkan
+									</button>
+								</li>
+							</ul>
+						)}
+					</div>
 				</div>
 			</div>
 

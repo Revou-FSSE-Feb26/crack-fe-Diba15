@@ -1,4 +1,3 @@
-import { useUserStore } from "@/store/UserStore";
 import type { Artwork } from "@/types";
 
 /**
@@ -52,37 +51,4 @@ export function evaluateVerification(
 	);
 
 	return { total, approved, isEligible, neededForEligibility };
-}
-
-// TODO(backend): Fungsi di bawah ini adalah shim sementara pengganti peran
-// backend selama belum ada. Setelah migrasi, hapus pemanggilan fungsi ini
-// dari ArtworkStore — recalculation is_verified harus jadi side-effect dari
-// approve/reject di server (transaksi yang sama), lalu frontend cukup
-// invalidate/refetch profile via TanStack Query. Fungsi evaluateVerification
-// di atas TETAP dipakai pasca-migrasi, tapi berubah peran jadi display
-// helper saja (menghitung progress dari artwork list yang sudah di-fetch).
-//
-// `allArtworks` sengaja diterima sebagai parameter (bukan baca langsung dari
-// useArtworkStore di sini) supaya tidak ada circular import ArtworkStore <->
-// artistVerification — pemanggil (ArtworkStore) sudah punya list ini lewat
-// get().artworks.
-export function syncVerificationAfterReview(
-	artistId: string,
-	allArtworks: Artwork[],
-) {
-	const artistArtworks = allArtworks.filter(
-		(artwork) => artwork.artists_id === artistId,
-	);
-	const { isEligible, approved } = evaluateVerification(artistArtworks);
-
-	const userState = useUserStore.getState();
-	if (userState.user?.id === artistId && userState.user.profile) {
-		userState.updateCurrentUser({
-			profile: {
-				...userState.user.profile,
-				is_verified: isEligible,
-				approved_portfolio_count: approved,
-			},
-		});
-	}
 }

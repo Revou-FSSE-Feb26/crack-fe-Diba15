@@ -9,7 +9,6 @@ import { usePagination } from "@/hooks/usePagination";
 import { useReports, useResolveReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useReportStore } from "@/store/ReportStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { JoinedReport } from "@/types";
 import { createReportsTableColumns } from "@/utils/dashboard/review-reports/reportsTableColumns";
@@ -17,13 +16,10 @@ import { createReportsTableColumns } from "@/utils/dashboard/review-reports/repo
 export default function ReviewReportsPage() {
 	const { users } = useUserManagementStore();
 	const { data: artworks = [] } = useArtworks();
-	const { data: realReports = [] } = useReports();
-	const { reports: mockReports } = useReportStore();
+	const { data: reportsList = [] } = useReports();
 	const resolveReportMutation = useResolveReport();
 	const { openModal } = useModalStore();
 	const { openLightbox } = useLightboxStore();
-
-	const reportsList = realReports.length > 0 ? realReports : mockReports;
 
 	const { pending, resolved, dismissed } = useMemo(() => {
 		const pending = reportsList.filter((r) => r.status === "pending");

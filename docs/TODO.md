@@ -8,9 +8,9 @@ artist yang memiliki art itu sendiri di halaman profile. (Selesai)
 (Optional TODO, harusnya di backend nanti lewat email mudahnya)
 TODO 3: Notification System
 
-TODO 4: Cleaning, untuk kode yang lebih bersih dan maintenance mudah. Bersihkan kode yang sudah tidak digunakan
+[x] TODO 4: Cleaning, untuk kode yang lebih bersih dan maintenance mudah. Bersihkan kode yang sudah tidak digunakan (Selesai)
 
-TODO 5: Periksa ulang UI yang masih acak-acakan dan tumpang tindih.
+[x] TODO 5: Periksa ulang UI yang masih acak-acakan dan tumpang tindih. (Selesai)
 
 (Infinite Scroll feed dengan maksimal 5-10 art - Masih pertimbangan)
 TODO 6: Perubahan dari reload ke infinite scroll ke atas seperti Twitter/X dengan maksimal 5-10 art yang muncul.

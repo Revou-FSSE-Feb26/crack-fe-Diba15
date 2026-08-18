@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import BottomNav from "@/components/ui/BottomNav";
@@ -12,13 +13,16 @@ export default function MainLayout({
 }: {
 	children: React.ReactNode;
 }) {
+	const pathname = usePathname();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 
 	// Close sidebar automatically when the pathname/route changes
 	useEffect(() => {
-		setIsSidebarOpen(false);
-	}, []);
+		if (pathname) {
+			setIsSidebarOpen(false);
+		}
+	}, [pathname]);
 
 	const handleToggleSidebar = () => {
 		setIsSidebarOpen((prev) => !prev);
@@ -66,7 +70,7 @@ export default function MainLayout({
 				</div>
 			</div>
 
-			<main className="flex flex-col flex-1 pb-16 md:pb-0">{children}</main>
+			<main className="flex flex-col flex-1 pb-20 md:pb-6">{children}</main>
 
 			<footer></footer>
 

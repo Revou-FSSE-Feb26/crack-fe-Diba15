@@ -344,31 +344,6 @@ export interface CreateArtworkPayload {
 	tag_names: string[];
 }
 
-export interface ArtworkState {
-	artworks: Artwork[];
-	artworkTags: ArtworkTag[];
-	tags: Tag[];
-	fetchArtworks: (filters?: {
-		search?: string;
-		tag?: string;
-		artistId?: string;
-		curationStatus?: string;
-		isVisibleOnFeed?: string;
-	}) => Promise<void>;
-	fetchPopularTags: () => Promise<Tag[]>;
-	fetchArtworkById: (id: string) => Promise<Artwork | null>;
-	createArtwork: (payload: CreateArtworkPayload) => Promise<Artwork>;
-	approveArtwork: (id: string, curatorId: string) => Promise<ActionResult>;
-	rejectArtwork: (
-		id: string,
-		curatorId: string,
-		reason: string,
-	) => Promise<ActionResult>;
-	deleteArtwork: (id: string) => Promise<ActionResult>;
-}
-
-// ── Profile Store ────────────────────────────────────────────────────────────
-
 export interface UpdateProfilePayload {
 	avatar_url?: string | null;
 	bio?: string | null;
@@ -377,15 +352,6 @@ export interface UpdateProfilePayload {
 	is_verified?: boolean;
 	approved_portfolio_count?: number;
 	strike_count?: number;
-}
-
-export interface ProfileState {
-	profiles: Profile[];
-	getProfileByUserId: (userId: string) => Profile | undefined;
-	updateProfile: (
-		userId: string,
-		payload: UpdateProfilePayload,
-	) => Promise<ActionResult>;
 }
 
 // ── Commission Store ─────────────────────────────────────────────────────────
@@ -426,8 +392,6 @@ export interface CommissionState {
 	) => ActionResult;
 }
 
-// ── Report Store ─────────────────────────────────────────────────────────────
-
 export interface CreateReportPayload {
 	reporter_id: string;
 	target_type: ReportTargetType;
@@ -435,42 +399,13 @@ export interface CreateReportPayload {
 	reason: string;
 }
 
-export interface ReportState {
-	reports: Report[];
-	createReport: (payload: CreateReportPayload) => ActionResult;
-	resolveReport: (reportId: string, curatorId: string) => ActionResult;
-	dismissReport: (reportId: string, curatorId: string) => ActionResult;
-}
-
-// ── Favorite Store ───────────────────────────────────────────────────────────
-
 export type FavoriteByUser = Record<string, string[]>;
-
-export interface FavoriteState {
-	favoritesByUser: FavoriteByUser;
-	getFavoriteIds: (userId: string) => string[];
-	isFavorite: (userId: string, artworkId: string) => boolean;
-	addFavorite: (userId: string, artworkId: string) => void;
-	removeFavorite: (userId: string, artworkId: string) => void;
-	toggleFavorite: (userId: string, artworkId: string) => boolean;
-	clearFavorites: (userId: string) => void;
-}
-
-// ── Follow Store ─────────────────────────────────────────────────────────────
 
 export interface FollowRecord {
 	id: string;
 	follower_id: string;
 	artist_id: string;
 	created_at: string;
-}
-
-export interface FollowState {
-	follows: FollowRecord[];
-	followArtist: (followerId: string, artistId: string) => ActionResult;
-	unfollowArtist: (followerId: string, artistId: string) => ActionResult;
-	isFollowing: (followerId: string, artistId: string) => boolean;
-	getFollowedArtistIds: (followerId: string) => string[];
 }
 
 // ── User Management Store ────────────────────────────────────────────────────
@@ -498,6 +433,7 @@ export interface UserManagementState {
 // ── User Store (Auth) ────────────────────────────────────────────────────────
 
 export type SafeUser = Omit<User, "password">;
+export type ProfileUser = SafeUser;
 
 export interface UserState {
 	user: SafeUser | null;

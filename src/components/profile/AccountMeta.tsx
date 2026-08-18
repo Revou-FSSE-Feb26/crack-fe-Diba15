@@ -1,6 +1,5 @@
 import { Mail, UserRound } from "lucide-react";
-
-import type { ProfileUser } from "@/components/profile/types";
+import type { ProfileUser } from "@/types";
 
 interface AccountMetaProps {
 	user: ProfileUser;

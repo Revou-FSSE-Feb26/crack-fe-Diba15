@@ -27,7 +27,6 @@ import EditProfileModal, {
 } from "@/components/profile/EditProfileModal";
 import ProfileHeading from "@/components/profile/ProfileHeading";
 import SummaryRow from "@/components/profile/SummaryRow";
-import type { ProfileUser } from "@/components/profile/types";
 import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
@@ -36,6 +35,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAppealStore } from "@/store/AppealStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
+import type { ProfileUser } from "@/types";
 import { formatPrice } from "@/utils";
 import {
 	evaluateVerification,

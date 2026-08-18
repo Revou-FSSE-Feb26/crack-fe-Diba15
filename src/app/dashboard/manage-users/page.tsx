@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import UserFormModal from "@/components/dashboard/manage-users/UserFormModal";
 import Button from "@/components/ui/Button";
@@ -364,62 +365,65 @@ export default function ManageUsersPage() {
 				onSubmit={editingUser ? handleEdit : handleCreate}
 			/>
 
-			{reviewAppeal && (
-				<div className="fixed inset-0 z-9998 flex items-center justify-center p-4">
-					<button
-						type="button"
-						className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer"
-						onClick={() => setReviewAppeal(null)}
-						aria-label="Tutup"
-					/>
-					<div className="relative z-10 w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-content/10 p-6 space-y-5">
-						<div className="space-y-1">
-							<h2 className="text-lg font-bold text-content flex items-center gap-2">
-								Tinjau Banding Pemulihan Akun
-							</h2>
-							<p className="text-sm text-content-muted">
-								Artis memohon untuk di-unblock dari sistem.
-							</p>
+			{reviewAppeal &&
+				typeof document !== "undefined" &&
+				createPortal(
+					<div className="fixed inset-0 z-9998 flex items-center justify-center p-4">
+						<button
+							type="button"
+							className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm cursor-pointer"
+							onClick={() => setReviewAppeal(null)}
+							aria-label="Tutup"
+						/>
+						<div className="relative z-10 w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-content/10 p-6 space-y-5">
+							<div className="space-y-1">
+								<h2 className="text-lg font-bold text-content flex items-center gap-2">
+									Tinjau Banding Pemulihan Akun
+								</h2>
+								<p className="text-sm text-content-muted">
+									Artis memohon untuk di-unblock dari sistem.
+								</p>
+							</div>
+							<hr className="border-content/5" />
+							<div className="space-y-2">
+								<p className="text-xs font-bold text-content-muted uppercase tracking-wider">
+									Pesan Penjelasan / Tobat:
+								</p>
+								<p className="text-sm bg-content/5 p-3 rounded-lg text-content italic leading-relaxed whitespace-pre-wrap">
+									&ldquo;{reviewAppeal.reason}&rdquo;
+								</p>
+								<p className="text-[10px] text-content-muted">
+									Diajukan pada:{" "}
+									{new Date(reviewAppeal.created_at).toLocaleString("id-ID")}
+								</p>
+							</div>
+							<div className="flex gap-3">
+								<Button
+									variant="danger"
+									className="flex-1 justify-center py-2"
+									onClick={() => {
+										const res = resolveAppeal(reviewAppeal.id, false);
+										addToast({ message: res.message, type: "success" });
+										setReviewAppeal(null);
+									}}
+								>
+									Tolak Banding
+								</Button>
+								<Button
+									className="flex-1 justify-center py-2"
+									onClick={() => {
+										const res = resolveAppeal(reviewAppeal.id, true);
+										addToast({ message: res.message, type: "success" });
+										setReviewAppeal(null);
+									}}
+								>
+									Terima &amp; Unblock
+								</Button>
+							</div>
 						</div>
-						<hr className="border-content/5" />
-						<div className="space-y-2">
-							<p className="text-xs font-bold text-content-muted uppercase tracking-wider">
-								Pesan Penjelasan / Tobat:
-							</p>
-							<p className="text-sm bg-content/5 p-3 rounded-lg text-content italic leading-relaxed whitespace-pre-wrap">
-								&ldquo;{reviewAppeal.reason}&rdquo;
-							</p>
-							<p className="text-[10px] text-content-muted">
-								Diajukan pada:{" "}
-								{new Date(reviewAppeal.created_at).toLocaleString("id-ID")}
-							</p>
-						</div>
-						<div className="flex gap-3">
-							<Button
-								variant="danger"
-								className="flex-1 justify-center py-2"
-								onClick={() => {
-									const res = resolveAppeal(reviewAppeal.id, false);
-									addToast({ message: res.message, type: "success" });
-									setReviewAppeal(null);
-								}}
-							>
-								Tolak Banding
-							</Button>
-							<Button
-								className="flex-1 justify-center py-2"
-								onClick={() => {
-									const res = resolveAppeal(reviewAppeal.id, true);
-									addToast({ message: res.message, type: "success" });
-									setReviewAppeal(null);
-								}}
-							>
-								Terima &amp; Unblock
-							</Button>
-						</div>
-					</div>
-				</div>
-			)}
+					</div>,
+					document.body,
+				)}
 		</>
 	);
 }

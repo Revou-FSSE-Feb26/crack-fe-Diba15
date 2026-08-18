@@ -21,10 +21,9 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 import ReportArtModal from "@/components/home/ReportArtModal";
 import { useArtworkDetail } from "@/hooks/useArtworkQueries";
 import { useCopyLink } from "@/hooks/useCopyLink";
+import { useCreateReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useReportStore } from "@/store/ReportStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type { User } from "@/types";
@@ -41,9 +40,8 @@ export default function Detail() {
 		successMessage: "Link karya berhasil disalin.",
 	});
 	const { user, isAuthenticated } = useUserStore();
-	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
-	const { createReport } = useReportStore();
+	const createReportMutation = useCreateReport();
 	const [isReportOpen, setIsReportOpen] = useState(false);
 
 	// Menggunakan TanStack Query v5 untuk mengambil detail karya
@@ -79,20 +77,14 @@ export default function Detail() {
 	const handleReportSubmit = useCallback(
 		(reason: string) => {
 			if (!user || !artwork) return;
-			const res = createReport({
-				reporter_id: user.id,
+			createReportMutation.mutate({
 				target_type: "artwork",
 				target_id: artwork.id,
 				reason,
 			});
-			if (res.success) {
-				addToast({ message: res.message, type: "success" });
-			} else {
-				addToast({ message: res.message, type: "error" });
-			}
 			setIsReportOpen(false);
 		},
-		[user, artwork, createReport, addToast],
+		[user, artwork, createReportMutation],
 	);
 
 	if (isLoading) {

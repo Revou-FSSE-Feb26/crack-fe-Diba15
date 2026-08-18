@@ -1,7 +1,7 @@
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
 import ProfileHeading from "@/components/profile/ProfileHeading";
-import type { ProfileUser } from "@/components/profile/types";
+import type { ProfileUser } from "@/types";
 
 interface StaffProfileProps {
 	user: ProfileUser;
