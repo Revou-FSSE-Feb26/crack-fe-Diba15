@@ -10,7 +10,8 @@ export default function Input({
 	label?: string;
 	placeholder?: string;
 } & { children?: React.ReactNode }) {
-	const inputClass = "input input-bordered w-full pl-10 pr-4";
+	const paddingClass = children ? "pl-10 pr-4" : "px-4";
+	const inputClass = `input input-bordered w-full ${paddingClass}`;
 
 	return (
 		<div>

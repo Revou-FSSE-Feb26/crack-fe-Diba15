@@ -15,7 +15,6 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import FileDisputeModal from "@/components/commission/FileDisputeModal";
-import PaymentMethodModal from "@/components/commission/PaymentMethodModal";
 import ProofPreview from "@/components/commission/ProofPreview";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Button from "@/components/ui/Button";
@@ -27,7 +26,6 @@ import {
 	useCancelCommission,
 	useCommissionDetail,
 	useCompleteCommission,
-	usePayCommission,
 	useRespondCommission,
 	useUpdateProgress,
 } from "@/hooks/useCommissionQueries";
@@ -77,7 +75,6 @@ export function CommissionDetailContent({
 	const { data: commission } = useCommissionDetail(commissionId);
 
 	const respondMutation = useRespondCommission();
-	const payMutation = usePayCommission();
 	const updateProgressMutation = useUpdateProgress();
 	const approveStepMutation = useApproveStep();
 	const addRevisionMutation = useAddRevision();
@@ -87,7 +84,6 @@ export function CommissionDetailContent({
 
 	const mounted = useMounted();
 	const [comment, setComment] = useState("");
-	const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 	const [isDisputeOpen, setIsDisputeOpen] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [sketchFile, setSketchFile] = useState<File | null>(null);
@@ -481,13 +477,13 @@ export function CommissionDetailContent({
 											Kredit) untuk memulai pengerjaan karya. Dana Anda akan
 											diamankan di Escrow.
 										</p>
-										<Button
-											className="flex items-center gap-2 w-full justify-center text-sm font-semibold"
-											onClick={() => setIsPaymentOpen(true)}
+										<Link
+											href={`/commissions/${commission.id}/payment`}
+											className="flex items-center gap-2 w-full justify-center text-sm font-semibold rounded-xl bg-primary px-4 py-2.5 text-background hover:bg-primary-hover transition-colors shadow-sm"
 										>
 											<CreditCard className="w-4 h-4" />
 											Bayar Komisi ({formatPrice(commission.price)})
-										</Button>
+										</Link>
 									</div>
 								)}
 
@@ -920,23 +916,7 @@ export function CommissionDetailContent({
 				</div>
 			</article>
 
-			{/* Modals for payment and dispute */}
-			<PaymentMethodModal
-				commissionId={commission.id}
-				commissionTitle={commission.commission_title}
-				price={commission.price}
-				isOpen={isPaymentOpen}
-				onClose={() => setIsPaymentOpen(false)}
-				onSubmitSuccess={(method, lastFour) => {
-					payMutation.mutate({
-						id: commission.id,
-						paymentMethod: method,
-						cardLastFour: lastFour,
-					});
-					setIsPaymentOpen(false);
-				}}
-			/>
-
+			{/* Dispute Modal */}
 			<FileDisputeModal
 				commissionTitle={commission.commission_title}
 				isOpen={isDisputeOpen}

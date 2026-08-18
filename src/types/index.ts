@@ -507,6 +507,12 @@ export interface UserState {
 	register: (payload: UserPayload) => Promise<ActionResult>;
 	logout: () => Promise<void>;
 	topUp: (amount: number) => Promise<ActionResult>;
+	withdraw: (payload: {
+		amount: number;
+		bankName: string;
+		accountNumber: string;
+		accountName: string;
+	}) => Promise<ActionResult>;
 	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 	hasRole: (role: UserRole) => boolean;
 	isArtist: () => boolean;

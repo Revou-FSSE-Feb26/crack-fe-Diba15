@@ -1,4 +1,5 @@
 import {
+	ArrowUpRight,
 	BadgeCheck,
 	CalendarDays,
 	Camera,
@@ -474,6 +475,14 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 								{formatPrice(artistUser.balance ?? 0)}
 							</span>
 						</SummaryRow>
+
+						<Link
+							href="/withdraw"
+							className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600/20 border border-emerald-500/20 px-4 py-2 text-xs font-bold transition-colors"
+						>
+							<ArrowUpRight className="w-3.5 h-3.5" />
+							Tarik Saldo (Min. Rp 100.000)
+						</Link>
 
 						<hr className="border-slate-200 dark:border-slate-700" />
 

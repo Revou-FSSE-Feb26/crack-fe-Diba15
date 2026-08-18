@@ -11,7 +11,7 @@ import { persist } from "zustand/middleware";
 export interface Transaction {
 	id: string;
 	user_id: string;
-	type: "payment" | "refund" | "release" | "topup";
+	type: "payment" | "refund" | "release" | "topup" | "withdraw";
 	amount: number;
 	title: string;
 	created_at: string;

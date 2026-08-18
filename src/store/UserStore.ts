@@ -165,6 +165,29 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			withdraw: async (payload) => {
+				try {
+					const res = await axiosClient.post("/user/withdraw", payload);
+					const newBalance = res.data.user?.balance ?? res.data.balance;
+					set((state) =>
+						state.user
+							? { user: { ...state.user, balance: newBalance } }
+							: state,
+					);
+					return {
+						success: true,
+						message: res.data.message || "Penarikan dana berhasil diproses.",
+					};
+				} catch (error) {
+					const err = error as {
+						response?: { data?: { message?: string } };
+					};
+					const msg =
+						err.response?.data?.message ?? "Gagal melakukan penarikan dana.";
+					return { success: false, message: msg };
+				}
+			},
+
 			updateCurrentUser: (payload) =>
 				set((state) =>
 					state.user ? { user: { ...state.user, ...payload } } : state,

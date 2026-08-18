@@ -19,13 +19,11 @@ import EditProfileModal, {
 } from "@/components/profile/EditProfileModal";
 import ProfileHeading from "@/components/profile/ProfileHeading";
 import SummaryRow from "@/components/profile/SummaryRow";
-import TopUpModal from "@/components/profile/TopUpModal";
 import type { ProfileUser } from "@/components/profile/types";
 import WalletTransactionsList from "@/components/profile/WalletTransactionsList";
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
@@ -38,7 +36,7 @@ export default function ClientProfile({
 	user: initialUser,
 }: ClientProfileProps) {
 	const { updateUser } = useUserManagementStore();
-	const { user: currentUser, topUp } = useUserStore();
+	const { user: currentUser } = useUserStore();
 
 	const [activeTab, setActiveTab] = useState<
 		"commissions" | "following" | "transactions"
@@ -63,7 +61,6 @@ export default function ClientProfile({
 		addToast,
 	} = useUserProfile(user.id);
 
-	const [isTopUpOpen, setIsTopUpOpen] = useState(false);
 	const [isEditOpen, setIsEditOpen] = useState(false);
 
 	const handleAvatarInputChange = async (
@@ -73,32 +70,6 @@ export default function ClientProfile({
 		if (file) {
 			await handleAvatarUpload(file);
 		}
-	};
-
-	const handleTopUpSuccess = async (amount: number) => {
-		const res = await topUp(amount);
-
-		if (!res.success) {
-			addToast({
-				message: res.message,
-				type: "error",
-			});
-			return;
-		}
-
-		// Log transaction
-		useTransactionStore.getState().addTransaction({
-			user_id: user.id,
-			type: "topup",
-			amount: amount,
-			title: "Top Up E-Wallet via Credit Card",
-		});
-
-		addToast({
-			message: `Berhasil Top Up ${formatPrice(amount)} ke E-Wallet.`,
-			type: "success",
-		});
-		setIsTopUpOpen(false);
 	};
 
 	const handleEditSubmit = async (values: EditProfileFormValues) => {
@@ -270,13 +241,12 @@ export default function ClientProfile({
 									</p>
 								</div>
 							</div>
-							<Button
-								variant="secondary"
-								className="text-xs py-1 px-2.5 h-auto shrink-0 bg-verified/10 text-verified border-verified hover:bg-verified/20"
-								onClick={() => setIsTopUpOpen(true)}
+							<Link
+								href="/topup"
+								className="text-xs py-1 px-2.5 rounded-lg font-semibold h-auto shrink-0 bg-verified/10 text-verified border border-verified/30 hover:bg-verified/20 transition-colors"
 							>
 								Top Up
-							</Button>
+							</Link>
 						</div>
 
 						<hr className="border-slate-200 dark:border-slate-700" />
@@ -378,11 +348,6 @@ export default function ClientProfile({
 			) : (
 				<WalletTransactionsList userId={user.id} />
 			)}
-			<TopUpModal
-				isOpen={isTopUpOpen}
-				onClose={() => setIsTopUpOpen(false)}
-				onSubmitSuccess={handleTopUpSuccess}
-			/>
 			<EditProfileModal
 				userName={user.name}
 				profile={profile}
