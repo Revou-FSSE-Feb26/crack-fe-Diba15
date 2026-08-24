@@ -34,14 +34,12 @@ import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAppealStore } from "@/store/AppealStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { ProfileUser } from "@/types";
 import { formatPrice } from "@/utils";
 import {
 	evaluateVerification,
 	VERIFICATION_MIN_APPROVED,
 } from "@/utils/artistVerification";
-import { buildArtworkWithRelations } from "@/utils/search";
 
 interface ArtistProfileProps {
 	user: ProfileUser;
@@ -50,7 +48,6 @@ interface ArtistProfileProps {
 export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const router = useRouter();
 	const { openModal } = useModalStore();
-	const { updateUser: updateUserRecord, users } = useUserManagementStore();
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState<
 		"portfolio" | "following" | "transactions"
@@ -64,6 +61,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		handleAvatarUpload,
 		handleUnfollowArtist,
 		updateProfile,
+		updateUserData,
 		updateCurrentUser,
 		addToast,
 	} = useUserProfile(user.id);
@@ -87,17 +85,11 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		(app) => app.artist_id === user.id && app.status === "rejected",
 	);
 
-	const { data: artistArtworksRaw = [] } = useArtworks({ artistId: user.id });
-
-	const artistArtworks = useMemo(() => {
-		return buildArtworkWithRelations(artistArtworksRaw, [], [], users);
-	}, [artistArtworksRaw, users]);
+	const { data: artistArtworks = [] } = useArtworks({ artistId: user.id });
 
 	const verificationProgress = useMemo(() => {
-		return evaluateVerification(artistArtworksRaw);
-	}, [artistArtworksRaw]);
-
-	const artistUser = users.find((u) => u.id === user.id) || user;
+		return evaluateVerification(artistArtworks);
+	}, [artistArtworks]);
 
 	const joinedDate = new Date(user.created_at).toLocaleDateString("id-ID", {
 		year: "numeric",
@@ -124,7 +116,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 		const hasSocialLinks = Object.keys(social_links).length > 0;
 
 		const nameResult = nameChanged
-			? await updateUserRecord(user.id, { name: trimmedName })
+			? await updateUserData(user.id, { name: trimmedName })
 			: { success: true, message: "" };
 
 		const profileResult = await updateProfile(user.id, {
@@ -472,7 +464,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 						)}
 						<SummaryRow label="Saldo dompet">
 							<span className="font-semibold text-verified">
-								{formatPrice(artistUser.balance ?? 0)}
+								{formatPrice(user.balance ?? 0)}
 							</span>
 						</SummaryRow>
 

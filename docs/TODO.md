@@ -25,7 +25,7 @@ TODO 8: Membuat alur bisnis yang lebih jelas pada aplikasi.
 
 [x] TODO 10: Periksa detail artwork ketika client, karena client masih bisa order artist yang belum terverifikasi (Selesai)
 
-TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. 
+[x] TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. (Selesai) 
 
 ## TODO Test
 

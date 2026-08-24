@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useArtistDetail } from "@/hooks/useArtworkQueries";
+import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useToggleFollow, useUserFollowing } from "@/hooks/useSocialQueries";
 import { axiosClient } from "@/lib/axiosClient";
-import { useCommissionStore } from "@/store/CommissionStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { Profile } from "@/types";
@@ -15,7 +15,7 @@ import type { Profile } from "@/types";
 export function useUserProfile(userId: string) {
 	const { user, updateCurrentUser } = useUserStore();
 	const { addToast } = useToastStore();
-	const { commissions } = useCommissionStore();
+	const { data: commissions = [] } = useUserCommissions();
 
 	const { data: rawFollowedArtists = [] } = useUserFollowing();
 	const toggleFollowMutation = useToggleFollow();
@@ -80,6 +80,26 @@ export function useUserProfile(userId: string) {
 			return {
 				success: false,
 				message: err.response?.data?.message || "Gagal memperbarui profil.",
+			};
+		}
+	};
+
+	const updateUserData = async (
+		targetUserId: string,
+		payload: { name?: string },
+	) => {
+		try {
+			await axiosClient.patch(`/user/${targetUserId}`, payload);
+			if (user?.id === targetUserId && payload.name) {
+				updateCurrentUser({ name: payload.name });
+			}
+			return { success: true, message: "Data pengguna berhasil diperbarui." };
+		} catch (error) {
+			const err = error as { response?: { data?: { message?: string } } };
+			return {
+				success: false,
+				message:
+					err.response?.data?.message || "Gagal memperbarui data pengguna.",
 			};
 		}
 	};
@@ -179,6 +199,7 @@ export function useUserProfile(userId: string) {
 		handleAvatarUpload,
 		handleUnfollowArtist,
 		updateProfile,
+		updateUserData,
 		updateCurrentUser,
 		addToast,
 	};

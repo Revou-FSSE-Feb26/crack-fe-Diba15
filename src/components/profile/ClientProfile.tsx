@@ -23,7 +23,6 @@ import WalletTransactionsList from "@/components/profile/WalletTransactionsList"
 import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ProfileUser } from "@/types";
 import { formatPrice } from "@/utils";
@@ -35,7 +34,6 @@ interface ClientProfileProps {
 export default function ClientProfile({
 	user: initialUser,
 }: ClientProfileProps) {
-	const { updateUser } = useUserManagementStore();
 	const { user: currentUser } = useUserStore();
 
 	const [activeTab, setActiveTab] = useState<
@@ -57,6 +55,7 @@ export default function ClientProfile({
 		handleAvatarUpload,
 		handleUnfollowArtist,
 		updateProfile,
+		updateUserData,
 		updateCurrentUser,
 		addToast,
 	} = useUserProfile(user.id);
@@ -77,7 +76,7 @@ export default function ClientProfile({
 		const nameChanged = trimmedName !== user.name;
 
 		const nameResult = nameChanged
-			? await updateUser(user.id, { name: trimmedName })
+			? await updateUserData(user.id, { name: trimmedName })
 			: { success: true, message: "" };
 
 		const profileResult = await updateProfile(user.id, {

@@ -121,6 +121,24 @@ export interface Commission {
 	revisions?: Revision[];
 	dispute?: DisputeLog | null;
 	disputes?: DisputeLog[];
+	artist?: {
+		id: string;
+		name: string;
+		email?: string;
+		profile?: {
+			avatarUrl?: string | null;
+			bio?: string | null;
+			isVerified?: boolean;
+		} | null;
+	};
+	client?: {
+		id: string;
+		name: string;
+		email?: string;
+		profile?: {
+			avatarUrl?: string | null;
+		} | null;
+	};
 }
 
 export interface CommissionProgress {
