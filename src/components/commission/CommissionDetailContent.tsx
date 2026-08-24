@@ -290,8 +290,28 @@ export function CommissionDetailContent({
 						/>
 						<Stat
 							icon={CheckCircle2}
-							label="Harga"
-							value={formatPrice(commission.price)}
+							label={isArtistView ? "Pendapatan Bersih" : "Harga"}
+							value={
+								isArtistView ? (
+									<span className="flex flex-col">
+										<span>
+											{formatPrice(
+												commission.net_artist_amount ??
+													Math.round(commission.price * 0.95),
+											)}
+										</span>
+										<span className="text-[10px] text-content-muted font-normal">
+											Fee 5%: -
+											{formatPrice(
+												commission.platform_fee ??
+													Math.round(commission.price * 0.05),
+											)}
+										</span>
+									</span>
+								) : (
+									formatPrice(commission.price)
+								)
+							}
 						/>
 						<Stat
 							icon={Briefcase}

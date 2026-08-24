@@ -111,6 +111,8 @@ export interface Commission {
 	commission_title: string;
 	description: string | null;
 	price: number;
+	platform_fee?: number;
+	net_artist_amount?: number;
 	status: CommissionStatus;
 	payment_status: PaymentStatus;
 	payment_method?: "wallet" | "credit_card";

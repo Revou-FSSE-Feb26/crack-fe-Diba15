@@ -15,17 +15,19 @@ TODO 3: Notification System
 (Infinite Scroll feed dengan maksimal 5-10 art - Masih pertimbangan)
 TODO 6: Perubahan dari reload ke infinite scroll ke atas seperti Twitter/X dengan maksimal 5-10 art yang muncul.
 
-TODO 7: Penambahan alur bisnis baru seperti biaya admin dalam pembayaran art dengan melihat aturan di indonesia.
+[x] TODO 7: Penambahan alur bisnis baru seperti biaya admin dalam pembayaran art dengan melihat aturan di indonesia (Selesai - 5% Platform Fee & Escrow Revenue).
 Optional: Penambahan fitur premium pada aplikasi untuk artist, dengan penawaran prioritas curator. 
 Ditampilkan sebagai artist premium dan dipercayai oleh professional.
 
-TODO 8: Membuat alur bisnis yang lebih jelas pada aplikasi.
+[x] TODO 8: Membuat alur bisnis yang lebih jelas pada aplikasi (Selesai - Escrow Guarantee, Net Artist Payout & Admin Executive Dashboard).
 
 [x] TODO 9: Membuat halaman cairkan dana artist dengan minimal 100000 (Selesai - /withdraw)
 
 [x] TODO 10: Periksa detail artwork ketika client, karena client masih bisa order artist yang belum terverifikasi (Selesai)
 
 [x] TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. (Selesai) 
+
+TODO 12: Menerapkan Prinsip SOLID, KISS, dan DRY pada FE dan BE
 
 ## TODO Test
 
