@@ -170,13 +170,7 @@ export interface DisputeLog {
 	status: "pending" | "approved" | "rejected";
 	mediator_id: string | null;
 	created_at: string;
-	commission?:
-		| (Commission & {
-				client?: Partial<User> | null;
-				artist?: Partial<User> | null;
-				progress?: CommissionProgress | null;
-		  })
-		| null;
+	commission?: Commission | null;
 	progress?: CommissionProgress | null;
 }
 
@@ -277,16 +271,34 @@ export interface CommissionWithRelations extends Commission {
 
 /** Sengketa lengkap dengan komisi, progress, client, dan artist — untuk tabel sengketa */
 export interface JoinedDispute extends DisputeLog {
-	commission?:
-		| (Commission & {
-				client?: Partial<User> | null;
-				artist?: Partial<User> | null;
-				progress?: CommissionProgress | null;
-		  })
-		| null;
+	commission?: Commission | null;
 	progress?: CommissionProgress | null;
-	client?: User | Partial<User> | null;
-	artist?: User | Partial<User> | null;
+	client?:
+		| User
+		| Partial<User>
+		| {
+				id: string;
+				name: string;
+				email?: string;
+				profile?: {
+					avatarUrl?: string | null;
+				} | null;
+		  }
+		| null;
+	artist?:
+		| User
+		| Partial<User>
+		| {
+				id: string;
+				name: string;
+				email?: string;
+				profile?: {
+					avatarUrl?: string | null;
+					bio?: string | null;
+					isVerified?: boolean;
+				} | null;
+		  }
+		| null;
 }
 
 /** Laporan lengkap dengan artwork, pelapor, dan artist — untuk tabel review laporan */
