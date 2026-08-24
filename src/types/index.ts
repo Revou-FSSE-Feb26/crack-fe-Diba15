@@ -482,10 +482,12 @@ export interface LightboxState {
 	images: string[];
 	initialIndex: number;
 	title?: string;
+	isProtected?: boolean;
 	openLightbox: (
 		images: string[],
 		initialIndex?: number,
 		title?: string,
+		isProtected?: boolean,
 	) => void;
 	closeLightbox: () => void;
 }

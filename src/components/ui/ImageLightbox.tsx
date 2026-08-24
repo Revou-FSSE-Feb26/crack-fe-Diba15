@@ -20,7 +20,8 @@ const MAX_SCALE = 4;
 const ZOOM_STEP = 0.5;
 
 function LightboxContent() {
-	const { images, initialIndex, title, closeLightbox } = useLightboxStore();
+	const { images, initialIndex, title, isProtected, closeLightbox } =
+		useLightboxStore();
 	const [index, setIndex] = useState(initialIndex);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -263,8 +264,31 @@ function LightboxContent() {
 							}}
 						/>
 					)}
+
+					{/* Watermark Diagonal Overlay for Protected Images */}
+					{isProtected && (
+						<>
+							<div
+								className="absolute inset-0 pointer-events-none opacity-25 mix-blend-overlay z-15"
+								style={{
+									backgroundImage:
+										"repeating-linear-gradient(45deg, #ffffff 0, #ffffff 1.5px, transparent 0, transparent 36px)",
+									backgroundSize: "36px 36px",
+								}}
+							/>
+							<div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-15 gap-4">
+								<span className="text-white/30 font-extrabold tracking-widest text-xl sm:text-3xl uppercase select-none font-display drop-shadow text-center px-4">
+									TRUBRUSH PREVIEW ONLY
+								</span>
+								<span className="text-white/20 font-bold tracking-wider text-xs sm:text-sm uppercase select-none font-display text-center px-4">
+									PROTECTED ARTWORK • DO NOT DISTRIBUTE
+								</span>
+							</div>
+						</>
+					)}
+
 					{/* Transparent cover overlay for anti-right click & anti-touch save */}
-					<div className="absolute inset-0 z-10 bg-transparent pointer-events-none" />
+					<div className="absolute inset-0 z-20 bg-transparent pointer-events-none" />
 				</section>
 
 				{hasMultiple && (

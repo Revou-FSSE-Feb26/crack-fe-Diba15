@@ -29,6 +29,7 @@ import {
 	useRespondCommission,
 	useUpdateProgress,
 } from "@/hooks/useCommissionQueries";
+import { useCopyProtection } from "@/hooks/useCopyProtection";
 import { useCreateDispute } from "@/hooks/useDisputeQueries";
 import { useMounted } from "@/hooks/useMounted";
 import { axiosClient } from "@/lib/axiosClient";
@@ -73,6 +74,7 @@ export function CommissionDetailContent({
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
 	const { data: commission } = useCommissionDetail(commissionId);
+	useCopyProtection();
 
 	const respondMutation = useRespondCommission();
 	const updateProgressMutation = useUpdateProgress();
