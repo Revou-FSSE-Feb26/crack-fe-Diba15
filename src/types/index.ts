@@ -208,6 +208,17 @@ export interface ArtworkWithRelations extends Artwork {
 	tags: Tag[];
 }
 
+export interface PaginatedArtworksResponse {
+	data: ArtworkWithRelations[];
+	meta: {
+		page: number;
+		limit: number;
+		total: number;
+		total_pages: number;
+		has_more: boolean;
+	};
+}
+
 /** Profile lengkap dengan data user — untuk halaman profil artist */
 export interface ProfileWithUser extends Profile {
 	user: Pick<User, "id" | "name" | "email" | "role">;

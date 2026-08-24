@@ -33,7 +33,7 @@ export function useUserFavorites() {
 	});
 }
 
-// Toggle Favorite Mutation
+// Toggle Favorite Mutation with Optimistic UI Update (Instagram-speed)
 export function useToggleFavorite() {
 	const queryClient = useQueryClient();
 	const { addToast } = useToastStore();
@@ -43,17 +43,32 @@ export function useToggleFavorite() {
 			const res = await axiosClient.post(`/social/favorite/${artworkId}`);
 			return res.data;
 		},
-		onSuccess: (data, artworkId) => {
-			queryClient.invalidateQueries({ queryKey: ["user-favorite-ids"] });
-			queryClient.invalidateQueries({ queryKey: ["user-favorites"] });
-			queryClient.invalidateQueries({ queryKey: ["artworks"] });
-			queryClient.invalidateQueries({ queryKey: ["artwork", artworkId] });
-			addToast({
-				message: data.message,
-				type: data.isFavorited ? "success" : "info",
-			});
+		onMutate: async (artworkId: string) => {
+			// 1. Batalkan refetch berjalan agar tidak menimpa update instan kita
+			await queryClient.cancelQueries({ queryKey: ["user-favorite-ids"] });
+
+			// 2. Simpan snapshot data sebelumnya untuk rollback jika error
+			const previousFavoriteIds =
+				queryClient.getQueryData<string[]>(["user-favorite-ids"]) ?? [];
+
+			// 3. Ubah data di cache secara instan (0 ms)
+			const isCurrentlyFavorite = previousFavoriteIds.includes(artworkId);
+			const updatedFavoriteIds = isCurrentlyFavorite
+				? previousFavoriteIds.filter((id) => id !== artworkId)
+				: [...previousFavoriteIds, artworkId];
+
+			queryClient.setQueryData(["user-favorite-ids"], updatedFavoriteIds);
+
+			return { previousFavoriteIds };
 		},
-		onError: (error) => {
+		onError: (error, _artworkId, context) => {
+			// Rollback cache ke kondisi awal jika request gagal
+			if (context?.previousFavoriteIds) {
+				queryClient.setQueryData(
+					["user-favorite-ids"],
+					context.previousFavoriteIds,
+				);
+			}
 			let msg = "Gagal mengubah status favorit.";
 			if (error && typeof error === "object" && "response" in error) {
 				const errObj = error as { response?: { data?: { message?: string } } };
@@ -62,6 +77,13 @@ export function useToggleFavorite() {
 				}
 			}
 			addToast({ message: msg, type: "error" });
+		},
+		onSettled: (_data, _error, artworkId) => {
+			// Sinkronisasi data di latar belakang
+			queryClient.invalidateQueries({ queryKey: ["user-favorite-ids"] });
+			queryClient.invalidateQueries({ queryKey: ["user-favorites"] });
+			queryClient.invalidateQueries({ queryKey: ["artworks"] });
+			queryClient.invalidateQueries({ queryKey: ["artwork", artworkId] });
 		},
 	});
 }
@@ -107,7 +129,7 @@ export function useUserFollowing() {
 	});
 }
 
-// Toggle Follow Mutation
+// Toggle Follow Mutation with Optimistic UI Update
 export function useToggleFollow() {
 	const queryClient = useQueryClient();
 	const { addToast } = useToastStore();
@@ -117,16 +139,31 @@ export function useToggleFollow() {
 			const res = await axiosClient.post(`/social/follow/${artistId}`);
 			return res.data;
 		},
-		onSuccess: (data, artistId) => {
-			queryClient.invalidateQueries({ queryKey: ["user-following-ids"] });
-			queryClient.invalidateQueries({ queryKey: ["user-following"] });
-			queryClient.invalidateQueries({ queryKey: ["artist-detail", artistId] });
-			addToast({
-				message: data.message,
-				type: data.isFollowing ? "success" : "info",
-			});
+		onMutate: async (artistId: string) => {
+			// 1. Batalkan query berjalan
+			await queryClient.cancelQueries({ queryKey: ["user-following-ids"] });
+
+			// 2. Simpan snapshot data sebelumnya
+			const previousFollowingIds =
+				queryClient.getQueryData<string[]>(["user-following-ids"]) ?? [];
+
+			// 3. Ubah data di cache secara instan (0 ms)
+			const isCurrentlyFollowing = previousFollowingIds.includes(artistId);
+			const updatedFollowingIds = isCurrentlyFollowing
+				? previousFollowingIds.filter((id) => id !== artistId)
+				: [...previousFollowingIds, artistId];
+
+			queryClient.setQueryData(["user-following-ids"], updatedFollowingIds);
+
+			return { previousFollowingIds };
 		},
-		onError: (error) => {
+		onError: (error, _artistId, context) => {
+			if (context?.previousFollowingIds) {
+				queryClient.setQueryData(
+					["user-following-ids"],
+					context.previousFollowingIds,
+				);
+			}
 			let msg = "Gagal mengubah status follow.";
 			if (error && typeof error === "object" && "response" in error) {
 				const errObj = error as { response?: { data?: { message?: string } } };
@@ -135,6 +172,11 @@ export function useToggleFollow() {
 				}
 			}
 			addToast({ message: msg, type: "error" });
+		},
+		onSettled: (_data, _error, artistId) => {
+			queryClient.invalidateQueries({ queryKey: ["user-following-ids"] });
+			queryClient.invalidateQueries({ queryKey: ["user-following"] });
+			queryClient.invalidateQueries({ queryKey: ["artist-detail", artistId] });
 		},
 	});
 }

@@ -12,8 +12,7 @@ TODO 3: Notification System
 
 [x] TODO 5: Periksa ulang UI yang masih acak-acakan dan tumpang tindih. (Selesai)
 
-(Infinite Scroll feed dengan maksimal 5-10 art - Masih pertimbangan)
-TODO 6: Perubahan dari reload ke infinite scroll ke atas seperti Twitter/X dengan maksimal 5-10 art yang muncul.
+[x] TODO 6: Perubahan dari reload ke infinite scroll dengan batch 6 karya per halaman (Selesai - useInfiniteArtworks & IntersectionObserver).
 
 [x] TODO 7: Penambahan alur bisnis baru seperti biaya admin dalam pembayaran art dengan melihat aturan di indonesia (Selesai - 5% Platform Fee & Escrow Revenue).
 Optional: Penambahan fitur premium pada aplikasi untuk artist, dengan penawaran prioritas curator. 

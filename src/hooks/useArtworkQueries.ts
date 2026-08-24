@@ -1,6 +1,9 @@
-"use client";
-
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
 import type {
 	ActionResult,
@@ -8,6 +11,7 @@ import type {
 	Artwork,
 	ArtworkWithRelations,
 	CreateArtworkPayload,
+	PaginatedArtworksResponse,
 	ProfileWithUser,
 	Tag,
 } from "@/types";
@@ -18,6 +22,8 @@ export const artworkKeys = {
 	lists: () => [...artworkKeys.all, "list"] as const,
 	list: (filters?: Record<string, unknown>) =>
 		[...artworkKeys.lists(), { filters }] as const,
+	infiniteList: (filters?: Record<string, unknown>, limit?: number) =>
+		[...artworkKeys.lists(), "infinite", { filters, limit }] as const,
 	details: () => [...artworkKeys.all, "detail"] as const,
 	detail: (id: string) => [...artworkKeys.details(), id] as const,
 	tags: ["artwork-tags"] as const,
@@ -42,7 +48,61 @@ export function useArtworks(filters?: {
 		queryKey: artworkKeys.list(filters),
 		queryFn: async () => {
 			const res = await axiosClient.get("/artwork", { params: filters });
+			if (
+				res.data &&
+				!Array.isArray(res.data) &&
+				Array.isArray(res.data.data)
+			) {
+				return res.data.data;
+			}
 			return res.data;
+		},
+	});
+}
+
+export function useInfiniteArtworks(
+	filters?: {
+		search?: string;
+		tag?: string;
+		artistId?: string;
+		curationStatus?: string;
+		isVisibleOnFeed?: string;
+	},
+	limit = 6,
+) {
+	return useInfiniteQuery<PaginatedArtworksResponse>({
+		queryKey: artworkKeys.infiniteList(filters, limit),
+		queryFn: async ({ pageParam = 1 }) => {
+			const res = await axiosClient.get("/artwork", {
+				params: {
+					...filters,
+					page: pageParam,
+					limit,
+				},
+			});
+
+			// Normalisasi respon jika mengembalikan array langsung
+			if (Array.isArray(res.data)) {
+				return {
+					data: res.data,
+					meta: {
+						page: pageParam as number,
+						limit,
+						total: res.data.length,
+						total_pages: 1,
+						has_more: false,
+					},
+				};
+			}
+
+			return res.data;
+		},
+		initialPageParam: 1,
+		getNextPageParam: (lastPage) => {
+			if (lastPage?.meta?.has_more) {
+				return lastPage.meta.page + 1;
+			}
+			return undefined;
 		},
 	});
 }
