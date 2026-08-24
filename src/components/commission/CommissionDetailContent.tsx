@@ -550,7 +550,7 @@ export function CommissionDetailContent({
 																const formData = new FormData();
 																formData.append("file", sketchFile);
 																const res = await axiosClient.post(
-																	`/upload/commissions/${commission.id}/preview`,
+																	`/upload/commissions/${commission.id}/sketch`,
 																	formData,
 																	{
 																		headers: {

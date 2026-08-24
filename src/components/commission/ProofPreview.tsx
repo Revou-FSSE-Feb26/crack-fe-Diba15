@@ -1,6 +1,8 @@
 "use client";
 
+import { ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import { useLightboxStore } from "@/store/LightboxStore";
 
 export default function ProofPreview({
@@ -12,6 +14,7 @@ export default function ProofPreview({
 	src: string | null | undefined;
 	empty: string;
 }) {
+	const [hasError, setHasError] = useState(false);
 	const { openLightbox } = useLightboxStore();
 
 	const isVideo =
@@ -22,7 +25,7 @@ export default function ProofPreview({
 			src.includes("/video/"));
 
 	const handleOpenLightbox = () => {
-		if (src && !isVideo) {
+		if (src && !isVideo && !hasError) {
 			openLightbox([src], 0, title);
 		}
 	};
@@ -35,7 +38,7 @@ export default function ProofPreview({
 					{isVideo ? "Video WIP" : "Pratinjau Terproteksi"}
 				</span>
 			</div>
-			{src ? (
+			{src && !hasError ? (
 				isVideo ? (
 					<div className="relative aspect-video w-full bg-black overflow-hidden">
 						<video
@@ -55,7 +58,7 @@ export default function ProofPreview({
 						onClick={handleOpenLightbox}
 						onContextMenu={(e) => e.preventDefault()}
 						onDragStart={(e) => e.preventDefault()}
-						className="relative aspect-video w-full bg-content/5 overflow-hidden group cursor-pointer block select-none focus:outline-none"
+						className="relative aspect-video w-full bg-content/5 overflow-hidden group cursor-pointer block select-none focus:outline-none p-0 border-0 text-left"
 						style={{
 							WebkitTouchCallout: "none",
 							WebkitUserSelect: "none",
@@ -65,40 +68,54 @@ export default function ProofPreview({
 							userSelect: "none",
 						}}
 					>
-						<Image
-							src={src}
-							alt={title}
-							fill
-							sizes="(max-width: 768px) 100vw, 50vw"
-							className="object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
-							draggable={false}
-							priority={false}
-						/>
+						<div className="relative w-full h-full">
+							<Image
+								src={src}
+								alt={title}
+								fill
+								loading={"eager"}
+								unoptimized
+								onError={() => setHasError(true)}
+								className="object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+								draggable={false}
+								priority={false}
+							/>
 
-						{/* Watermark Diagonal Overlay */}
-						<div
-							className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-25 mix-blend-overlay"
-							style={{
-								backgroundImage:
-									"repeating-linear-gradient(45deg, var(--color-content, #000) 0, var(--color-content, #000) 1px, transparent 0, transparent 50%)",
-								backgroundSize: "24px 24px",
-							}}
-						/>
+							{/* Watermark Diagonal Overlay */}
+							<div
+								className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-25 mix-blend-overlay"
+								style={{
+									backgroundImage:
+										"repeating-linear-gradient(45deg, var(--color-content, #000) 0, var(--color-content, #000) 1px, transparent 0, transparent 50%)",
+									backgroundSize: "24px 24px",
+								}}
+							/>
 
-						{/* Center Watermark Text */}
-						<div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-							<span className="text-content/20 dark:text-content/30 font-extrabold tracking-widest text-lg md:text-xl uppercase select-none font-display drop-shadow-sm">
-								TRUBRUSH PREVIEW ONLY
-							</span>
+							{/* Center Watermark Text */}
+							<div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+								<span className="text-content/20 dark:text-content/30 font-extrabold tracking-widest text-lg md:text-xl uppercase select-none font-display drop-shadow-sm">
+									TRUBRUSH PREVIEW ONLY
+								</span>
+							</div>
+
+							{/* Transparent Anti-Touch Cover */}
+							<div className="absolute inset-0 z-10 bg-transparent pointer-events-none" />
 						</div>
-
-						{/* Transparent Anti-Touch Cover */}
-						<div className="absolute inset-0 z-10 bg-transparent pointer-events-none" />
 					</button>
 				)
 			) : (
-				<div className="aspect-video bg-content/5 flex items-center justify-center px-4 text-center">
-					<p className="text-sm text-content-muted">{empty}</p>
+				<div className="aspect-video bg-content/5 flex flex-col items-center justify-center px-4 text-center gap-2">
+					{hasError ? (
+						<>
+							<ImageIcon className="w-8 h-8 text-content-muted/40" />
+							<p className="text-xs text-content-muted">
+								Berkas pratinjau tidak dapat dimuat (URL kedaluwarsa atau berkas
+								telah dipindahkan).
+							</p>
+						</>
+					) : (
+						<p className="text-sm text-content-muted">{empty}</p>
+					)}
 				</div>
 			)}
 		</div>

@@ -253,7 +253,8 @@ function LightboxContent() {
 							src={currentImage}
 							alt={title ?? `Gambar ${index + 1}`}
 							fill
-							sizes="(max-width: 768px) 100vw, 600px"
+							unoptimized
+							priority
 							draggable={false}
 							onContextMenu={(e) => e.preventDefault()}
 							className="object-contain transition-transform duration-150 ease-out pointer-events-none"

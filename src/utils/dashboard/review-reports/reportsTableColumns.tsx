@@ -62,6 +62,7 @@ export function createReportsTableColumns({
 									src={firstImage}
 									alt={row.artwork?.title || "Preview"}
 									fill
+									unoptimized
 									sizes="64px"
 									className="object-cover group-hover:scale-105 transition-transform"
 								/>

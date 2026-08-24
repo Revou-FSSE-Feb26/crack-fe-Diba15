@@ -148,7 +148,8 @@ export default function Detail() {
 												height={0}
 												sizes="100vw"
 												className="w-full h-auto"
-												loading={index === 0 ? "eager" : "lazy"}
+												priority={index === 0}
+												unoptimized
 											/>
 										</button>
 									</div>
@@ -201,7 +202,7 @@ export default function Detail() {
 													src={artwork.wip_proof_url}
 													alt={`WIP proof ${artwork.title}`}
 													fill
-													sizes="(max-width: 1024px) 100vw, 700px"
+													unoptimized
 													className="object-cover"
 												/>
 											</button>
@@ -244,13 +245,22 @@ export default function Detail() {
 							)}
 
 							{artwork.artist_profile.is_open_for_commission && (
-								<CommissionButton
-									artworkId={artwork.id}
-									artworkTitle={artwork.title}
-									artistId={artwork.artist.id}
-									artistName={artwork.artist.name}
-									basePrice={artistProfile?.base_price_idr ?? null}
-								/>
+								<div className="space-y-2">
+									<CommissionButton
+										artworkId={artwork.id}
+										artworkTitle={artwork.title}
+										artistId={artwork.artist.id}
+										artistName={artwork.artist.name}
+										basePrice={artistProfile?.base_price_idr ?? null}
+										isVerified={artwork.artist_profile.is_verified}
+									/>
+									{!artwork.artist_profile.is_verified && (
+										<p className="text-[11px] text-content-muted text-center leading-tight">
+											Artis belum terverifikasi kurator (min. 5 portofolio lolos
+											kurasi).
+										</p>
+									)}
+								</div>
 							)}
 						</div>
 

@@ -282,9 +282,10 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							src={images[currentImageIndex]}
 							alt={`${artwork.title} - Image ${currentImageIndex + 1}`}
 							fill
-							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+							quality={90}
+							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 700px, 800px"
 							className="object-cover transition-opacity duration-300"
-							loading="eager"
+							priority={currentImageIndex === 0}
 						/>
 					) : (
 						<div className="w-full h-full flex items-center justify-center text-content-muted">

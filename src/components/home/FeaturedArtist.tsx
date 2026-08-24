@@ -68,6 +68,7 @@ export default function FeaturedArtist({
 					artistId={user.id}
 					artistName={user.name}
 					basePrice={base_price_idr}
+					isVerified={is_verified}
 					className="text-xs font-medium py-1.5 rounded-lg transition-colors duration-150"
 				>
 					Hire Artis

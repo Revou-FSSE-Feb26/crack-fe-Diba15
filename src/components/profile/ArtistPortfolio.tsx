@@ -43,6 +43,7 @@ export default function ArtistPortfolio({
 										src={artwork.images_url[0]}
 										alt={artwork.title}
 										fill
+										quality={90}
 										sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
 										className="object-cover group-hover:scale-105 transition-transform duration-300"
 									/>

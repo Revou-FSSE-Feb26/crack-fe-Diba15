@@ -23,7 +23,7 @@ TODO 8: Membuat alur bisnis yang lebih jelas pada aplikasi.
 
 [x] TODO 9: Membuat halaman cairkan dana artist dengan minimal 100000 (Selesai - /withdraw)
 
-TODO 10: Periksa detail artwork ketika client, karena client masih bisa order artist yang belum terverifikasi
+[x] TODO 10: Periksa detail artwork ketika client, karena client masih bisa order artist yang belum terverifikasi (Selesai)
 
 TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. 
 

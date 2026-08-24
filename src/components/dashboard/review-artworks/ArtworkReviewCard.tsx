@@ -81,6 +81,7 @@ function PreviewPanel({
 						src={src}
 						alt={alt}
 						fill
+						quality={95}
 						sizes="(max-width: 640px) 100vw, 50vw"
 						className="object-cover"
 					/>

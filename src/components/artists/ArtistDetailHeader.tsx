@@ -220,6 +220,7 @@ export default function ArtistDetailHeader({
 								artistId={artist.user.id}
 								artistName={artist.user.name}
 								basePrice={artist.base_price_idr}
+								isVerified={artist.is_verified}
 								className="text-sm justify-center"
 							>
 								Pesan Komisi Sekarang

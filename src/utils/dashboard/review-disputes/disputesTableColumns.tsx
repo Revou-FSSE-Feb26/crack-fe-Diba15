@@ -1,12 +1,53 @@
 "use client";
 
-import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, ImageIcon, XCircle } from "lucide-react";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 import Button from "@/components/ui/Button";
 import type { DataTableColumn, JoinedDispute } from "@/types";
 import { formatDate, formatPrice } from "@/utils";
+
+function DisputeThumbnail({
+	src,
+	alt,
+	title,
+	openLightbox,
+}: {
+	src: string;
+	alt: string;
+	title: string;
+	openLightbox: (urls: string[], index: number, title?: string) => void;
+}) {
+	const [hasError, setHasError] = useState(false);
+
+	if (hasError) {
+		return (
+			<div className="relative w-16 aspect-video bg-content/5 rounded-md flex items-center justify-center border border-content/10">
+				<ImageIcon className="w-4 h-4 text-content-muted/40" />
+			</div>
+		);
+	}
+
+	return (
+		<button
+			type="button"
+			onClick={() => openLightbox([src], 0, title)}
+			className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block select-none focus:outline-none p-0"
+		>
+			<div className="relative w-full h-full">
+				<Image
+					src={src}
+					alt={alt}
+					fill
+					unoptimized
+					onError={() => setHasError(true)}
+					className="object-cover group-hover:scale-105 transition-transform"
+				/>
+			</div>
+		</button>
+	);
+}
 
 interface CreateDisputesTableColumnsOptions {
 	openLightbox: (urls: string[], index: number, title?: string) => void;
@@ -44,7 +85,7 @@ export function createDisputesTableColumns({
 		{
 			key: "artwork_previews",
 			header: "WIP / Preview",
-			cellClassName: "align-top",
+			cellClassName: "align-top min-w-[140px]",
 			cell: (row) => {
 				const sketchUrl = row.progress?.sketch_url;
 				const finalArtworkUrl = row.progress?.final_artwork_url;
@@ -56,26 +97,12 @@ export function createDisputesTableColumns({
 								WIP Proof
 							</p>
 							{sketchUrl ? (
-								<button
-									type="button"
-									onClick={() =>
-										openLightbox(
-											[sketchUrl],
-											0,
-											`WIP Proof - ${row.commission?.commission_title}`,
-										)
-									}
-									className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
-								>
-									<Image
-										src={sketchUrl}
-										alt="WIP Sketch"
-										fill
-										unoptimized
-										sizes="64px"
-										className="object-cover group-hover:scale-105 transition-transform"
-									/>
-								</button>
+								<DisputeThumbnail
+									src={sketchUrl}
+									alt="WIP Sketch"
+									title={`WIP Proof - ${row.commission?.commission_title}`}
+									openLightbox={openLightbox}
+								/>
 							) : (
 								<p className="text-[10px] text-content-muted italic">
 									Tidak ada
@@ -87,26 +114,12 @@ export function createDisputesTableColumns({
 								Final Art
 							</p>
 							{finalArtworkUrl ? (
-								<button
-									type="button"
-									onClick={() =>
-										openLightbox(
-											[finalArtworkUrl],
-											0,
-											`Final Art - ${row.commission?.commission_title}`,
-										)
-									}
-									className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
-								>
-									<Image
-										src={finalArtworkUrl}
-										alt="Final Artwork"
-										fill
-										unoptimized
-										sizes="64px"
-										className="object-cover group-hover:scale-105 transition-transform"
-									/>
-								</button>
+								<DisputeThumbnail
+									src={finalArtworkUrl}
+									alt="Final Artwork"
+									title={`Final Art - ${row.commission?.commission_title}`}
+									openLightbox={openLightbox}
+								/>
 							) : (
 								<p className="text-[10px] text-content-muted italic">
 									Tidak ada

@@ -20,6 +20,7 @@ interface CommissionButtonProps {
 	artistId: string;
 	artistName: string;
 	basePrice: number | null;
+	isVerified?: boolean;
 	children?: ReactNode;
 	className?: string;
 }
@@ -35,6 +36,7 @@ export default function CommissionButton({
 	artistId,
 	artistName,
 	basePrice,
+	isVerified = true,
 	children = "Pesan Komisi",
 	className = "",
 }: CommissionButtonProps) {
@@ -102,6 +104,15 @@ export default function CommissionButton({
 			return;
 		}
 
+		if (!isVerified) {
+			openModal({
+				title: "Artis Belum Terverifikasi",
+				description:
+					"Artis ini belum terverifikasi oleh Kurator TruBrush (memerlukan minimal 5 karya portofolio yang disetujui kurator) sehingga belum dapat menerima pesanan komisi berbayar.",
+			});
+			return;
+		}
+
 		reset(defaultValues);
 		setIsFormOpen(true);
 	};
@@ -135,6 +146,19 @@ export default function CommissionButton({
 			},
 		);
 	};
+
+	if (!isVerified) {
+		return (
+			<Button
+				type="button"
+				variant="danger"
+				className={`w-full justify-center pointer-events-none opacity-80 ${className}`}
+				disabled
+			>
+				Belum Diverifikasi
+			</Button>
+		);
+	}
 
 	return (
 		<>
