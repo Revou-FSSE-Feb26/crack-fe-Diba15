@@ -48,20 +48,20 @@ export default function Stat({
 	if (variant === "card") {
 		return (
 			<div
-				className={`stats shadow bg-surface border border-content/10 w-full ${className}`}
+				className={`stats shadow bg-surface border border-content/10 w-full overflow-hidden ${className}`}
 			>
-				<div className="stat p-4">
+				<div className="stat p-4 min-w-0">
 					<div className="stat-figure text-primary">
 						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
 							<Icon className="h-5 w-5" />
 						</div>
 					</div>
 					{label && (
-						<div className="stat-title text-xs font-medium text-content-muted">
+						<div className="stat-title text-xs font-medium text-content-muted whitespace-normal break-words leading-snug">
 							{label}
 						</div>
 					)}
-					<div className="stat-value font-display text-2xl font-bold text-content">
+					<div className="stat-value font-display text-2xl font-bold text-content truncate mt-1">
 						{displayValue}
 					</div>
 				</div>

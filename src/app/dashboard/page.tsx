@@ -90,36 +90,46 @@ export default function DashboardPage() {
 		<div className="space-y-6">
 			{user?.role === "admin" ? (
 				<div className="space-y-6">
-					{/* Financial & Business Metrics Row */}
-					<div className="space-y-2">
-						<h2 className="text-xs font-bold uppercase tracking-wider text-content-muted">
-							Kinerja Finansial & Transaksi Platform
-						</h2>
-						<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-							<Stat
-								variant="card"
-								label="Pendapatan Platform (Fee 5%)"
-								value={formatPrice(stats.platformRevenue)}
-								icon={TrendingUp}
-							/>
-							<Stat
-								variant="card"
-								label="Total Transaksi (GMV)"
-								value={formatPrice(stats.grossMerchandiseValue)}
-								icon={Coins}
-							/>
-							<Stat
-								variant="card"
-								label="Dana di Escrow (Aktif)"
-								value={formatPrice(stats.activeEscrowBalance)}
-								icon={ShieldCheck}
-							/>
-							<Stat
-								variant="card"
-								label="Pesanan Komisi Aktif"
-								value={stats.activeCommissions}
-								icon={Briefcase}
-							/>
+					{/* Financial & Business Metrics Section */}
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<h2 className="text-xs font-bold uppercase tracking-wider text-content-muted">
+								Kinerja Finansial Platform
+							</h2>
+							<div className="grid gap-4 sm:grid-cols-2">
+								<Stat
+									variant="card"
+									label="Pendapatan Platform (Fee 5%)"
+									value={formatPrice(stats.platformRevenue)}
+									icon={TrendingUp}
+								/>
+								<Stat
+									variant="card"
+									label="Total Transaksi (GMV)"
+									value={formatPrice(stats.grossMerchandiseValue)}
+									icon={Coins}
+								/>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<h2 className="text-xs font-bold uppercase tracking-wider text-content-muted">
+								Operasional Escrow & Komisi
+							</h2>
+							<div className="grid gap-4 sm:grid-cols-2">
+								<Stat
+									variant="card"
+									label="Dana di Escrow (Aktif)"
+									value={formatPrice(stats.activeEscrowBalance)}
+									icon={ShieldCheck}
+								/>
+								<Stat
+									variant="card"
+									label="Pesanan Komisi Aktif"
+									value={stats.activeCommissions}
+									icon={Briefcase}
+								/>
+							</div>
 						</div>
 					</div>
 
@@ -157,7 +167,7 @@ export default function DashboardPage() {
 					</div>
 				</div>
 			) : (
-				<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<div className="grid gap-4 sm:grid-cols-3">
 					<Stat
 						variant="card"
 						label="Artwork Pending"
@@ -175,12 +185,6 @@ export default function DashboardPage() {
 						label="Laporan Pending"
 						value={stats.pendingReports}
 						icon={AlertTriangle}
-					/>
-					<Stat
-						variant="card"
-						label="Komisi Aktif"
-						value={stats.activeCommissions}
-						icon={Briefcase}
 					/>
 				</div>
 			)}

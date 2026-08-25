@@ -27,7 +27,24 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
 [x] TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. (Selesai) 
 
 [x] TODO 12: Menerapkan Prinsip SOLID, KISS, dan DRY pada BE (Selesai - Auth Isolation, Repositories Interfaces, Logger & Maintenance Middlewares, Swagger OpenAPI Docs & Unit Tests 100% Passing).
-[x] TODO 12 (FE): Menerapkan Prinsip SOLID, KISS, dan DRY pada FE (Selesai - Centralized Query Keys, Modular Post-Art & Commission Payment & Profile SRP Subcomponents, Form UI Components, and Dead Code Elimination).
+[ ] TODO 12 (FE): Menerapkan Prinsip SOLID, KISS, dan DRY pada FE (On Progress - Evaluasi & Refactoring Modul per Modul).
+
+[ ] TODO 13: Halaman Laporan Finansial & Audit Transaksi Platform (`/dashboard/financial-reports`)
+  - Tabel rekapitulasi buku kas platform (rincian ID pesanan komisi, harga transaksi, potongan platform fee 5%, net payout artis, dan status pembayaran).
+  - Monitoring perputaran saldo escrow dan riwayat penarikan dana (*withdraw*).
+  - Filter periode (bulan/rentang tanggal) dan fitur Export Laporan (*CSV / Print Summary*).
+
+[ ] TODO 14: Halaman Log Audit & Riwayat Aktivitas Moderasi (`/dashboard/audit-logs`)
+  - Rekam jejak kronologis tindakan moderasi (kurasi karya, resolusi sengketa komisi, pembekuan/pemulihan akun user).
+  - Transparansi dan akuntabilitas keputusan moderator/kurator.
+
+[ ] TODO 15: Halaman Laporan Kinerja Moderasi & Metrik Kurator (`/dashboard/curator-performance`)
+  - SLA & rata-rata waktu respons kurasi karya anti-AI.
+  - Distribusi beban kerja antar kurator dan rasio persetujuan vs penolakan karya.
+
+[ ] TODO 16: Halaman Manajemen Tag & Katalog Karya Global (`/dashboard/manage-tags`)
+  - Master tag & pembersihan tag duplikat/spam.
+  - Fitur *takedown* karya terpublikasi yang bermasalah secara sentral.
 
 ## TODO Test
 
