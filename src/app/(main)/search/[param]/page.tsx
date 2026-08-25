@@ -6,7 +6,6 @@ import { useMemo } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useArtworks } from "@/hooks/useArtworkQueries";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { buildArtworkWithRelations, parseSearchQuery } from "@/utils/search";
 
 const TYPE_CONFIG = {
@@ -31,7 +30,6 @@ export default function SearchPage() {
 	const params = useParams();
 	const rawQuery = decodeURIComponent(params.param as string);
 	const parsed = parseSearchQuery(rawQuery);
-	const { users } = useUserManagementStore();
 
 	// Tentukan parameter filter backend berdasarkan query type
 	const filters = useMemo(() => {
@@ -44,17 +42,17 @@ export default function SearchPage() {
 	const { data: artworks = [], isLoading } = useArtworks(filters);
 
 	const results = useMemo(() => {
-		return buildArtworkWithRelations(artworks, [], [], users).filter(
+		return buildArtworkWithRelations(artworks, [], []).filter(
 			(artwork) => artwork.is_visible_on_feed,
 		);
-	}, [artworks, users]);
+	}, [artworks]);
 
 	const { label, Icon, pill } = TYPE_CONFIG[parsed.type];
 
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">
-			{/* Header */}
-			<header className="border-b border-content/10 bg-surface/50 backdrop-blur-md sticky top-0 z-40">
+			{/* Search Header Banner */}
+			<div className="border-b border-content/10 bg-surface/50">
 				<div className="max-w-5xl mx-auto px-4 py-4 sm:px-6 flex items-center justify-between">
 					<div className="flex items-center gap-3">
 						<Search className="w-5 h-5 text-content-muted" />
@@ -79,7 +77,7 @@ export default function SearchPage() {
 						{isLoading ? "Mencari..." : `${results.length} karya ditemukan`}
 					</div>
 				</div>
-			</header>
+			</div>
 
 			{/* Content */}
 			<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">

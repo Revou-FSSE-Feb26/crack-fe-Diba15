@@ -1,8 +1,3 @@
-import artworks from "@/data/artworks";
-import artworkTags from "@/data/artworkTags";
-import profiles from "@/data/profiles";
-import tags from "@/data/tags";
-import users from "@/data/users";
 import type {
 	Artwork,
 	ArtworkTag,
@@ -41,11 +36,11 @@ export function parseSearchQuery(raw: string): ParsedQuery {
 
 /** Assembles the full ArtworkWithRelations list from artwork data sources. */
 export function buildArtworkWithRelations(
-	sourceArtworks: Artwork[] = artworks,
-	sourceArtworkTags: ArtworkTag[] = artworkTags,
-	sourceTags: Tag[] = tags,
-	sourceUsers: User[] = users,
-	sourceProfiles: Profile[] = profiles,
+	sourceArtworks: Artwork[] = [],
+	sourceArtworkTags: ArtworkTag[] = [],
+	sourceTags: Tag[] = [],
+	sourceUsers: User[] = [],
+	sourceProfiles: Profile[] = [],
 ): ArtworkWithRelations[] {
 	return sourceArtworks.map((artwork) => {
 		const anyArt = artwork as ArtworkWithRelations;
@@ -56,7 +51,7 @@ export function buildArtworkWithRelations(
 			return artwork as ArtworkWithRelations;
 		}
 
-		// Fallback: rakit dari mock data lokal
+		// Fallback: rakit dari parameter sumber
 		const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
 		const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
 		const tagIds = sourceArtworkTags
@@ -81,11 +76,11 @@ export function buildArtworkWithRelations(
 /** Filters artworks based on a parsed search query. */
 export function searchArtworks(
 	query: ParsedQuery,
-	sourceArtworks?: Artwork[],
-	sourceArtworkTags?: ArtworkTag[],
-	sourceTags?: Tag[],
-	sourceUsers?: User[],
-	sourceProfiles?: Profile[],
+	sourceArtworks: Artwork[] = [],
+	sourceArtworkTags: ArtworkTag[] = [],
+	sourceTags: Tag[] = [],
+	sourceUsers: User[] = [],
+	sourceProfiles: Profile[] = [],
 ): ArtworkWithRelations[] {
 	const all = buildArtworkWithRelations(
 		sourceArtworks,

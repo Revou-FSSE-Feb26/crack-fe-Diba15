@@ -6,47 +6,24 @@ import {
 	ArrowLeft,
 	ArrowUpRight,
 	CheckCircle2,
-	Clock3,
-	Loader2,
 	Lock,
-	ShieldCheck,
 	Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/form/Input";
-import AmountPresetSelector from "@/components/wallet/AmountPresetSelector";
+import {
+	WithdrawDestinationForm,
+	type WithdrawFormValues,
+} from "@/components/wallet/withdraw/WithdrawDestinationForm";
+import { WithdrawSummaryCard } from "@/components/wallet/withdraw/WithdrawSummaryCard";
 import { useMounted } from "@/hooks/useMounted";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
-
-interface WithdrawFormValues {
-	amount: number;
-	bankName: string;
-	accountNumber: string;
-	accountName: string;
-}
-
-const DESTINATION_OPTIONS = [
-	{ id: "BCA", label: "Bank Central Asia (BCA)", type: "bank" },
-	{ id: "Mandiri", label: "Bank Mandiri", type: "bank" },
-	{ id: "BNI", label: "Bank Negara Indonesia (BNI)", type: "bank" },
-	{ id: "BRI", label: "Bank Rakyat Indonesia (BRI)", type: "bank" },
-	{ id: "CIMB", label: "Bank CIMB Niaga", type: "bank" },
-	{ id: "Jago", label: "Bank Jago", type: "bank" },
-	{ id: "GoPay", label: "GoPay", type: "ewallet" },
-	{ id: "OVO", label: "OVO", type: "ewallet" },
-	{ id: "DANA", label: "DANA", type: "ewallet" },
-	{ id: "ShopeePay", label: "ShopeePay", type: "ewallet" },
-];
-
-const QUICK_AMOUNTS = [100000, 250000, 500000, 1000000];
 
 export function WithdrawContent() {
 	const router = useRouter();
@@ -78,25 +55,48 @@ export function WithdrawContent() {
 	const selectedBank = watch("bankName");
 
 	const isEligibleToWithdraw = currentBalance >= 100000;
-	const remainingBalanceAfter = Math.max(0, currentBalance - enteredAmount);
+	const adminFee = enteredAmount > 0 ? 2500 : 0;
+	const netAmount = Math.max(0, enteredAmount - adminFee);
+	const balanceAfterWithdraw = Math.max(0, currentBalance - enteredAmount);
 
-	const handleQuickAmountSelect = (val: number) => {
-		setValue("amount", val, { shouldValidate: true });
+	const handleQuickAmountSelect = (amount: number) => {
+		const targetAmount = Math.min(amount, currentBalance);
+		setValue("amount", targetAmount, { shouldValidate: true });
 	};
 
 	const handleWithdrawAll = () => {
 		setValue("amount", currentBalance, { shouldValidate: true });
 	};
 
-	const onConfirmWithdraw = async (values: WithdrawFormValues) => {
+	const onConfirmWithdraw = (values: WithdrawFormValues) => {
 		if (!user) return;
+
+		if (Number(values.amount) < 100000) {
+			addToast({
+				message: "Minimal penarikan dana adalah Rp 100.000.",
+				type: "error",
+			});
+			return;
+		}
+
+		if (Number(values.amount) > currentBalance) {
+			addToast({
+				message: "Saldo Anda tidak mencukupi untuk nominal penarikan ini.",
+				type: "error",
+			});
+			return;
+		}
 
 		openModal({
 			title: "Konfirmasi Pencairan Dana",
-			description: `Apakah Anda yakin ingin mencairkan saldo sebesar ${formatPrice(values.amount)} ke ${values.bankName} (${values.accountNumber} a.n. ${values.accountName})?`,
+			description: `Apakah Anda yakin ingin mencairkan saldo sebesar ${formatPrice(
+				Number(values.amount),
+			)} ke ${values.bankName} - ${values.accountNumber} a/n ${
+				values.accountName
+			}?`,
 			type: "confirm",
 			confirmLabel: "Cairkan Sekarang",
-			cancelLabel: "Periksa Kembali",
+			cancelLabel: "Batal",
 			onConfirm: async () => {
 				setIsSubmitting(true);
 				try {
@@ -196,6 +196,11 @@ export function WithdrawContent() {
 		);
 	}
 
+	const isFormValid =
+		enteredAmount >= 100000 &&
+		enteredAmount <= currentBalance &&
+		isEligibleToWithdraw;
+
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 			{/* Top Navigation */}
@@ -263,257 +268,33 @@ export function WithdrawContent() {
 						)}
 					</div>
 
-					{/* Form Input */}
-					<form
-						onSubmit={handleSubmit(onConfirmWithdraw)}
-						className="space-y-4 bg-surface border border-content/10 rounded-2xl p-5 shadow-sm"
-					>
-						<h2 className="text-sm font-bold uppercase tracking-wider text-content-muted">
-							Detail Penarikan
-						</h2>
-
-						{/* Amount Input */}
-						<div className="space-y-2">
-							<div className="space-y-1">
-								<Input
-									label="Nominal Penarikan (IDR)"
-									type="number"
-									placeholder="100000"
-									required
-									min={100000}
-									max={currentBalance}
-									{...register("amount", {
-										required: "Nominal penarikan wajib diisi.",
-										valueAsNumber: true,
-										min: {
-											value: 100000,
-											message: "Minimal penarikan dana adalah Rp 100.000.",
-										},
-										max: {
-											value: currentBalance,
-											message: "Nominal penarikan melebihi saldo dompet Anda.",
-										},
-									})}
-								/>
-								{errors.amount && (
-									<p className="text-danger text-xs">{errors.amount.message}</p>
-								)}
-							</div>
-
-							{/* Quick Amount Selection */}
-							<div className="space-y-2 pt-1">
-								<AmountPresetSelector
-									amounts={QUICK_AMOUNTS}
-									selectedAmount={enteredAmount}
-									onSelect={handleQuickAmountSelect}
-									disabled={false}
-								/>
-								<button
-									type="button"
-									disabled={!isEligibleToWithdraw}
-									onClick={handleWithdrawAll}
-									className="w-full py-2 px-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 text-xs font-semibold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed text-center"
-								>
-									Tarik Semua ({formatPrice(currentBalance).replace(",00", "")})
-								</button>
-							</div>
-						</div>
-
-						{/* Destination Bank / E-Wallet */}
-						<div className="space-y-1">
-							<label
-								htmlFor="bankName"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
-								Bank / E-Wallet Tujuan
-							</label>
-							<select
-								id="bankName"
-								className="select select-bordered w-full rounded-lg bg-background text-content text-sm"
-								{...register("bankName", {
-									required: "Pilih bank atau e-wallet tujuan.",
-								})}
-							>
-								<optgroup label="Transfer Bank">
-									{DESTINATION_OPTIONS.filter((d) => d.type === "bank").map(
-										(opt) => (
-											<option key={opt.id} value={opt.id}>
-												{opt.label}
-											</option>
-										),
-									)}
-								</optgroup>
-								<optgroup label="E-Wallet">
-									{DESTINATION_OPTIONS.filter((d) => d.type === "ewallet").map(
-										(opt) => (
-											<option key={opt.id} value={opt.id}>
-												{opt.label}
-											</option>
-										),
-									)}
-								</optgroup>
-							</select>
-							{errors.bankName && (
-								<p className="text-danger text-xs">{errors.bankName.message}</p>
-							)}
-						</div>
-
-						{/* Account Number */}
-						<div className="space-y-1">
-							<Input
-								label="Nomor Rekening / Akun E-Wallet"
-								placeholder="e.g. 1234567890 / 08123456789"
-								required
-								{...register("accountNumber", {
-									required: "Nomor rekening/e-wallet wajib diisi.",
-									minLength: {
-										value: 8,
-										message: "Nomor rekening minimal 8 digit.",
-									},
-								})}
-							/>
-							{errors.accountNumber && (
-								<p className="text-danger text-xs">
-									{errors.accountNumber.message}
-								</p>
-							)}
-						</div>
-
-						{/* Account Name */}
-						<div className="space-y-1">
-							<Input
-								label="Nama Pemilik Rekening (Sesuai KTP / Buku Tabungan)"
-								placeholder="e.g. ARI RAMADAN"
-								required
-								{...register("accountName", {
-									required: "Nama pemilik rekening wajib diisi.",
-									minLength: {
-										value: 3,
-										message: "Nama pemilik rekening minimal 3 karakter.",
-									},
-								})}
-							/>
-							{errors.accountName && (
-								<p className="text-danger text-xs">
-									{errors.accountName.message}
-								</p>
-							)}
-						</div>
-
-						{/* Submit button on mobile */}
-						<div className="pt-2 lg:hidden">
-							<Button
-								type="submit"
-								disabled={!isEligibleToWithdraw || isSubmitting}
-								className="w-full py-3 justify-center text-sm font-semibold flex items-center gap-2 shadow-sm"
-							>
-								{isSubmitting ? (
-									<>
-										<Loader2 className="w-4 h-4 animate-spin" />
-										Memproses Pencairan...
-									</>
-								) : (
-									<>
-										<ArrowUpRight className="w-4 h-4" />
-										Cairkan Dana ({formatPrice(enteredAmount)})
-									</>
-								)}
-							</Button>
-						</div>
+					{/* Form Destination & Amounts */}
+					<form onSubmit={handleSubmit(onConfirmWithdraw)}>
+						<WithdrawDestinationForm
+							register={register}
+							errors={errors}
+							enteredAmount={enteredAmount}
+							currentBalance={currentBalance}
+							isEligibleToWithdraw={isEligibleToWithdraw}
+							onQuickAmountSelect={handleQuickAmountSelect}
+							onWithdrawAll={handleWithdrawAll}
+						/>
 					</form>
 				</div>
 
-				{/* Right Column: Invoice & Payout Summary */}
-				<div className="lg:col-span-5 space-y-4">
-					<h2 className="text-sm font-bold uppercase tracking-wider text-content-muted">
-						Ringkasan Pencairan
-					</h2>
-
-					<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-5 shadow-sm">
-						<div className="space-y-3 pb-4 border-b border-content/10 text-xs sm:text-sm">
-							<div className="flex justify-between text-content-muted">
-								<span>Nominal Penarikan</span>
-								<span className="font-semibold text-content">
-									{formatPrice(enteredAmount)}
-								</span>
-							</div>
-
-							<div className="flex justify-between text-content-muted">
-								<span>Biaya Transfer Antar Bank</span>
-								<span className="font-semibold text-emerald-600 dark:text-emerald-400">
-									Rp 0 (Bebas Biaya)
-								</span>
-							</div>
-
-							<div className="flex justify-between text-content-muted">
-								<span>Tujuan Pencairan</span>
-								<span className="font-medium text-content">
-									{selectedBank || "-"}
-								</span>
-							</div>
-
-							<div className="pt-2 border-t border-content/10 flex justify-between items-baseline">
-								<span className="font-bold text-sm text-content">
-									Total Diterima
-								</span>
-								<span className="font-heading text-xl font-bold text-emerald-600 dark:text-emerald-400">
-									{formatPrice(enteredAmount)}
-								</span>
-							</div>
-
-							<div className="flex justify-between text-xs text-content-muted pt-1">
-								<span>Sisa Saldo TruBrush</span>
-								<span className="font-medium text-content">
-									{formatPrice(remainingBalanceAfter)}
-								</span>
-							</div>
-						</div>
-
-						{/* Payout Info Notice */}
-						<div className="p-3.5 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl border border-emerald-500/20 text-xs leading-relaxed space-y-1.5">
-							<div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
-								<Clock3 className="w-4 h-4 shrink-0" />
-								<span>Estimasi Pencairan Cepat</span>
-							</div>
-							<p className="text-[11px] opacity-90">
-								Dana akan ditransfer secara otomatis ke rekening Anda dalam
-								waktu <strong>1x24 jam kerja</strong> setelah pengajuan
-								dikonfirmasi.
-							</p>
-						</div>
-
-						{/* Desktop Submit Button */}
-						<div className="hidden lg:block">
-							<Button
-								type="button"
-								disabled={
-									!isEligibleToWithdraw ||
-									enteredAmount < 100000 ||
-									enteredAmount > currentBalance ||
-									isSubmitting
-								}
-								onClick={handleSubmit(onConfirmWithdraw)}
-								className="w-full py-3 justify-center text-sm font-semibold flex items-center gap-2 shadow-sm"
-							>
-								{isSubmitting ? (
-									<>
-										<Loader2 className="w-4 h-4 animate-spin" />
-										Memproses Pencairan...
-									</>
-								) : (
-									<>
-										<ArrowUpRight className="w-4 h-4" />
-										Cairkan Dana ({formatPrice(enteredAmount)})
-									</>
-								)}
-							</Button>
-						</div>
-
-						<p className="text-[10px] text-center text-content-muted flex items-center justify-center gap-1">
-							<ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-							Transaksi penarikan dana aman dan terverifikasi
-						</p>
-					</div>
+				{/* Right Column: Summary Card */}
+				<div className="lg:col-span-5">
+					<WithdrawSummaryCard
+						currentBalance={currentBalance}
+						enteredAmount={enteredAmount}
+						adminFee={adminFee}
+						netAmount={netAmount}
+						balanceAfterWithdraw={balanceAfterWithdraw}
+						selectedBank={selectedBank}
+						isSubmitting={isSubmitting}
+						isFormValid={isFormValid}
+						onSubmit={handleSubmit(onConfirmWithdraw)}
+					/>
 				</div>
 			</div>
 		</div>

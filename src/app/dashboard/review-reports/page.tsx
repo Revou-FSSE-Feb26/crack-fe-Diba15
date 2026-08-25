@@ -4,18 +4,14 @@ import { AlertCircle, CheckCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
-import { useArtworks } from "@/hooks/useArtworkQueries";
 import { usePagination } from "@/hooks/usePagination";
 import { useReports, useResolveReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { JoinedReport } from "@/types";
 import { createReportsTableColumns } from "@/utils/dashboard/review-reports/reportsTableColumns";
 
 export default function ReviewReportsPage() {
-	const { users } = useUserManagementStore();
-	const { data: artworks = [] } = useArtworks();
 	const { data: reportsList = [] } = useReports();
 	const resolveReportMutation = useResolveReport();
 	const { openModal } = useModalStore();
@@ -32,30 +28,20 @@ export default function ReviewReportsPage() {
 		initialPerPage: 5,
 	});
 
-	// Join reports with artwork, reporter, artist
+	// Normalize reports with artwork, reporter, artist
 	const joinedReports = useMemo(() => {
 		return reportsList
-			.map((report) => {
-				const artwork =
-					report.artwork ?? artworks.find((a) => a.id === report.target_id);
-				const reporter =
-					report.reporter ?? users.find((u) => u.id === report.reporter_id);
-				const artist =
-					report.artwork?.artist ??
-					users.find((u) => u.id === artwork?.artists_id);
-
-				return {
-					...report,
-					artwork,
-					reporter,
-					artist,
-				};
-			})
+			.map((report) => ({
+				...report,
+				artwork: report.artwork,
+				reporter: report.reporter,
+				artist: report.artwork?.artist,
+			}))
 			.sort(
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [reportsList, artworks, users]);
+	}, [reportsList]);
 
 	const [search, setSearch] = useState("");
 
@@ -150,7 +136,7 @@ export default function ReviewReportsPage() {
 							value={search}
 							onChange={(event) => setSearch(event.target.value)}
 							placeholder="Cari karya, pelapor, artist, atau alasan..."
-							className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+							className="w-full rounded-xl border border-content/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-content-muted"
 						/>
 					</div>
 				</div>

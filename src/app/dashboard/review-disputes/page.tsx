@@ -8,13 +8,11 @@ import { useDisputes, useResolveDispute } from "@/hooks/useDisputeQueries";
 import { usePagination } from "@/hooks/usePagination";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { JoinedDispute } from "@/types";
 import { formatPrice } from "@/utils";
 import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/disputesTableColumns";
 
 export default function ReviewDisputesPage() {
-	const { users } = useUserManagementStore();
 	const { data: disputesList = [] } = useDisputes();
 	const resolveDisputeMutation = useResolveDispute();
 	const { openModal } = useModalStore();
@@ -31,28 +29,19 @@ export default function ReviewDisputesPage() {
 		initialPerPage: 5,
 	});
 
-	// Join dispute with client & artist details if not populated
+	// Normalize dispute with client & artist details
 	const joinedDisputes = useMemo(() => {
 		return disputesList
-			.map((dispute) => {
-				const clientUser =
-					dispute.commission?.client ??
-					users.find((u) => u.id === dispute.commission?.client_id);
-				const artistUser =
-					dispute.commission?.artist ??
-					users.find((u) => u.id === dispute.commission?.artists_id);
-
-				return {
-					...dispute,
-					client: clientUser,
-					artist: artistUser,
-				};
-			})
+			.map((dispute) => ({
+				...dispute,
+				client: dispute.commission?.client,
+				artist: dispute.commission?.artist,
+			}))
 			.sort(
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [disputesList, users]);
+	}, [disputesList]);
 
 	const [search, setSearch] = useState("");
 
@@ -147,7 +136,7 @@ export default function ReviewDisputesPage() {
 							value={search}
 							onChange={(event) => setSearch(event.target.value)}
 							placeholder="Cari komisi, klien, artis, atau alasan..."
-							className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+							className="w-full rounded-xl border border-content/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-content-muted"
 						/>
 					</div>
 				</div>

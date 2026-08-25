@@ -7,7 +7,6 @@ import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useInfiniteArtworks } from "@/hooks/useArtworkQueries";
 import { useMounted } from "@/hooks/useMounted";
 import { useUserFollowingIds } from "@/hooks/useSocialQueries";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { buildArtworkWithRelations } from "@/utils/search";
 
@@ -18,7 +17,6 @@ export default function ArtworkList() {
 	const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
 		useInfiniteArtworks({}, 6);
 
-	const { users } = useUserManagementStore();
 	const { user, isAuthenticated } = useUserStore();
 	const { data: followedArtistIds = [] } = useUserFollowingIds();
 
@@ -28,10 +26,10 @@ export default function ArtworkList() {
 	// Flatten all paginated pages into a single artwork list
 	const allArtworks = useMemo(() => {
 		const rawArtworks = data?.pages.flatMap((page) => page.data) ?? [];
-		return buildArtworkWithRelations(rawArtworks, [], [], users).filter(
+		return buildArtworkWithRelations(rawArtworks, [], []).filter(
 			(item) => item.is_visible_on_feed,
 		);
-	}, [data, users]);
+	}, [data]);
 
 	const filteredArtworks = useMemo(() => {
 		if (feedType === "followed") {
