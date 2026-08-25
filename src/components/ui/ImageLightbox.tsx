@@ -13,7 +13,6 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useLightboxStore } from "@/store/LightboxStore";
-import { randomKey } from "@/utils";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -312,7 +311,7 @@ function LightboxContent() {
 					{images.map((img, i) => {
 						return (
 							<button
-								key={`${img}-${randomKey()}`}
+								key={img}
 								type="button"
 								onClick={() => setIndex(i)}
 								className={[

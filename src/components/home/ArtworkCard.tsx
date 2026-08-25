@@ -29,7 +29,6 @@ import { useCreateReport } from "@/hooks/useReportQueries";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations, User } from "@/types";
-import { randomKey } from "@/utils";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
@@ -332,9 +331,9 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 						)}
 
 						<div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center">
-							{images.map((_, index) => (
+							{images.map((imgUrl, index) => (
 								<button
-									key={randomKey()}
+									key={`${artwork.id}-dot-${imgUrl}`}
 									type="button"
 									onClick={(e) => handleDotClick(e, index)}
 									className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${

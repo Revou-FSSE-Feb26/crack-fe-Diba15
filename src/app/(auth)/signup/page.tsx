@@ -61,9 +61,9 @@ export default function Signup() {
 		<section className="flex flex-1 justify-center relative">
 			{/* Palette accent dots decorator */}
 			<div className="absolute top-5 right-5 flex gap-1.5">
-				<div className="w-3 h-3 rounded-full bg-[#e8a87c] opacity-70"></div>
-				<div className="w-3 h-3 rounded-full bg-[#88ccdd] opacity-70"></div>
-				<div className="w-3 h-3 rounded-full bg-[#a8d8b0] opacity-70"></div>
+				<div className="deco-dot-warm"></div>
+				<div className="deco-dot-accent"></div>
+				<div className="deco-dot-mint"></div>
 			</div>
 
 			<div className="flex flex-col justify-center items-center gap-4 h-screen text-primary p-12 w-full max-w-md">

@@ -26,7 +26,6 @@ import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 import type { User } from "@/types";
-import { randomKey } from "@/utils";
 
 export default function Detail() {
 	const params = useParams();
@@ -128,7 +127,7 @@ export default function Detail() {
 							artwork.images_url.map((imgUrl: string, index: number) => {
 								return (
 									<div
-										key={`${imgUrl}-${randomKey()}`}
+										key={imgUrl}
 										className="relative w-full rounded-xl overflow-hidden shadow-sm"
 									>
 										<button
