@@ -150,26 +150,26 @@ export default function Sidebar({ onClose }: SidebarProps) {
 							</button>
 
 							{profileMenuOpen && (
-								<div className="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50 overflow-hidden flex flex-col">
+								<div className="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-surface shadow-xl border border-content/10 z-50 overflow-hidden flex flex-col">
 									<Link
 										href="/profile"
 										onClick={() => {
 											setProfileMenuOpen(false);
 											onClose();
 										}}
-										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-content hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
+										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-content hover:bg-content/5 transition-colors duration-200 cursor-pointer"
 									>
 										<User className="h-5 w-5 text-content-muted" />
 										<span className="font-semibold">Profil Saya</span>
 									</Link>
-									<div className="border-t border-slate-100 dark:border-slate-800" />
+									<div className="border-t border-content/10" />
 									<button
 										type="button"
 										onClick={() => {
 											handleLogout();
 											onClose();
 										}}
-										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
+										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-danger hover:bg-danger/10 transition-colors duration-200 cursor-pointer"
 									>
 										<LogOut className="h-5 w-5" />
 										<span className="font-semibold">Logout</span>

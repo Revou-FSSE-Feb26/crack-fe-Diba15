@@ -21,7 +21,7 @@ import Button from "@/components/ui/Button";
 import { useArtistDetail } from "@/hooks/useArtworkQueries";
 import { useFollowArtist } from "@/hooks/useFollowArtist";
 import { useUserStore } from "@/store/UserStore";
-import { formatPrice } from "@/utils";
+import { formatDate, formatPrice } from "@/utils";
 
 interface ArtistDetailHeaderProps {
 	artistId: string;
@@ -61,10 +61,7 @@ export default function ArtistDetailHeader({
 			? formatPrice(artist.base_price_idr)
 			: null;
 
-	// Backend mengembalikan user.createdAt lewat field createdAt
-	// namun API response tidak expose createdAt, jadi kita skip joinedDate
-	// (bisa ditambahkan di backend jika diperlukan)
-	const joinedDate = null as string | null;
+	const joinedDate = artist.created_at ? formatDate(artist.created_at) : null;
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -103,7 +100,7 @@ export default function ArtistDetailHeader({
 									className={`group px-3.5 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1.5 ${
 										isArtistFollowed
 											? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
-											: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
+											: "bg-primary border-primary text-white font-semibold hover:bg-primary-hover shadow-sm"
 									}`}
 								>
 									{isArtistFollowed ? (

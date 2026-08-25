@@ -119,48 +119,48 @@ export default function ReviewReportsPage() {
 				/>
 			</div>
 
-			<div className="rounded-2xl border border-content/10 bg-surface">
-				<div className="flex flex-col gap-3 border-b border-content/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-					<div>
-						<h2 className="font-heading text-lg font-semibold text-content">
-							Daftar Laporan Karya (Art Reports)
-						</h2>
-						<p className="text-sm text-content-muted">
-							Tinjau laporan aktif dari pengguna atau riwayat keputusan laporan.
-						</p>
-					</div>
-					<div className="relative w-full sm:max-w-sm">
-						<Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-content-muted" />
-						<input
-							type="search"
-							value={search}
-							onChange={(event) => setSearch(event.target.value)}
-							placeholder="Cari karya, pelapor, artist, atau alasan..."
-							className="w-full rounded-xl border border-content/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-content-muted"
-						/>
-					</div>
-				</div>
-
-				<DataTable
-					columns={columns}
-					pagination={paginatedReports}
-					getRowKey={(row) => row.id}
-					onPageChange={setPage}
-					onPerPageChange={setPerPage}
-					itemLabel="laporan"
-					emptyState={
-						<div className="py-12 text-center">
-							<CheckCircle className="mx-auto mb-3 h-10 w-10 text-verified" />
-							<p className="font-semibold text-content text-base">
-								Semua Laporan Bersih
-							</p>
-							<p className="text-sm text-content-muted mt-1">
-								Tidak ada karya yang dilaporkan oleh pengguna saat ini.
+			<DataTable
+				columns={columns}
+				pagination={paginatedReports}
+				getRowKey={(row) => row.id}
+				onPageChange={setPage}
+				onPerPageChange={setPerPage}
+				itemLabel="laporan"
+				toolbar={
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div>
+							<h2 className="font-heading text-lg font-semibold text-content">
+								Daftar Laporan Karya (Art Reports)
+							</h2>
+							<p className="text-sm text-content-muted">
+								Tinjau laporan aktif dari pengguna atau riwayat keputusan
+								laporan.
 							</p>
 						</div>
-					}
-				/>
-			</div>
+						<div className="relative w-full sm:max-w-sm">
+							<Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-content-muted" />
+							<input
+								type="search"
+								value={search}
+								onChange={(event) => setSearch(event.target.value)}
+								placeholder="Cari karya, pelapor, artist, atau alasan..."
+								className="w-full rounded-xl border border-content/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-content-muted"
+							/>
+						</div>
+					</div>
+				}
+				emptyState={
+					<div className="py-12 text-center">
+						<CheckCircle className="mx-auto mb-3 h-10 w-10 text-verified" />
+						<p className="font-semibold text-content text-base">
+							Semua Laporan Bersih
+						</p>
+						<p className="text-sm text-content-muted mt-1">
+							Tidak ada karya yang dilaporkan oleh pengguna saat ini.
+						</p>
+					</div>
+				}
+			/>
 		</div>
 	);
 }

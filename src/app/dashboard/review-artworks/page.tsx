@@ -219,7 +219,7 @@ export default function ReviewArtworksPage() {
 								value={search}
 								onChange={(event) => setSearch(event.target.value)}
 								placeholder="Cari judul, artist, atau tag..."
-								className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+								className="w-full rounded-xl border border-content/10 bg-surface py-2.5 pr-4 pl-10 text-sm text-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-content-muted"
 							/>
 						</div>
 					</div>

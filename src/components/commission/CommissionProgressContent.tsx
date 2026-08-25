@@ -89,6 +89,9 @@ export default function CommissionProgressContent() {
 						const counterpartName = isArtistView
 							? (client?.name ?? "Client")
 							: (artist?.name ?? "Artist");
+						const counterpartAvatar = isArtistView
+							? client?.profile?.avatarUrl
+							: artist?.profile?.avatarUrl;
 
 						return (
 							<article
@@ -99,6 +102,7 @@ export default function CommissionProgressContent() {
 									<div className="flex items-start gap-3 min-w-0">
 										<AvatarInitials
 											name={counterpartName}
+											src={counterpartAvatar ?? undefined}
 											className="w-12 h-12 text-sm shrink-0"
 										/>
 										<div className="min-w-0">
@@ -143,7 +147,7 @@ export default function CommissionProgressContent() {
 										/>
 										<Link
 											href={`/commissions/${commission.id}`}
-											className="flex flex-col items-center justify-center rounded-xl bg-primary text-background p-2.5 transition-colors hover:bg-primary-hover col-span-2 sm:col-span-1"
+											className="flex flex-col items-center justify-center rounded-xl bg-primary text-white p-2.5 transition-colors hover:bg-primary-hover col-span-2 sm:col-span-1 shadow-xs"
 										>
 											<Eye className="w-4 h-4 mb-1" />
 											<span className="text-xs font-semibold">Buka Order</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	AlertTriangle,
 	Briefcase,
 	CheckCircle2,
 	Coins,
@@ -11,22 +12,30 @@ import {
 	TrendingUp,
 	Users,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useDisputes } from "@/hooks/useDisputeQueries";
+import { useReports } from "@/hooks/useReportQueries";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 
 export default function DashboardPage() {
 	const { user } = useUserStore();
-	const { users } = useUserManagementStore();
+	const { users, fetchUsers } = useUserManagementStore();
 	const { data: artworks = [] } = useArtworks();
 	const { data: commissionsData = [] } = useUserCommissions();
 	const { data: disputesData = [] } = useDisputes();
+	const { data: reportsData = [] } = useReports();
+
+	useEffect(() => {
+		if (user?.role === "admin") {
+			fetchUsers();
+		}
+	}, [fetchUsers, user?.role]);
 
 	const activeCommissionsList = commissionsData;
 
@@ -36,6 +45,9 @@ export default function DashboardPage() {
 		);
 		const disputedCommissions = disputesData.filter(
 			(dispute) => dispute.status === "approved",
+		);
+		const pendingReports = reportsData.filter(
+			(report) => report.status === "pending",
 		);
 		const activeCommissions = activeCommissionsList.filter((commission) =>
 			["pending", "accepted", "in_progress", "revision"].includes(
@@ -66,12 +78,13 @@ export default function DashboardPage() {
 			totalArtworks: artworks.length,
 			pendingArtworks: pendingArtworks.length,
 			disputedCommissions: disputedCommissions.length,
+			pendingReports: pendingReports.length,
 			activeCommissions: activeCommissions.length,
 			platformRevenue,
 			grossMerchandiseValue,
 			activeEscrowBalance,
 		};
-	}, [artworks, activeCommissionsList, users, disputesData]);
+	}, [artworks, activeCommissionsList, users, disputesData, reportsData]);
 
 	return (
 		<div className="space-y-6">
@@ -159,9 +172,9 @@ export default function DashboardPage() {
 					/>
 					<Stat
 						variant="card"
-						label="Total Artist"
-						value={stats.totalArtists}
-						icon={Users}
+						label="Laporan Pending"
+						value={stats.pendingReports}
+						icon={AlertTriangle}
 					/>
 					<Stat
 						variant="card"

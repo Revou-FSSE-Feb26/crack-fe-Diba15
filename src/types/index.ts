@@ -229,6 +229,7 @@ export interface ArtistDetailResponse {
 	base_price_idr: number | null;
 	approved_portfolio_count: number;
 	followersCount: number;
+	created_at?: string | Date;
 	user: Pick<User, "id" | "name" | "email" | "role">;
 }
 

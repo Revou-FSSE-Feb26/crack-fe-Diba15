@@ -16,7 +16,7 @@ export function formatPrice(price: number | null): string {
 	}).format(price);
 }
 
-export function formatDate(date: string) {
+export function formatDate(date: string | Date) {
 	return new Date(date).toLocaleDateString("id-ID", {
 		year: "numeric",
 		month: "long",
@@ -24,7 +24,7 @@ export function formatDate(date: string) {
 	});
 }
 
-export function formatShortDate(value: string): string {
+export function formatShortDate(value: string | Date): string {
 	return new Intl.DateTimeFormat("id-ID", {
 		day: "numeric",
 		month: "short",
@@ -32,7 +32,7 @@ export function formatShortDate(value: string): string {
 	}).format(new Date(value));
 }
 
-export function formatDateTime(value: string): string {
+export function formatDateTime(value: string | Date): string {
 	return new Intl.DateTimeFormat("id-ID", {
 		day: "numeric",
 		month: "short",
@@ -42,9 +42,7 @@ export function formatDateTime(value: string): string {
 	}).format(new Date(value));
 }
 
-export function randomKey(): string {
-	const key =
-		Math.random().toString(36).substring(2, 15) +
-		Math.random().toString(36).substring(2, 15);
-	return key;
-}
+// export function randomKey(): string {
+// 	return Math.random().toString(36).substring(2, 15) +
+// 		Math.random().toString(36).substring(2, 15);
+// }

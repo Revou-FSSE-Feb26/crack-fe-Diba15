@@ -41,7 +41,7 @@ export default function NotFound() {
 					</Link>
 					<Link
 						href="/help"
-						className="inline-flex items-center justify-center gap-2 bg-surface border border-slate-200 dark:border-slate-700 text-content px-5 py-2.5 rounded-xl font-medium text-sm transition-colors hover:border-primary hover:text-primary"
+						className="inline-flex items-center justify-center gap-2 bg-surface border border-content/10 text-content px-5 py-2.5 rounded-xl font-medium text-sm transition-colors hover:border-primary hover:text-primary"
 					>
 						<HelpCircle className="w-4 h-4" />
 						Pusat Bantuan

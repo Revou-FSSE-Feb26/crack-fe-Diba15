@@ -167,7 +167,7 @@ export default function EditProfileModal({
 						<label className="flex items-start gap-3 rounded-xl border border-content/10 bg-content/5 px-4 py-3 cursor-pointer">
 							<input
 								type="checkbox"
-								className="mt-1 h-4 w-4 accent-primary"
+								className="checkbox checkbox-primary rounded-md mt-1 cursor-pointer"
 								{...register("is_open_for_commission")}
 							/>
 							<span>
