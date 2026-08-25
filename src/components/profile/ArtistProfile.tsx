@@ -7,8 +7,6 @@ import {
 	ImageIcon,
 	Loader2,
 	Palette,
-	Send,
-	ShieldAlert,
 	ShieldCheck,
 	UserMinus,
 } from "lucide-react";
@@ -21,7 +19,9 @@ import pixivIcon from "@/assets/pixiv.svg";
 import xIcon from "@/assets/x.svg";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import AccountMeta from "@/components/profile/AccountMeta";
+import { ArtistAppealBox } from "@/components/profile/ArtistAppealBox";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
+import { ArtistVerificationBanner } from "@/components/profile/ArtistVerificationBanner";
 import EditProfileModal, {
 	type EditProfileFormValues,
 } from "@/components/profile/EditProfileModal";
@@ -32,14 +32,10 @@ import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useAppealStore } from "@/store/AppealStore";
 import { useModalStore } from "@/store/ModalStore";
 import type { ProfileUser } from "@/types";
 import { formatPrice } from "@/utils";
-import {
-	evaluateVerification,
-	VERIFICATION_MIN_APPROVED,
-} from "@/utils/artistVerification";
+import { evaluateVerification } from "@/utils/artistVerification";
 
 interface ArtistProfileProps {
 	user: ProfileUser;
@@ -74,16 +70,6 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 			await handleAvatarUpload(file);
 		}
 	};
-
-	const { appeals, createAppeal } = useAppealStore();
-	const [appealReason, setAppealReason] = useState("");
-
-	const activeAppeal = appeals.find(
-		(app) => app.artist_id === user.id && app.status === "pending",
-	);
-	const rejectedAppeal = appeals.find(
-		(app) => app.artist_id === user.id && app.status === "rejected",
-	);
 
 	const { data: artistArtworks = [] } = useArtworks({ artistId: user.id });
 
@@ -321,101 +307,16 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 						</div>
 					</div>
 
-					{!profile?.is_verified && (
-						<div className="mt-5 rounded-xl bg-primary/5 px-3 py-3">
-							<div className="flex items-center justify-between text-xs text-content-muted">
-								<span>Progress verifikasi</span>
-								<span className="font-medium text-content">
-									{verificationProgress.approved}/{VERIFICATION_MIN_APPROVED}{" "}
-									karya approved
-								</span>
-							</div>
-							<div className="mt-2 h-1.5 w-full rounded-full bg-content/10">
-								<div
-									className="h-1.5 rounded-full bg-primary transition-all"
-									style={{
-										width: `${Math.min(100, (verificationProgress.approved / VERIFICATION_MIN_APPROVED) * 100)}%`,
-									}}
-								/>
-							</div>
-							<p className="mt-1.5 text-xs text-content-muted">
-								{verificationProgress.neededForEligibility} karya approved lagi
-								menuju verifikasi.
-							</p>
-						</div>
-					)}
+					<ArtistVerificationBanner
+						isVerified={profile?.is_verified}
+						approvedCount={verificationProgress.approved}
+						neededForEligibility={verificationProgress.neededForEligibility}
+					/>
 
-					{profile?.strike_count !== undefined && profile.strike_count >= 5 && (
-						<div className="mt-5 rounded-xl border border-danger/20 bg-danger/5 p-4 space-y-3">
-							<div className="flex items-start gap-3">
-								<ShieldAlert className="w-5 h-5 text-danger shrink-0 mt-0.5" />
-								<div>
-									<h3 className="text-sm font-bold text-danger">
-										Akun Ditangguhkan (Blocked)
-									</h3>
-									<p className="text-xs text-content-muted mt-0.5">
-										Akun Anda telah ditangguhkan karena melanggar aturan anti-AI
-										TruBrush (Strike Count: {profile.strike_count}/5).
-									</p>
-								</div>
-							</div>
-
-							{activeAppeal ? (
-								<div className="rounded-lg bg-primary/5 border border-primary/10 p-3 text-xs text-primary leading-relaxed">
-									<strong>Status Banding: Menunggu Tinjauan Admin</strong>
-									<p className="mt-1 text-content-muted">
-										Pesan Anda: &ldquo;{activeAppeal.reason}&rdquo;
-									</p>
-									<p className="mt-2 text-[10px] text-content-muted">
-										Diajukan pada:{" "}
-										{new Date(activeAppeal.created_at).toLocaleString("id-ID")}
-									</p>
-								</div>
-							) : (
-								<div className="space-y-2">
-									<p className="text-xs text-content-muted">
-										Silakan ajukan banding dengan memberikan penjelasan/bukti
-										proses manual karya Anda untuk ditinjau oleh Admin.
-									</p>
-									{rejectedAppeal && (
-										<div className="rounded-lg bg-danger/10 p-2.5 text-xs text-danger">
-											<strong>Banding Sebelumnya Ditolak:</strong> Akun Anda
-											tetap ditangguhkan. Silakan kirim permohonan banding baru
-											dengan penjelasan yang lebih detail.
-										</div>
-									)}
-									<form
-										onSubmit={(e) => {
-											e.preventDefault();
-											const res = createAppeal(user.id, appealReason);
-											addToast({
-												message: res.message,
-												type: res.success ? "success" : "error",
-											});
-											if (res.success) setAppealReason("");
-										}}
-										className="space-y-2"
-									>
-										<textarea
-											value={appealReason}
-											onChange={(e) => setAppealReason(e.target.value)}
-											placeholder="Tulis alasan banding Anda di sini (minimal 30 karakter)..."
-											className="w-full min-h-20 rounded-lg border border-content/10 bg-background p-2.5 text-xs text-content outline-none focus:border-danger dark:border-slate-700 dark:bg-slate-900"
-										/>
-										<Button
-											type="submit"
-											variant="danger"
-											className="w-full text-xs justify-center gap-1.5 py-2 cursor-pointer"
-											disabled={appealReason.trim().length < 30}
-										>
-											<Send className="w-3.5 h-3.5" />
-											Kirim Permohonan Banding
-										</Button>
-									</form>
-								</div>
-							)}
-						</div>
-					)}
+					<ArtistAppealBox
+						userId={user.id}
+						strikeCount={profile?.strike_count ?? 0}
+					/>
 				</div>
 
 				<aside className="lg:w-72 shrink-0">

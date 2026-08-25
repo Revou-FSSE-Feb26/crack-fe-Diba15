@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { JoinedReport } from "@/types";
@@ -8,7 +9,7 @@ export function useReports(status?: string) {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<JoinedReport[]>({
-		queryKey: ["reports", status],
+		queryKey: queryKeys.reports.list(status),
 		queryFn: async () => {
 			const res = await axiosClient.get("/reports", {
 				params: { status },
@@ -33,7 +34,7 @@ export function useCreateReport() {
 			return res.data;
 		},
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["reports"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.reports.all });
 			addToast({
 				message: data.message || "Laporan berhasil dikirim.",
 				type: "success",
@@ -68,8 +69,8 @@ export function useResolveReport() {
 			return res.data;
 		},
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["reports"] });
-			queryClient.invalidateQueries({ queryKey: ["artworks"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.reports.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.artworks.all });
 			addToast({
 				message: data.message || "Laporan berhasil diproses.",
 				type: "success",

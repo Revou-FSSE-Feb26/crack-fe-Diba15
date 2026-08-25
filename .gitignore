@@ -23,6 +23,9 @@
 # Jetbrains
 .idea/
 
+# docs
+docs/ARCHITECTURE_CHECKLIST.md
+
 
 # production
 /build

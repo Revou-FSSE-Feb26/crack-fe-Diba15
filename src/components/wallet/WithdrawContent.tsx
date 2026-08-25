@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
+import AmountPresetSelector from "@/components/wallet/AmountPresetSelector";
 import { useMounted } from "@/hooks/useMounted";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
@@ -300,27 +301,18 @@ export function WithdrawContent() {
 							</div>
 
 							{/* Quick Amount Selection */}
-							<div className="flex flex-wrap gap-2 pt-1">
-								{QUICK_AMOUNTS.map((amt) => (
-									<button
-										key={amt}
-										type="button"
-										disabled={amt > currentBalance}
-										onClick={() => handleQuickAmountSelect(amt)}
-										className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-											enteredAmount === amt
-												? "border-primary bg-primary/10 text-primary"
-												: "border-content/10 bg-background text-content hover:border-content/20 disabled:opacity-40 disabled:cursor-not-allowed"
-										}`}
-									>
-										{formatPrice(amt).replace(",00", "")}
-									</button>
-								))}
+							<div className="space-y-2 pt-1">
+								<AmountPresetSelector
+									amounts={QUICK_AMOUNTS}
+									selectedAmount={enteredAmount}
+									onSelect={handleQuickAmountSelect}
+									disabled={false}
+								/>
 								<button
 									type="button"
 									disabled={!isEligibleToWithdraw}
 									onClick={handleWithdrawAll}
-									className="px-3 py-1.5 rounded-xl border border-dashed border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 text-xs font-semibold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+									className="w-full py-2 px-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 text-xs font-semibold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed text-center"
 								>
 									Tarik Semua ({formatPrice(currentBalance).replace(",00", "")})
 								</button>

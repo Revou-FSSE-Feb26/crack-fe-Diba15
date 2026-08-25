@@ -1,8 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useArtistDetail } from "@/hooks/useArtworkQueries";
 import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useToggleFollow, useUserFollowing } from "@/hooks/useSocialQueries";
 import { axiosClient } from "@/lib/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { Profile } from "@/types";
@@ -13,6 +15,7 @@ import type { Profile } from "@/types";
  * upload avatar (dengan validasi tipe & ukuran berkas), serta aksi unfollow via API Backend.
  */
 export function useUserProfile(userId: string) {
+	const queryClient = useQueryClient();
 	const { user, updateCurrentUser } = useUserStore();
 	const { addToast } = useToastStore();
 	const { data: commissions = [] } = useUserCommissions();
@@ -74,6 +77,14 @@ export function useUserProfile(userId: string) {
 				});
 			}
 
+			// Invalidate queries in cache
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.artworks.artistDetail(targetUserId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.artworks.artistsList(),
+			});
+
 			return { success: true, message: "Profil berhasil diperbarui." };
 		} catch (error) {
 			const err = error as { response?: { data?: { message?: string } } };
@@ -93,6 +104,9 @@ export function useUserProfile(userId: string) {
 			if (user?.id === targetUserId && payload.name) {
 				updateCurrentUser({ name: payload.name });
 			}
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.artworks.artistDetail(targetUserId),
+			});
 			return { success: true, message: "Data pengguna berhasil diperbarui." };
 		} catch (error) {
 			const err = error as { response?: { data?: { message?: string } } };

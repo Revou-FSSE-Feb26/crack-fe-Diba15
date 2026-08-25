@@ -20,7 +20,6 @@ import {
 } from "@/hooks/useArtworkQueries";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
 import { formatShortDate } from "@/utils";
@@ -28,7 +27,6 @@ import { buildArtworkWithRelations } from "@/utils/search";
 
 export default function ReviewArtworksPage() {
 	const { user, isCurator } = useUserStore();
-	const { users } = useUserManagementStore();
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
 
@@ -86,7 +84,8 @@ export default function ReviewArtworksPage() {
 
 	const getReviewerName = (reviewerId?: string | null) => {
 		if (!reviewerId) return "Kurator";
-		return users.find((item) => item.id === reviewerId)?.name ?? "Kurator";
+		if (user && user.id === reviewerId) return user.name;
+		return "Kurator";
 	};
 
 	const handleApprove = (artwork: ArtworkWithRelations) => {

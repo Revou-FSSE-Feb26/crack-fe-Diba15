@@ -17,6 +17,7 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
+import AmountPresetSelector from "@/components/wallet/AmountPresetSelector";
 import { useMounted } from "@/hooks/useMounted";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
@@ -280,25 +281,11 @@ export function TopUpContent() {
 						</h2>
 
 						{/* Quick Amount Grid */}
-						<div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-							{QUICK_AMOUNTS.map((amt) => {
-								const isSelected = !customAmount && selectedAmount === amt;
-								return (
-									<button
-										key={amt}
-										type="button"
-										onClick={() => handleQuickAmountClick(amt)}
-										className={`py-3 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer text-center ${
-											isSelected
-												? "border-primary bg-primary/10 text-primary ring-2 ring-primary/20 shadow-sm"
-												: "border-content/10 bg-background text-content hover:border-content/20"
-										}`}
-									>
-										{formatPrice(amt).replace(",00", "")}
-									</button>
-								);
-							})}
-						</div>
+						<AmountPresetSelector
+							amounts={QUICK_AMOUNTS}
+							selectedAmount={customAmount ? 0 : selectedAmount}
+							onSelect={handleQuickAmountClick}
+						/>
 
 						{/* Custom Amount Input */}
 						<div className="space-y-1 pt-1">

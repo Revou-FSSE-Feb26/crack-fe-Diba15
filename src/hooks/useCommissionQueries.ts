@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { Commission } from "@/types";
@@ -9,7 +10,7 @@ export function useUserCommissions(role?: "client" | "artist") {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<Commission[]>({
-		queryKey: ["commissions", role],
+		queryKey: queryKeys.commissions.list(role),
 		queryFn: async () => {
 			const res = await axiosClient.get("/commissions", {
 				params: { as: role },
@@ -25,7 +26,7 @@ export function useCommissionDetail(id: string) {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<Commission>({
-		queryKey: ["commission", id],
+		queryKey: queryKeys.commissions.detail(id),
 		queryFn: async () => {
 			const res = await axiosClient.get(`/commissions/${id}`);
 			return res.data;
@@ -52,8 +53,8 @@ export function useCreateCommission() {
 			return res.data;
 		},
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.balance() });
 			addToast({
 				message: data.message || "Pesanan komisi berhasil dibuat.",
 				type: "success",
@@ -87,8 +88,10 @@ export function useRespondCommission() {
 			return res.data;
 		},
 		onSuccess: (data, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
 			addToast({
 				message: data.message || "Status komisi diperbarui.",
 				type: "success",
@@ -125,8 +128,10 @@ export function useUpdateProgress() {
 			return res.data;
 		},
 		onSuccess: (data, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
 			addToast({
 				message: data.message || "Progress komisi berhasil diperbarui.",
 				type: "success",
@@ -160,8 +165,10 @@ export function useApproveStep() {
 			return res.data;
 		},
 		onSuccess: (data, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
 			addToast({
 				message: data.message || "Penyetujuan komisi berhasil.",
 				type: "success",
@@ -188,7 +195,9 @@ export function useAddRevision() {
 			return res.data;
 		},
 		onSuccess: (data, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
 			addToast({
 				message: data.message || "Catatan revisi berhasil ditambahkan.",
 				type: "success",
@@ -214,8 +223,10 @@ export function useCancelCommission() {
 			return res.data;
 		},
 		onSuccess: (data, id) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
 			addToast({
 				message: data.message || "Komisi berhasil dibatalkan.",
 				type: "success",
@@ -251,9 +262,11 @@ export function usePayCommission() {
 			return res.data;
 		},
 		onSuccess: (data, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
-			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.balance() });
 			addToast({
 				message: data.message || "Pembayaran komisi berhasil.",
 				type: "success",
@@ -279,9 +292,11 @@ export function useCompleteCommission() {
 			return res.data;
 		},
 		onSuccess: (data, id) => {
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission", id] });
-			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.commissions.detail(id),
+			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.balance() });
 			addToast({
 				message:
 					data.message ||

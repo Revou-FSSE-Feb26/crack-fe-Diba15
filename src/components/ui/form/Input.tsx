@@ -18,14 +18,14 @@ export default function Input({
 			{label && (
 				<label
 					htmlFor={props.id}
-					className="block text-sm font-semibold mb-1.5"
+					className="block text-sm font-semibold mb-1.5 text-content"
 				>
 					{label}
 				</label>
 			)}
 			<div className="relative">
 				{children && (
-					<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+					<div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10 text-content-muted">
 						{children}
 					</div>
 				)}

@@ -6,7 +6,6 @@ import { useMemo } from "react";
 
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Stat from "@/components/ui/Stat";
-import users from "@/data/users";
 import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useMounted } from "@/hooks/useMounted";
 import { useUserStore } from "@/store/UserStore";
@@ -58,23 +57,18 @@ export default function CommissionProgressContent() {
 	const isArtistView = user.role === "artist";
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+		<div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<p className="text-sm font-medium text-primary">
-						{isArtistView ? "Artist POV" : "Client POV"}
-					</p>
-					<h1 className="font-heading text-3xl font-bold text-content">
+					<h1 className="font-heading text-2xl font-bold text-content">
 						Progress Commission
 					</h1>
-					<p className="mt-1 text-sm text-content-muted">
-						{isArtistView
-							? "Lihat daftar commission dari client dan buka detail untuk mengelola progress."
-							: "Lihat daftar commission kamu dan buka detail untuk pembayaran, revisi, approval, atau dispute."}
+					<p className="text-sm text-content-muted">
+						Lacak proses kerja, preview karya, dan riwayat pesanan aktif Anda.
 					</p>
 				</div>
-				<span className="text-sm text-content-muted">
-					{visibleCommissions.length} order
+				<span className="self-start rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:self-auto">
+					Mode: {isArtistView ? "Artist (Penerima)" : "Client (Pemesan)"}
 				</span>
 			</div>
 
@@ -89,12 +83,8 @@ export default function CommissionProgressContent() {
 			) : (
 				<div className="space-y-4">
 					{visibleCommissions.map((commission) => {
-						const artist = users.find(
-							(item) => item.id === commission.artists_id,
-						);
-						const client = users.find(
-							(item) => item.id === commission.client_id,
-						);
+						const artist = commission.artist;
+						const client = commission.client;
 						const status = commissionStatusConfig[commission.status];
 						const counterpartName = isArtistView
 							? (client?.name ?? "Client")
@@ -151,22 +141,14 @@ export default function CommissionProgressContent() {
 											label="Harga"
 											value={formatPrice(commission.price)}
 										/>
-										<Stat
-											icon={Briefcase}
-											label="Dibuat"
-											value={formatDate(commission.created_at)}
-										/>
+										<Link
+											href={`/commissions/${commission.id}`}
+											className="flex flex-col items-center justify-center rounded-xl bg-primary text-background p-2.5 transition-colors hover:bg-primary-hover col-span-2 sm:col-span-1"
+										>
+											<Eye className="w-4 h-4 mb-1" />
+											<span className="text-xs font-semibold">Buka Order</span>
+										</Link>
 									</div>
-								</div>
-
-								<div className="mt-4 flex justify-end">
-									<Link
-										href={`/commissions/${commission.id}`}
-										className="btn btn-primary btn-sm gap-2"
-									>
-										<Eye className="w-4 h-4" />
-										Buka Detail & Manage Progress
-									</Link>
 								</div>
 							</article>
 						);

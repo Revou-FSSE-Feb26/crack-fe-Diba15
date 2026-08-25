@@ -16,7 +16,7 @@ import { useMemo } from "react";
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserCommissions } from "@/hooks/useCommissionQueries";
-import { useCommissionStore } from "@/store/CommissionStore";
+import { useDisputes } from "@/hooks/useDisputeQueries";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
@@ -26,16 +26,15 @@ export default function DashboardPage() {
 	const { users } = useUserManagementStore();
 	const { data: artworks = [] } = useArtworks();
 	const { data: commissionsData = [] } = useUserCommissions();
-	const { disputes, commissions: fallbackCommissions } = useCommissionStore();
+	const { data: disputesData = [] } = useDisputes();
 
-	const activeCommissionsList =
-		commissionsData.length > 0 ? commissionsData : fallbackCommissions;
+	const activeCommissionsList = commissionsData;
 
 	const stats = useMemo(() => {
 		const pendingArtworks = artworks.filter(
 			(artwork) => artwork.curation_status === "pending",
 		);
-		const disputedCommissions = disputes.filter(
+		const disputedCommissions = disputesData.filter(
 			(dispute) => dispute.status === "approved",
 		);
 		const activeCommissions = activeCommissionsList.filter((commission) =>
@@ -72,7 +71,7 @@ export default function DashboardPage() {
 			grossMerchandiseValue,
 			activeEscrowBalance,
 		};
-	}, [artworks, activeCommissionsList, users, disputes]);
+	}, [artworks, activeCommissionsList, users, disputesData]);
 
 	return (
 		<div className="space-y-6">

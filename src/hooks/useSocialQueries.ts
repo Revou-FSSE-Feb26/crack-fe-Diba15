@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
@@ -9,7 +10,7 @@ export function useUserFavoriteIds() {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<string[]>({
-		queryKey: ["user-favorite-ids"],
+		queryKey: queryKeys.social.favoriteIds(),
 		queryFn: async () => {
 			const res = await axiosClient.get("/social/favorite/ids");
 			return res.data;
@@ -24,7 +25,7 @@ export function useUserFavorites() {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<ArtworkWithRelations[]>({
-		queryKey: ["user-favorites"],
+		queryKey: queryKeys.social.favorites(),
 		queryFn: async () => {
 			const res = await axiosClient.get("/social/favorite");
 			return res.data;
@@ -45,11 +46,14 @@ export function useToggleFavorite() {
 		},
 		onMutate: async (artworkId: string) => {
 			// 1. Batalkan refetch berjalan agar tidak menimpa update instan kita
-			await queryClient.cancelQueries({ queryKey: ["user-favorite-ids"] });
+			await queryClient.cancelQueries({
+				queryKey: queryKeys.social.favoriteIds(),
+			});
 
 			// 2. Simpan snapshot data sebelumnya untuk rollback jika error
 			const previousFavoriteIds =
-				queryClient.getQueryData<string[]>(["user-favorite-ids"]) ?? [];
+				queryClient.getQueryData<string[]>(queryKeys.social.favoriteIds()) ??
+				[];
 
 			// 3. Ubah data di cache secara instan (0 ms)
 			const isCurrentlyFavorite = previousFavoriteIds.includes(artworkId);
@@ -57,7 +61,10 @@ export function useToggleFavorite() {
 				? previousFavoriteIds.filter((id) => id !== artworkId)
 				: [...previousFavoriteIds, artworkId];
 
-			queryClient.setQueryData(["user-favorite-ids"], updatedFavoriteIds);
+			queryClient.setQueryData(
+				queryKeys.social.favoriteIds(),
+				updatedFavoriteIds,
+			);
 
 			return { previousFavoriteIds };
 		},
@@ -65,7 +72,7 @@ export function useToggleFavorite() {
 			// Rollback cache ke kondisi awal jika request gagal
 			if (context?.previousFavoriteIds) {
 				queryClient.setQueryData(
-					["user-favorite-ids"],
+					queryKeys.social.favoriteIds(),
 					context.previousFavoriteIds,
 				);
 			}
@@ -80,10 +87,16 @@ export function useToggleFavorite() {
 		},
 		onSettled: (_data, _error, artworkId) => {
 			// Sinkronisasi data di latar belakang
-			queryClient.invalidateQueries({ queryKey: ["user-favorite-ids"] });
-			queryClient.invalidateQueries({ queryKey: ["user-favorites"] });
-			queryClient.invalidateQueries({ queryKey: ["artworks"] });
-			queryClient.invalidateQueries({ queryKey: ["artwork", artworkId] });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.social.favoriteIds(),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.social.favorites(),
+			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.artworks.all });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.artworks.detail(artworkId),
+			});
 		},
 	});
 }
@@ -93,7 +106,7 @@ export function useUserFollowingIds() {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<string[]>({
-		queryKey: ["user-following-ids"],
+		queryKey: queryKeys.social.followingIds(),
 		queryFn: async () => {
 			const res = await axiosClient.get("/social/following/ids");
 			return res.data;
@@ -120,7 +133,7 @@ export function useUserFollowing() {
 			};
 		}>
 	>({
-		queryKey: ["user-following"],
+		queryKey: queryKeys.social.following(),
 		queryFn: async () => {
 			const res = await axiosClient.get("/social/following");
 			return res.data;
@@ -141,11 +154,14 @@ export function useToggleFollow() {
 		},
 		onMutate: async (artistId: string) => {
 			// 1. Batalkan query berjalan
-			await queryClient.cancelQueries({ queryKey: ["user-following-ids"] });
+			await queryClient.cancelQueries({
+				queryKey: queryKeys.social.followingIds(),
+			});
 
 			// 2. Simpan snapshot data sebelumnya
 			const previousFollowingIds =
-				queryClient.getQueryData<string[]>(["user-following-ids"]) ?? [];
+				queryClient.getQueryData<string[]>(queryKeys.social.followingIds()) ??
+				[];
 
 			// 3. Ubah data di cache secara instan (0 ms)
 			const isCurrentlyFollowing = previousFollowingIds.includes(artistId);
@@ -153,14 +169,17 @@ export function useToggleFollow() {
 				? previousFollowingIds.filter((id) => id !== artistId)
 				: [...previousFollowingIds, artistId];
 
-			queryClient.setQueryData(["user-following-ids"], updatedFollowingIds);
+			queryClient.setQueryData(
+				queryKeys.social.followingIds(),
+				updatedFollowingIds,
+			);
 
 			return { previousFollowingIds };
 		},
 		onError: (error, _artistId, context) => {
 			if (context?.previousFollowingIds) {
 				queryClient.setQueryData(
-					["user-following-ids"],
+					queryKeys.social.followingIds(),
 					context.previousFollowingIds,
 				);
 			}
@@ -174,9 +193,15 @@ export function useToggleFollow() {
 			addToast({ message: msg, type: "error" });
 		},
 		onSettled: (_data, _error, artistId) => {
-			queryClient.invalidateQueries({ queryKey: ["user-following-ids"] });
-			queryClient.invalidateQueries({ queryKey: ["user-following"] });
-			queryClient.invalidateQueries({ queryKey: ["artist-detail", artistId] });
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.social.followingIds(),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.social.following(),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.artworks.artistDetail(artistId),
+			});
 		},
 	});
 }

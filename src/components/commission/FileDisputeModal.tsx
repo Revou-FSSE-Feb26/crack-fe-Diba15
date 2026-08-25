@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
+import Textarea from "@/components/ui/form/Textarea";
 import { useModalStore } from "@/store/ModalStore";
 
 interface DisputeFormValues {
@@ -64,11 +65,10 @@ export default function FileDisputeModal({
 					<label htmlFor="dispute-reason" className="form-label">
 						Alasan Detail Dispute
 					</label>
-					<textarea
+					<Textarea
 						id="dispute-reason"
 						rows={5}
 						placeholder="Jelaskan secara terperinci mengapa Anda mengajukan dispute, bagian mana dari hasil yang tidak sesuai, dan sertakan bukti penunjang (misal: visual tidak sesuai sketch, indikasi AI, dll)."
-						className="form-textarea"
 						{...register("reason", {
 							required: "Alasan dispute wajib diisi",
 							minLength: {

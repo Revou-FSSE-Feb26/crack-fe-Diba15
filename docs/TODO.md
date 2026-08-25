@@ -26,7 +26,8 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
 
 [x] TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. (Selesai) 
 
-TODO 12: Menerapkan Prinsip SOLID, KISS, dan DRY pada FE dan BE
+[x] TODO 12: Menerapkan Prinsip SOLID, KISS, dan DRY pada BE (Selesai - Auth Isolation, Repositories Interfaces, Logger & Maintenance Middlewares, Swagger OpenAPI Docs & Unit Tests 100% Passing).
+[x] TODO 12 (FE): Menerapkan Prinsip SOLID, KISS, dan DRY pada FE (Selesai - Centralized Query Keys, Modular Post-Art & Commission Payment & Profile SRP Subcomponents, Form UI Components, and Dead Code Elimination).
 
 ## TODO Test
 

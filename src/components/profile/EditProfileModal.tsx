@@ -9,6 +9,7 @@ import instagramIcon from "@/assets/instagram.svg";
 import pixivIcon from "@/assets/pixiv.svg";
 import xIcon from "@/assets/x.svg";
 import Input from "@/components/ui/form/Input";
+import Textarea from "@/components/ui/form/Textarea";
 import { useModalStore } from "@/store/ModalStore";
 import type { Profile } from "@/types";
 
@@ -116,7 +117,7 @@ export default function EditProfileModal({
 					>
 						Bio
 					</label>
-					<textarea
+					<Textarea
 						id="profile-bio"
 						rows={4}
 						placeholder={
@@ -124,7 +125,6 @@ export default function EditProfileModal({
 								? "Ceritakan gaya, medium, dan spesialisasi kamu sebagai artist."
 								: "Tulis bio singkat profil kamu di sini."
 						}
-						className="form-textarea"
 						{...register("bio", {
 							maxLength: { value: 500, message: "Bio maksimal 500 karakter" },
 						})}

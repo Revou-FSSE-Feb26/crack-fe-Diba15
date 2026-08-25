@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
+import Textarea from "@/components/ui/form/Textarea";
 import { useCreateCommission } from "@/hooks/useCommissionQueries";
 import { useMounted } from "@/hooks/useMounted";
 import { useModalStore } from "@/store/ModalStore";
@@ -234,10 +235,10 @@ export default function CommissionButton({
 								>
 									Deskripsi
 								</label>
-								<textarea
+								<Textarea
 									id="commission-description"
 									placeholder="Jelaskan brief, referensi, style, dan kebutuhan komisi."
-									className="min-h-28 w-full resize-none rounded-lg border border-content/10 bg-background px-3 py-2.5 text-sm text-content outline-none focus:border-primary"
+									rows={4}
 									{...register("description", {
 										required: "Deskripsi wajib diisi",
 										validate: (value) =>

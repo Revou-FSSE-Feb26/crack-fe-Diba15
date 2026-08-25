@@ -6,7 +6,6 @@ import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useDisputes, useResolveDispute } from "@/hooks/useDisputeQueries";
 import { usePagination } from "@/hooks/usePagination";
-import { useCommissionStore } from "@/store/CommissionStore";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserManagementStore } from "@/store/UserManagementStore";
@@ -16,17 +15,10 @@ import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/di
 
 export default function ReviewDisputesPage() {
 	const { users } = useUserManagementStore();
-	const { data: realDisputes = [] } = useDisputes();
-	const {
-		disputes: mockDisputes,
-		commissions,
-		progress,
-	} = useCommissionStore();
+	const { data: disputesList = [] } = useDisputes();
 	const resolveDisputeMutation = useResolveDispute();
 	const { openModal } = useModalStore();
 	const { openLightbox } = useLightboxStore();
-
-	const disputesList = realDisputes.length > 0 ? realDisputes : mockDisputes;
 
 	const { pending, disputed, rejected } = useMemo(() => {
 		const pending = disputesList.filter((d) => d.status === "pending");
@@ -39,30 +31,19 @@ export default function ReviewDisputesPage() {
 		initialPerPage: 5,
 	});
 
-	// Join dispute with commission, progress, client, artist
+	// Join dispute with client & artist details if not populated
 	const joinedDisputes = useMemo(() => {
 		return disputesList
 			.map((dispute) => {
-				const commission =
-					dispute.commission ??
-					commissions.find((c) => c.id === dispute.commission_id);
-				const comProgress = progress.find(
-					(p) => p.commission_id === dispute.commission_id,
-				);
 				const clientUser =
 					dispute.commission?.client ??
-					users.find((u) => u.id === commission?.client_id);
+					users.find((u) => u.id === dispute.commission?.client_id);
 				const artistUser =
 					dispute.commission?.artist ??
-					users.find((u) => u.id === commission?.artists_id);
-
-				const finalProgress =
-					dispute.progress ?? dispute.commission?.progress ?? comProgress;
+					users.find((u) => u.id === dispute.commission?.artists_id);
 
 				return {
 					...dispute,
-					commission,
-					progress: finalProgress,
 					client: clientUser,
 					artist: artistUser,
 				};
@@ -71,7 +52,7 @@ export default function ReviewDisputesPage() {
 				(a, b) =>
 					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
 			);
-	}, [disputesList, commissions, progress, users]);
+	}, [disputesList, users]);
 
 	const [search, setSearch] = useState("");
 

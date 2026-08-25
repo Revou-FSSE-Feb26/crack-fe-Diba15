@@ -24,7 +24,6 @@ import { useCopyLink } from "@/hooks/useCopyLink";
 import { useCreateReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
 import type { User } from "@/types";
 import { randomKey } from "@/utils";
@@ -35,7 +34,6 @@ export default function Detail() {
 	const id = params.id as string;
 	const { openLightbox } = useLightboxStore();
 	const [showWip, setShowWip] = useState(false);
-	const { users } = useUserManagementStore();
 	const { copied, copyPath } = useCopyLink({
 		successMessage: "Link karya berhasil disalin.",
 	});
@@ -113,8 +111,7 @@ export default function Detail() {
 		);
 	}
 
-	const artist =
-		artwork.artist || users.find((u) => u.id === artwork.artists_id);
+	const artist = artwork.artist;
 	const artistProfile =
 		artwork.artist_profile || (artist as Partial<User>)?.profile;
 

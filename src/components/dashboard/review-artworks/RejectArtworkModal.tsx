@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import Textarea from "@/components/ui/form/Textarea";
 import { useModalStore } from "@/store/ModalStore";
 
 interface RejectFormValues {
@@ -88,11 +89,10 @@ export default function RejectArtworkModal({
 					<label htmlFor="reject-reason" className="form-label">
 						Alasan penolakan
 					</label>
-					<textarea
+					<Textarea
 						id="reject-reason"
 						rows={4}
 						placeholder="Jelaskan secara spesifik mengapa artwork ditolak, misalnya indikasi AI, WIP tidak valid, atau ketidaksesuaian kebijakan platform."
-						className="form-textarea"
 						{...register("reason", {
 							required: "Alasan penolakan wajib diisi",
 							minLength: {

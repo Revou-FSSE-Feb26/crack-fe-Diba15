@@ -7,19 +7,17 @@ import {
 	Briefcase,
 	CheckCircle2,
 	CreditCard,
-	Lock,
-	ShieldCheck,
-	Sparkles,
-	Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import AvatarInitials from "@/components/home/AvatarInitials";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/form/Input";
-import users from "@/data/users";
+import {
+	PaymentCardForm,
+	type PaymentFormValues,
+} from "@/components/commission/payment/PaymentCardForm";
+import { PaymentMethodSelector } from "@/components/commission/payment/PaymentMethodSelector";
+import { PaymentSummaryCard } from "@/components/commission/payment/PaymentSummaryCard";
 import {
 	useCommissionDetail,
 	usePayCommission,
@@ -27,7 +25,7 @@ import {
 import { useMounted } from "@/hooks/useMounted";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import { formatDate, formatPrice } from "@/utils";
+import { formatPrice } from "@/utils";
 import {
 	formatCardNumber,
 	formatCvv,
@@ -37,13 +35,6 @@ import {
 
 interface CommissionPaymentContentProps {
 	commissionId: string;
-}
-
-interface PaymentFormValues {
-	cardName: string;
-	cardNumber: string;
-	cardExpiry: string;
-	cardCvv: string;
 }
 
 export function CommissionPaymentContent({
@@ -278,11 +269,9 @@ export function CommissionPaymentContent({
 		);
 	}
 
-	const artist = users.find((item) => item.id === commission.artists_id);
-	const artistName = artist?.name ?? "Artist TruBrush";
+	const artistName = commission.artist?.name ?? "Artist TruBrush";
 	const userBalance = user.balance ?? 0;
 	const isBalanceSufficient = userBalance >= commission.price;
-	const balanceShortage = Math.max(0, commission.price - userBalance);
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -310,348 +299,37 @@ export function CommissionPaymentContent({
 			{/* Main Content Grid */}
 			<div className="grid gap-6 lg:grid-cols-12 items-start">
 				{/* Left Column: Payment Method Selection & Forms */}
-				<div className="lg:col-span-7 space-y-4">
-					<h2 className="text-sm font-bold uppercase tracking-wider text-content-muted">
-						Pilih Metode Pembayaran
-					</h2>
-
-					{/* Option 1: TruBrush E-Wallet */}
-					<div
-						className={`rounded-2xl border p-4 sm:p-5 transition-all ${
-							paymentMethod === "wallet"
-								? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-sm"
-								: "border-content/10 bg-surface hover:border-content/20"
-						}`}
+				<div className="lg:col-span-7">
+					<PaymentMethodSelector
+						paymentMethod={paymentMethod}
+						onSelectMethod={setPaymentMethod}
+						userBalance={userBalance}
+						totalPrice={commission.price}
+						commissionId={commission.id}
 					>
-						<label className="flex items-start justify-between gap-3 cursor-pointer">
-							<div className="flex items-center gap-3">
-								<div
-									className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-										paymentMethod === "wallet"
-											? "bg-primary text-background"
-											: "bg-content/5 text-content-muted"
-									}`}
-								>
-									<Wallet className="w-5 h-5" />
-								</div>
-								<div>
-									<p className="font-bold text-sm sm:text-base text-content flex items-center gap-2">
-										Saldo TruBrush E-Wallet
-										<span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/20">
-											Instan & Bebas Biaya
-										</span>
-									</p>
-									<p className="text-xs text-content-muted mt-0.5">
-										Sisa saldo akun Anda saat ini:{" "}
-										<span className="font-semibold text-content">
-											{formatPrice(userBalance)}
-										</span>
-									</p>
-								</div>
-							</div>
-
-							<input
-								type="radio"
-								name="payment_method"
-								value="wallet"
-								checked={paymentMethod === "wallet"}
-								onChange={() => setPaymentMethod("wallet")}
-								className="radio radio-primary radio-sm mt-1"
-							/>
-						</label>
-
-						{/* Wallet Status Details (shown when active) */}
-						{paymentMethod === "wallet" && (
-							<div className="mt-4 pt-4 border-t border-content/10 space-y-3">
-								{isBalanceSufficient ? (
-									<div className="flex items-center gap-2 p-3 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-500/20 text-xs font-medium">
-										<CheckCircle2 className="w-4 h-4 shrink-0" />
-										<span>
-											Saldo mencukupi. Sisa saldo setelah pembayaran:{" "}
-											<strong className="font-bold">
-												{formatPrice(userBalance - commission.price)}
-											</strong>
-										</span>
-									</div>
-								) : (
-									<div className="space-y-2.5">
-										<div className="flex items-start gap-2 p-3 bg-danger/10 text-danger rounded-xl border border-danger/20 text-xs">
-											<AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-											<div className="space-y-0.5">
-												<p className="font-bold">Saldo Tidak Mencukupi</p>
-												<p className="text-content-muted">
-													Kekurangan saldo sebesar{" "}
-													<strong className="text-danger font-semibold">
-														{formatPrice(balanceShortage)}
-													</strong>
-													. Silakan lakukan Top Up untuk melanjutkan.
-												</p>
-											</div>
-										</div>
-
-										<Link
-											href={`/topup?redirect=/commissions/${commission.id}/payment`}
-											className="w-full text-xs py-2 justify-center flex items-center gap-1.5 rounded-xl bg-surface border border-content/10 text-content hover:bg-content/5 font-semibold transition-colors"
-										>
-											<Wallet className="w-3.5 h-3.5" />
-											Top Up Saldo E-Wallet Sekarang
-										</Link>
-									</div>
-								)}
-							</div>
-						)}
-					</div>
-
-					{/* Option 2: Credit / Debit Card */}
-					<div
-						className={`rounded-2xl border p-4 sm:p-5 transition-all ${
-							paymentMethod === "credit_card"
-								? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-sm"
-								: "border-content/10 bg-surface hover:border-content/20"
-						}`}
-					>
-						<label className="flex items-start justify-between gap-3 cursor-pointer">
-							<div className="flex items-center gap-3">
-								<div
-									className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-										paymentMethod === "credit_card"
-											? "bg-primary text-background"
-											: "bg-content/5 text-content-muted"
-									}`}
-								>
-									<CreditCard className="w-5 h-5" />
-								</div>
-								<div>
-									<p className="font-bold text-sm sm:text-base text-content">
-										Kartu Kredit / Debit Online
-									</p>
-									<p className="text-xs text-content-muted mt-0.5">
-										Mendukung Visa, Mastercard, JCB & GPN
-									</p>
-								</div>
-							</div>
-
-							<input
-								type="radio"
-								name="payment_method"
-								value="credit_card"
-								checked={paymentMethod === "credit_card"}
-								onChange={() => setPaymentMethod("credit_card")}
-								className="radio radio-primary radio-sm mt-1"
-							/>
-						</label>
-
-						{/* Credit Card Form (shown when active) */}
-						{paymentMethod === "credit_card" && (
-							<div className="mt-4 pt-4 border-t border-content/10 space-y-3">
-								<div className="p-3 rounded-xl bg-content/5 border border-content/10 text-xs text-content-muted flex items-center gap-2">
-									<Sparkles className="w-4 h-4 text-primary shrink-0" />
-									<span>
-										Mode Sandbox Testing: Gunakan kartu dummy{" "}
-										<strong className="text-content font-mono font-bold">
-											4242 4242 4242 4242
-										</strong>
-									</span>
-								</div>
-
-								<div className="space-y-3">
-									<div className="space-y-1">
-										<Input
-											label="Nama Pemegang Kartu"
-											placeholder="e.g. DIMAS PRASETYO"
-											required
-											{...register("cardName", {
-												required: "Nama pemegang kartu wajib diisi.",
-												minLength: {
-													value: 3,
-													message: "Nama minimal 3 karakter.",
-												},
-											})}
-										/>
-										{errors.cardName && (
-											<p className="text-danger text-xs">
-												{errors.cardName.message}
-											</p>
-										)}
-									</div>
-
-									<div className="space-y-1">
-										<Input
-											label="Nomor Kartu Kredit / Debit"
-											placeholder="4242 4242 4242 4242"
-											required
-											maxLength={19}
-											{...register("cardNumber", {
-												required: "Nomor kartu wajib diisi.",
-												validate: (val) =>
-													val.replace(/\s+/g, "").length === 16 ||
-													"Nomor kartu harus terdiri dari 16 digit.",
-											})}
-											onChange={handleCardNumberChange}
-										/>
-										{errors.cardNumber && (
-											<p className="text-danger text-xs">
-												{errors.cardNumber.message}
-											</p>
-										)}
-									</div>
-
-									<div className="grid grid-cols-2 gap-3">
-										<div className="space-y-1">
-											<Input
-												label="Masa Berlaku"
-												placeholder="MM/YY"
-												required
-												maxLength={5}
-												{...register("cardExpiry", {
-													required: "Masa berlaku wajib diisi.",
-													pattern: {
-														value: /^(0[1-9]|1[0-2])\/?([0-9]{2})$/,
-														message: "Format harus MM/YY (contoh: 12/28).",
-													},
-												})}
-												onChange={handleExpiryChange}
-											/>
-											{errors.cardExpiry && (
-												<p className="text-danger text-xs">
-													{errors.cardExpiry.message}
-												</p>
-											)}
-										</div>
-
-										<div className="space-y-1">
-											<Input
-												label="CVV / CVC"
-												placeholder="123"
-												type="password"
-												required
-												maxLength={4}
-												{...register("cardCvv", {
-													required: "CVV wajib diisi.",
-													minLength: {
-														value: 3,
-														message: "CVV minimal 3 digit.",
-													},
-												})}
-												onChange={handleCvvChange}
-											/>
-											{errors.cardCvv && (
-												<p className="text-danger text-xs">
-													{errors.cardCvv.message}
-												</p>
-											)}
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
-					</div>
+						<PaymentCardForm
+							register={register}
+							errors={errors}
+							onCardNumberChange={handleCardNumberChange}
+							onExpiryChange={handleExpiryChange}
+							onCvvChange={handleCvvChange}
+						/>
+					</PaymentMethodSelector>
 				</div>
 
 				{/* Right Column: Order & Escrow Protection Summary */}
-				<div className="lg:col-span-5 space-y-4">
-					<h2 className="text-sm font-bold uppercase tracking-wider text-content-muted">
-						Ringkasan Pesanan
-					</h2>
-
-					<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-5 shadow-sm">
-						{/* Item info */}
-						<div className="flex items-start gap-3 pb-4 border-b border-content/10">
-							<AvatarInitials
-								name={artistName}
-								className="w-10 h-10 text-xs shrink-0"
-							/>
-							<div className="min-w-0 flex-1">
-								<h3 className="font-bold text-sm sm:text-base text-content line-clamp-1">
-									{commission.commission_title}
-								</h3>
-								<p className="text-xs text-content-muted mt-0.5">
-									Artis: <strong className="text-content">{artistName}</strong>
-								</p>
-								<p className="text-[11px] text-content-muted mt-1">
-									Dipesan: {formatDate(commission.created_at)}
-								</p>
-							</div>
-						</div>
-
-						{/* Invoice breakdown */}
-						<div className="space-y-2.5 text-xs sm:text-sm">
-							<div className="flex justify-between text-content-muted">
-								<span>Harga Jasa Komisi</span>
-								<span className="font-medium text-content">
-									{formatPrice(commission.price)}
-								</span>
-							</div>
-							<div className="flex justify-between text-content-muted">
-								<span>Biaya Layanan Escrow</span>
-								<span className="font-semibold text-emerald-600 dark:text-emerald-400">
-									Rp 0 (Gratis)
-								</span>
-							</div>
-
-							<div className="pt-3 border-t border-content/10 flex justify-between items-baseline">
-								<span className="font-bold text-sm text-content">
-									Total Tagihan
-								</span>
-								<span className="font-heading text-xl font-bold text-primary">
-									{formatPrice(commission.price)}
-								</span>
-							</div>
-						</div>
-
-						{/* Escrow Guarantee Box */}
-						<div className="p-3.5 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl border border-emerald-500/20 text-xs leading-relaxed space-y-1">
-							<div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
-								<ShieldCheck className="w-4 h-4 shrink-0" />
-								<span>Jaminan Perlindungan Escrow TruBrush</span>
-							</div>
-							<p className="text-[11px] opacity-90">
-								Dana Anda ditahan dengan aman di rekening penampung (Escrow) dan
-								baru akan dicairkan ke Artis setelah Anda menyetujui hasil karya
-								akhir.
-							</p>
-						</div>
-
-						{/* Execution Pay Button */}
-						{paymentMethod === "wallet" ? (
-							<Button
-								type="button"
-								disabled={!isBalanceSufficient || payMutation.isPending}
-								onClick={() => handlePaymentSubmit()}
-								className="w-full py-3 justify-center text-sm font-semibold flex items-center gap-2 shadow-sm"
-							>
-								{payMutation.isPending ? (
-									<>Memproses Pembayaran Escrow...</>
-								) : (
-									<>
-										<Lock className="w-4 h-4" />
-										Bayar Komisi ({formatPrice(commission.price)})
-									</>
-								)}
-							</Button>
-						) : (
-							<Button
-								type="button"
-								disabled={payMutation.isPending}
-								onClick={handleSubmit(handlePaymentSubmit)}
-								className="w-full py-3 justify-center text-sm font-semibold flex items-center gap-2 shadow-sm"
-							>
-								{payMutation.isPending ? (
-									<>Memproses Transaksi Kartu...</>
-								) : (
-									<>
-										<Lock className="w-4 h-4" />
-										Bayar via Kartu ({formatPrice(commission.price)})
-									</>
-								)}
-							</Button>
-						)}
-
-						<p className="text-[10px] text-center text-content-muted flex items-center justify-center gap-1">
-							<Lock className="w-3 h-3 text-content-muted" />
-							Koneksi aman terenkripsi SSL 256-bit
-						</p>
-					</div>
+				<div className="lg:col-span-5">
+					<PaymentSummaryCard
+						artistName={artistName}
+						commissionTitle={commission.commission_title}
+						commissionDate={commission.created_at}
+						price={commission.price}
+						paymentMethod={paymentMethod}
+						isBalanceSufficient={isBalanceSufficient}
+						isPending={payMutation.isPending}
+						onPayWallet={() => handlePaymentSubmit()}
+						onPayCard={handleSubmit(handlePaymentSubmit)}
+					/>
 				</div>
 			</div>
 		</div>

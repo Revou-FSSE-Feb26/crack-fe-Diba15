@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
+import Textarea from "@/components/ui/form/Textarea";
 import { useModalStore } from "@/store/ModalStore";
 
 interface ReportFormValues {
@@ -67,11 +68,10 @@ export default function ReportArtModal({
 					<label htmlFor="report-reason" className="form-label">
 						Alasan Detail Laporan
 					</label>
-					<textarea
+					<Textarea
 						id="report-reason"
 						rows={4}
 						placeholder="Jelaskan secara terperinci mengapa Anda melaporkan karya ini..."
-						className="form-textarea"
 						{...register("reason", {
 							required: "Alasan laporan wajib diisi",
 							minLength: {

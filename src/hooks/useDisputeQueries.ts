@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { JoinedDispute } from "@/types";
@@ -8,7 +9,7 @@ export function useDisputes(status?: string) {
 	const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
 	return useQuery<JoinedDispute[]>({
-		queryKey: ["disputes", status],
+		queryKey: queryKeys.disputes.list(status),
 		queryFn: async () => {
 			const res = await axiosClient.get("/disputes", {
 				params: { status },
@@ -29,9 +30,8 @@ export function useCreateDispute() {
 			return res.data;
 		},
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["disputes"] });
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.disputes.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
 			addToast({
 				message: data.message || "Sengketa komisi berhasil diajukan.",
 				type: "success",
@@ -67,10 +67,9 @@ export function useResolveDispute() {
 			return res.data;
 		},
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["disputes"] });
-			queryClient.invalidateQueries({ queryKey: ["commissions"] });
-			queryClient.invalidateQueries({ queryKey: ["commission"] });
-			queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.disputes.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.commissions.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.balance() });
 			addToast({
 				message: data.message || "Sengketa komisi berhasil diputuskan.",
 				type: "success",

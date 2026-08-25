@@ -5,6 +5,7 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axiosClient";
+import { queryKeys } from "@/lib/queryKeys";
 import type {
 	ActionResult,
 	ArtistDetailResponse,
@@ -16,25 +17,8 @@ import type {
 	Tag,
 } from "@/types";
 
-// ─── Query Keys ─────────────────────────────────────────────────────────────
-export const artworkKeys = {
-	all: ["artworks"] as const,
-	lists: () => [...artworkKeys.all, "list"] as const,
-	list: (filters?: Record<string, unknown>) =>
-		[...artworkKeys.lists(), { filters }] as const,
-	infiniteList: (filters?: Record<string, unknown>, limit?: number) =>
-		[...artworkKeys.lists(), "infinite", { filters, limit }] as const,
-	details: () => [...artworkKeys.all, "detail"] as const,
-	detail: (id: string) => [...artworkKeys.details(), id] as const,
-	tags: ["artwork-tags"] as const,
-	popularTags: () => [...artworkKeys.tags, "popular"] as const,
-	pending: () => [...artworkKeys.all, "pending"] as const,
-	artists: ["artists"] as const,
-	popularArtists: () => [...artworkKeys.artists, "popular"] as const,
-	artistsList: () => [...artworkKeys.artists, "all"] as const,
-	artistDetail: (id: string) => [...artworkKeys.artists, "detail", id] as const,
-	tagsList: () => [...artworkKeys.tags, "all"] as const,
-};
+// ─── Query Keys (Referencing Central Factory) ──────────────────────────────
+export const artworkKeys = queryKeys.artworks;
 
 // ─── Query Hooks ─────────────────────────────────────────────────────────────
 export function useArtworks(filters?: {
