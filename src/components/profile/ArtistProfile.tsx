@@ -22,6 +22,7 @@ import AccountMeta from "@/components/profile/AccountMeta";
 import { ArtistAppealBox } from "@/components/profile/ArtistAppealBox";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
 import { ArtistVerificationBanner } from "@/components/profile/ArtistVerificationBanner";
+import ClientCommissionHistory from "@/components/profile/ClientCommissionHistory";
 import EditProfileModal, {
 	type EditProfileFormValues,
 } from "@/components/profile/EditProfileModal";
@@ -46,7 +47,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 	const { openModal } = useModalStore();
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState<
-		"portfolio" | "following" | "transactions"
+		"portfolio" | "commissions" | "following" | "transactions"
 	>("portfolio");
 
 	const {
@@ -411,11 +412,11 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 			</div>
 
 			{/* Tab Switcher */}
-			<div className="flex border-b border-content/10">
+			<div className="flex border-b border-content/10 overflow-x-auto">
 				<button
 					type="button"
 					onClick={() => setActiveTab("portfolio")}
-					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
 						activeTab === "portfolio"
 							? "border-primary text-primary"
 							: "border-transparent text-content-muted hover:text-content"
@@ -425,8 +426,19 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 				</button>
 				<button
 					type="button"
+					onClick={() => setActiveTab("commissions")}
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+						activeTab === "commissions"
+							? "border-primary text-primary"
+							: "border-transparent text-content-muted hover:text-content"
+					}`}
+				>
+					Pesanan Komisi ({artistCommissions.length})
+				</button>
+				<button
+					type="button"
 					onClick={() => setActiveTab("following")}
-					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
 						activeTab === "following"
 							? "border-primary text-primary"
 							: "border-transparent text-content-muted hover:text-content"
@@ -437,7 +449,7 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 				<button
 					type="button"
 					onClick={() => setActiveTab("transactions")}
-					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+					className={`px-6 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
 						activeTab === "transactions"
 							? "border-primary text-primary"
 							: "border-transparent text-content-muted hover:text-content"
@@ -449,6 +461,11 @@ export default function ArtistProfile({ user }: ArtistProfileProps) {
 
 			{activeTab === "portfolio" ? (
 				<ArtistPortfolio artworksWithTags={artistArtworks} />
+			) : activeTab === "commissions" ? (
+				<ClientCommissionHistory
+					commissions={artistCommissions}
+					isArtist={true}
+				/>
 			) : activeTab === "following" ? (
 				<section className="space-y-4">
 					{followedArtists.length === 0 ? (
