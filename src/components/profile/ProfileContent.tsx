@@ -13,9 +13,11 @@ export default function ProfileContent() {
 
 	if (!mounted) {
 		return (
-			<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-				<div className="bg-surface border border-content/10 rounded-2xl p-6">
-					<p className="text-sm text-content-muted">Memuat profil...</p>
+			<div className="max-w-5xl mx-auto px-3 sm:px-6 py-5 sm:py-8 w-full">
+				<div className="bg-surface border border-content/10 rounded-2xl p-4 sm:p-6">
+					<p className="text-xs sm:text-sm text-content-muted">
+						Memuat profil...
+					</p>
 				</div>
 			</div>
 		);

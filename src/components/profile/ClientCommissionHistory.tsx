@@ -29,7 +29,7 @@ export default function ClientCommissionHistory({
 	return (
 		<section className="space-y-4">
 			<div className="flex items-center justify-between mb-2">
-				<h2 className="font-heading text-xl font-semibold text-content">
+				<h2 className="font-heading text-lg sm:text-xl font-semibold text-content">
 					{isArtist ? "Pesanan Komisi Masuk" : "Riwayat Komisi"}
 				</h2>
 				<span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-content/5 text-content-muted">
@@ -69,47 +69,47 @@ export default function ClientCommissionHistory({
 									href={`/commissions/${commission.id}`}
 									className="block group"
 								>
-									<article className="bg-surface border border-content/10 rounded-2xl p-4 transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-sm">
-										<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-											<div className="flex items-start gap-3">
+									<article className="bg-surface border border-content/10 rounded-2xl p-3.5 sm:p-4 transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-sm">
+										<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+											<div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
 												<AvatarInitials
 													name={counterpartName}
 													src={counterpartAvatar}
-													className="w-11 h-11 text-sm shrink-0"
+													className="w-10 h-10 sm:w-11 sm:h-11 text-xs sm:text-sm shrink-0"
 												/>
-												<div>
-													<div className="flex flex-wrap items-center gap-2">
-														<h3 className="font-semibold text-content group-hover:text-primary transition-colors">
+												<div className="min-w-0 flex-1">
+													<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+														<h3 className="font-semibold text-sm sm:text-base text-content group-hover:text-primary transition-colors">
 															{commission.commission_title}
 														</h3>
 														<span
-															className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}
+															className={`rounded-full px-2 py-0.5 text-[11px] sm:text-xs font-medium ${status.className}`}
 														>
 															{status.label}
 														</span>
 													</div>
-													<p className="mt-1 text-sm text-content-muted">
+													<p className="mt-0.5 text-xs text-content-muted">
 														{counterpartRole}: {counterpartName}
 													</p>
 													{commission.description && (
-														<p className="mt-2 text-sm text-content-muted leading-relaxed line-clamp-2">
+														<p className="mt-1.5 text-xs text-content-muted leading-relaxed line-clamp-2">
 															{commission.description}
 														</p>
 													)}
 												</div>
 											</div>
 
-											<div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0">
-												<p className="font-display text-lg font-bold text-primary">
+											<div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0 pt-2 sm:pt-0 border-t border-content/5 sm:border-t-0">
+												<p className="font-display text-base sm:text-lg font-bold text-primary">
 													{formatPrice(commission.price)}
 												</p>
-												<p className="text-xs text-content-muted">
+												<p className="text-[11px] sm:text-xs text-content-muted">
 													{formatDate(commission.created_at)}
 												</p>
 											</div>
 										</div>
 
-										<div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+										<div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
 											<Stat
 												icon={CreditCard}
 												label="Pembayaran"

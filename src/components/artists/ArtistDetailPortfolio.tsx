@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import ArtistPortfolio from "@/components/profile/ArtistPortfolio";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { buildArtworkWithRelations } from "@/utils/search";
@@ -20,11 +21,19 @@ export default function ArtistDetailPortfolio({
 
 	if (isLoading) {
 		return (
-			<div className="py-12 text-center text-sm text-content-muted">
-				Memuat portfolio artist...
+			<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center flex flex-col items-center justify-center">
+				<Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin text-primary mb-2" />
+				<p className="text-xs sm:text-sm text-content-muted">
+					Memuat portfolio artist...
+				</p>
 			</div>
 		);
 	}
 
-	return <ArtistPortfolio artworksWithTags={artistArtworks} />;
+	return (
+		<ArtistPortfolio
+			artworksWithTags={artistArtworks}
+			title="Portfolio Artist"
+		/>
+	);
 }

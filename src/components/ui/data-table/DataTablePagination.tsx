@@ -27,20 +27,20 @@ export default function DataTablePagination({
 	const end = Math.min(page * perPage, total);
 
 	return (
-		<div className="flex flex-col gap-3 border-t border-content/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-			<p className="text-sm text-content-muted">
+		<div className="flex flex-col gap-2.5 sm:gap-3 border-t border-content/10 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm">
+			<p className="text-content-muted">
 				Menampilkan {start}-{end} dari {total} {itemLabel}
 			</p>
 
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-				<label className="flex items-center gap-2 text-sm text-content-muted">
-					<span>Per halaman</span>
+			<div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3">
+				<label className="flex items-center gap-1.5 sm:gap-2 text-content-muted">
+					<span className="whitespace-nowrap">Per halaman</span>
 					<select
 						value={perPage}
 						onChange={(event) =>
 							onPerPageChange(Number(event.target.value) as 5 | 10)
 						}
-						className="select select-bordered select-xs text-content font-medium"
+						className="select select-bordered select-xs text-content font-medium h-7 min-h-7 text-xs"
 					>
 						{PAGE_SIZE_OPTIONS.map((size) => (
 							<option key={size} value={size}>
@@ -55,21 +55,23 @@ export default function DataTablePagination({
 						type="button"
 						onClick={() => onPageChange(page - 1)}
 						disabled={page <= 1}
-						className="join-item btn btn-outline btn-xs gap-1"
+						className="join-item btn btn-outline btn-xs gap-1 px-2 sm:px-2.5 h-7 min-h-7"
+						title="Halaman sebelumnya"
 					>
 						<ChevronLeft className="h-3.5 w-3.5" />
-						Sebelumnya
+						<span className="hidden sm:inline">Sebelumnya</span>
 					</button>
-					<span className="join-item btn btn-xs btn-ghost no-animation cursor-default min-w-[72px] text-xs font-medium text-content-muted">
+					<span className="join-item btn btn-xs btn-ghost no-animation cursor-default px-2 min-w-10 sm:min-w-14 text-xs font-medium text-content-muted h-7 min-h-7">
 						{page} / {totalPages}
 					</span>
 					<button
 						type="button"
 						onClick={() => onPageChange(page + 1)}
 						disabled={page >= totalPages}
-						className="join-item btn btn-outline btn-xs gap-1"
+						className="join-item btn btn-outline btn-xs gap-1 px-2 sm:px-2.5 h-7 min-h-7"
+						title="Halaman berikutnya"
 					>
-						Berikutnya
+						<span className="hidden sm:inline">Berikutnya</span>
 						<ChevronRight className="h-3.5 w-3.5" />
 					</button>
 				</div>

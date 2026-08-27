@@ -56,7 +56,7 @@ export default async function ArtistDetailPage({ params }: PageProps) {
 	if (!artist) notFound();
 
 	return (
-		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+		<div className="max-w-5xl mx-auto px-3 sm:px-6 py-5 sm:py-8 space-y-6 sm:space-y-8 w-full">
 			<ArtistDetailHeader artistId={id} />
 
 			<ArtistDetailPortfolio artistId={id} />

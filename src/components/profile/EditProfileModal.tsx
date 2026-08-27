@@ -110,29 +110,27 @@ export default function EditProfileModal({
 					)}
 				</div>
 
-				<div>
-					<label
-						htmlFor="profile-bio"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
-						Bio
-					</label>
-					<Textarea
-						id="profile-bio"
-						rows={4}
-						placeholder={
-							isArtist
-								? "Ceritakan gaya, medium, dan spesialisasi kamu sebagai artist."
-								: "Tulis bio singkat profil kamu di sini."
-						}
-						{...register("bio", {
-							maxLength: { value: 500, message: "Bio maksimal 500 karakter" },
-						})}
-					/>
-					{errors.bio && (
-						<p className="mt-1 text-xs text-danger">{errors.bio.message}</p>
-					)}
-				</div>
+				{isArtist && (
+					<div>
+						<label
+							htmlFor="profile-bio"
+							className="mb-1.5 block text-sm font-semibold text-content"
+						>
+							Bio
+						</label>
+						<Textarea
+							id="profile-bio"
+							rows={4}
+							placeholder="Ceritakan gaya, medium, dan spesialisasi kamu sebagai artist."
+							{...register("bio", {
+								maxLength: { value: 500, message: "Bio maksimal 500 karakter" },
+							})}
+						/>
+						{errors.bio && (
+							<p className="mt-1 text-xs text-danger">{errors.bio.message}</p>
+						)}
+					</div>
+				)}
 
 				{isArtist && (
 					<>
@@ -266,7 +264,7 @@ export default function EditProfileModal({
 				title: isArtist ? "Edit Profil Artist" : "Edit Profil Client",
 				description: isArtist
 					? "Perbarui bio, harga, dan status ketersediaan komisi kamu."
-					: "Perbarui bio dan nama profil kamu.",
+					: "Perbarui nama tampilan akun Anda.",
 				content,
 				maxWidthClassName: "max-w-xl",
 				formClassName: "space-y-4",
