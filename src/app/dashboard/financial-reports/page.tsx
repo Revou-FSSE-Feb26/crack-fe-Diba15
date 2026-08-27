@@ -253,8 +253,8 @@ export default function FinancialReportsPage() {
 				</div>
 			</div>
 
-			{/* KPI Summary Cards */}
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			{/* KPI Summary Cards (2 Rows x 2 Columns) */}
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<Stat
 					variant="card"
 					icon={CircleDollarSign}
