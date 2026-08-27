@@ -54,4 +54,13 @@ export const queryKeys = {
 		followingIds: () => [...queryKeys.social.all, "following-ids"] as const,
 		following: () => [...queryKeys.social.all, "following"] as const,
 	},
+	transactions: {
+		all: ["transactions"] as const,
+		my: () => [...queryKeys.transactions.all, "my"] as const,
+		list: (filters?: Record<string, unknown>) =>
+			[...queryKeys.transactions.all, "list", filters] as const,
+		summary: () => [...queryKeys.transactions.all, "summary"] as const,
+		detail: (id: string) =>
+			[...queryKeys.transactions.all, "detail", id] as const,
+	},
 };

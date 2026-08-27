@@ -40,6 +40,18 @@ export type ReportTargetType = "artwork" | "profile";
 
 export type ReportStatus = "pending" | "resolved" | "dismissed";
 
+export type DisputeStatus = "pending" | "approved" | "rejected";
+
+export type TransactionType =
+	| "topup"
+	| "withdraw"
+	| "payment"
+	| "release"
+	| "refund"
+	| "platform_fee";
+
+export type TransactionStatus = "pending" | "success" | "failed";
+
 export type Theme = "light" | "dark";
 
 // ── Core Entities (Prisma-like Models) ───────────────────────────────────────
@@ -188,6 +200,42 @@ export interface Report {
 		  })
 		| null;
 	reporter?: User | Partial<User> | null;
+}
+
+export interface WalletTransaction {
+	id: string;
+	user_id: string;
+	type: TransactionType;
+	amount: number;
+	title: string;
+	status: TransactionStatus;
+	commission_id?: string | null;
+	metadata?: Record<string, unknown> | null;
+	created_at: string;
+	user?: Pick<User, "id" | "name" | "email" | "role">;
+	commission?: {
+		id: string;
+		commission_title: string;
+		price: number;
+		status: CommissionStatus;
+	};
+}
+
+export interface FinancialSummary {
+	total_gmv: number;
+	escrow_balance: number;
+	platform_fee_revenue: number;
+	total_withdrawals: number;
+	active_commissions_count: number;
+}
+
+export interface TransactionFilterParams {
+	type?: TransactionType;
+	userId?: string;
+	startDate?: string;
+	endDate?: string;
+	page?: number;
+	limit?: number;
 }
 
 // ── Relational / Joined Entities ─────────────────────────────────────────────

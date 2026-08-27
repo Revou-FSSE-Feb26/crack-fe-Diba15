@@ -1,5 +1,11 @@
 import type { LucideIcon } from "lucide-react";
-import { FileWarning, Home, ImageIcon, Users } from "lucide-react";
+import {
+	CircleDollarSign,
+	FileWarning,
+	Home,
+	ImageIcon,
+	Users,
+} from "lucide-react";
 
 export type DashboardMenuItem = {
 	label: string;
@@ -16,6 +22,13 @@ export const adminMenu: DashboardMenuItem[] = [
 		description: "Ringkasan platform",
 		icon: Home,
 		href: "/dashboard",
+		enabled: true,
+	},
+	{
+		label: "Laporan Finansial",
+		description: "Rekap transaksi dan fee platform",
+		icon: CircleDollarSign,
+		href: "/dashboard/financial-reports",
 		enabled: true,
 	},
 	{

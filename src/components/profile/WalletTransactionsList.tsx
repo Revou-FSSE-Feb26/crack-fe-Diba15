@@ -3,22 +3,34 @@
 import {
 	ArrowDownLeft,
 	ArrowUpRight,
+	Loader2,
 	Plus,
 	RefreshCw,
 	Wallet,
 } from "lucide-react";
-import { useTransactionStore } from "@/store/TransactionStore";
+import { useMyTransactions } from "@/hooks/useTransactionQueries";
 import { formatDate, formatPrice } from "@/utils";
 
 interface WalletTransactionsListProps {
-	userId: string;
+	userId?: string;
 }
 
 export default function WalletTransactionsList({
-	userId,
+	userId: _userId,
 }: WalletTransactionsListProps) {
-	const { getTransactionsByUserId } = useTransactionStore();
-	const userTransactions = getTransactionsByUserId(userId);
+	const { data: transactions, isLoading } = useMyTransactions();
+	const userTransactions = transactions || [];
+
+	if (isLoading) {
+		return (
+			<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center flex flex-col items-center justify-center">
+				<Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+				<p className="text-sm text-content-muted">
+					Memuat riwayat transaksi...
+				</p>
+			</div>
+		);
+	}
 
 	if (userTransactions.length === 0) {
 		return (
@@ -28,7 +40,7 @@ export default function WalletTransactionsList({
 					Belum Ada Transaksi
 				</p>
 				<p className="text-sm text-content-muted mt-1">
-					Semua riwayat pengeluaran, pengisian saldo, dan refund komisi akan
+					Semua riwayat pengeluaran, pengisian saldo, dan pencairan komisi akan
 					muncul di sini.
 				</p>
 			</div>
@@ -61,9 +73,9 @@ export default function WalletTransactionsList({
 									<div
 										className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
 											tx.type === "topup"
-												? "bg-verified/10 text-verified"
+												? "bg-success/10 text-success"
 												: tx.type === "refund"
-													? "bg-mint/10 text-verified"
+													? "bg-secondary/10 text-secondary"
 													: tx.type === "release"
 														? "bg-primary/10 text-primary"
 														: "bg-danger/10 text-danger"
@@ -73,6 +85,8 @@ export default function WalletTransactionsList({
 										{tx.type === "refund" && <RefreshCw size={16} />}
 										{tx.type === "release" && <ArrowDownLeft size={18} />}
 										{tx.type === "payment" && <ArrowUpRight size={18} />}
+										{tx.type === "withdraw" && <ArrowUpRight size={18} />}
+										{tx.type === "platform_fee" && <ArrowUpRight size={18} />}
 									</div>
 
 									{/* Detail Title */}
@@ -88,7 +102,9 @@ export default function WalletTransactionsList({
 
 								{/* Amount Text */}
 								<div
-									className={`text-sm font-bold shrink-0 ${isIncoming ? "text-verified" : "text-danger"}`}
+									className={`text-sm font-bold shrink-0 font-mono ${
+										isIncoming ? "text-success" : "text-danger"
+									}`}
 								>
 									{isIncoming ? "+ " : "- "}
 									{formatPrice(tx.amount)}

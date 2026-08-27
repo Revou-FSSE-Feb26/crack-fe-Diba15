@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,9 +15,9 @@ import {
 import { TopUpMethodSelector } from "@/components/wallet/topup/TopUpMethodSelector";
 import { TopUpSummaryCard } from "@/components/wallet/topup/TopUpSummaryCard";
 import { useMounted } from "@/hooks/useMounted";
+import { queryKeys } from "@/lib/queryKeys";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
-import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 import { formatCardNumber, formatCvv, formatExpiry } from "@/utils/payments";
@@ -29,6 +30,7 @@ export function TopUpContent() {
 	const redirectUrl = searchParams.get("redirect") || "/profile";
 
 	const mounted = useMounted();
+	const queryClient = useQueryClient();
 	const { user, isAuthenticated } = useUserStore();
 	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
@@ -116,18 +118,9 @@ export function TopUpContent() {
 				return;
 			}
 
-			// Catat mutasi di transaction store
-			const methodTitle =
-				paymentMethod === "cc"
-					? "Top Up E-Wallet via Kartu Kredit"
-					: `Top Up E-Wallet via ${selectedVa}`;
-
-			useTransactionStore.getState().addTransaction({
-				user_id: user.id,
-				type: "topup",
-				amount: activeAmount,
-				title: methodTitle,
-			});
+			// Invalidate queries agar mutasi dompet dan saldo real-time terupdate
+			queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
 
 			addToast({
 				message: `Berhasil Top Up ${formatPrice(activeAmount)}. Saldo Anda telah diperbarui.`,

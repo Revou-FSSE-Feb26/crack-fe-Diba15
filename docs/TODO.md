@@ -29,7 +29,7 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
 [x] TODO 12: Menerapkan Prinsip SOLID, KISS, dan DRY pada BE (Selesai - Auth Isolation, Repositories Interfaces, Logger & Maintenance Middlewares, Swagger OpenAPI Docs & Unit Tests 100% Passing).
 [x] TODO 12 (FE): Menerapkan Prinsip SOLID, KISS, dan DRY pada FE (Selesai - Full 117 Files Audit, Zero Hardcoded Palette, Clean Proxy Guard, & Architecture Checklist 100%).
 
-[ ] TODO 13: Integrasi Backend & Halaman Laporan Finansial Platform (`/dashboard/financial-reports` & `WalletTransaction`)
+[x] TODO 13: Integrasi Backend & Halaman Laporan Finansial Platform (`/dashboard/financial-reports` & `WalletTransaction`) (Selesai - Prisma Model, NestJS Module 100% Spec Pass, TanStack Query Hook, & Interactive Financial Reports Page with Export CSV & Print).
   - **Backend**: Buat model Prisma `WalletTransaction` (id, userId, type: topup/withdraw/payment/release/refund/fee, amount, title, status, metadata, createdAt) & repository/service/controller.
   - **Backend**: Endpoint REST API `/api/transactions` untuk mutasi user pribadi dan rekap transaksi global admin.
   - **Frontend**: Migrasi `TransactionStore` (localStorage) ke TanStack Query hook (`useTransactionQueries`).

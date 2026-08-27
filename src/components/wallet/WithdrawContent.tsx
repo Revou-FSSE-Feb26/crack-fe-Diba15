@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -19,15 +20,16 @@ import {
 } from "@/components/wallet/withdraw/WithdrawDestinationForm";
 import { WithdrawSummaryCard } from "@/components/wallet/withdraw/WithdrawSummaryCard";
 import { useMounted } from "@/hooks/useMounted";
+import { queryKeys } from "@/lib/queryKeys";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
-import { useTransactionStore } from "@/store/TransactionStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 
 export function WithdrawContent() {
 	const router = useRouter();
 	const mounted = useMounted();
+	const queryClient = useQueryClient();
 	const { user, isAuthenticated, isArtist } = useUserStore();
 	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
@@ -115,13 +117,11 @@ export function WithdrawContent() {
 						return;
 					}
 
-					// Catat transaksi mutasi di store
-					useTransactionStore.getState().addTransaction({
-						user_id: user.id,
-						type: "withdraw",
-						amount: Number(values.amount),
-						title: `Pencairan Dana ke ${values.bankName} (${values.accountNumber})`,
+					// Invalidate queries agar mutasi dompet dan saldo real-time terupdate
+					queryClient.invalidateQueries({
+						queryKey: queryKeys.transactions.all,
 					});
+					queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
 
 					addToast({
 						message: res.message,
