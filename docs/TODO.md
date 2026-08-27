@@ -27,16 +27,22 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
 [x] TODO 11: Profile artist dan client masih ada beberapa yang belum dinamis data yang ditampilkan. (Selesai) 
 
 [x] TODO 12: Menerapkan Prinsip SOLID, KISS, dan DRY pada BE (Selesai - Auth Isolation, Repositories Interfaces, Logger & Maintenance Middlewares, Swagger OpenAPI Docs & Unit Tests 100% Passing).
-[ ] TODO 12 (FE): Menerapkan Prinsip SOLID, KISS, dan DRY pada FE (On Progress - Evaluasi & Refactoring Modul per Modul).
+[x] TODO 12 (FE): Menerapkan Prinsip SOLID, KISS, dan DRY pada FE (Selesai - Full 117 Files Audit, Zero Hardcoded Palette, Clean Proxy Guard, & Architecture Checklist 100%).
 
-[ ] TODO 13: Halaman Laporan Finansial & Audit Transaksi Platform (`/dashboard/financial-reports`)
-  - Tabel rekapitulasi buku kas platform (rincian ID pesanan komisi, harga transaksi, potongan platform fee 5%, net payout artis, dan status pembayaran).
-  - Monitoring perputaran saldo escrow dan riwayat penarikan dana (*withdraw*).
-  - Filter periode (bulan/rentang tanggal) dan fitur Export Laporan (*CSV / Print Summary*).
+[ ] TODO 13: Integrasi Backend & Halaman Laporan Finansial Platform (`/dashboard/financial-reports` & `WalletTransaction`)
+  - **Backend**: Buat model Prisma `WalletTransaction` (id, userId, type: topup/withdraw/payment/release/refund/fee, amount, title, status, metadata, createdAt) & repository/service/controller.
+  - **Backend**: Endpoint REST API `/api/transactions` untuk mutasi user pribadi dan rekap transaksi global admin.
+  - **Frontend**: Migrasi `TransactionStore` (localStorage) ke TanStack Query hook (`useTransactionQueries`).
+  - **Frontend**: Tabel rekapitulasi buku kas platform (rincian ID komisi, GMV, platform fee 5%, net payout artis, dan status pembayaran).
+  - **Frontend**: Monitoring perputaran saldo escrow dan riwayat penarikan dana (*withdraw*).
+  - **Frontend**: Filter periode (bulan/rentang tanggal) dan fitur Export Laporan (*CSV / Print Summary*).
 
-[ ] TODO 14: Halaman Log Audit & Riwayat Aktivitas Moderasi (`/dashboard/audit-logs`)
-  - Rekam jejak kronologis tindakan moderasi (kurasi karya, resolusi sengketa komisi, pembekuan/pemulihan akun user).
-  - Transparansi dan akuntabilitas keputusan moderator/kurator.
+[ ] TODO 14: Integrasi Backend & Halaman Log Audit Moderasi / Banding Akun (`/dashboard/audit-logs` & `Appeal`)
+  - **Backend**: Buat model Prisma `Appeal` (id, artistId, reason, status: pending/approved/rejected, resolvedById, resolutionNotes, createdAt, updatedAt).
+  - **Backend**: Endpoint REST API `/api/appeals` (pengajuan banding artis, peninjauan & approve/reject oleh admin).
+  - **Frontend**: Migrasi `AppealStore` (localStorage) ke TanStack Query hook (`useAppealQueries`).
+  - **Frontend**: Rekam jejak kronologis tindakan moderasi (kurasi karya, resolusi sengketa komisi, pembekuan/pemulihan akun user).
+  - **Frontend**: Transparansi dan akuntabilitas keputusan moderator/kurator.
 
 [ ] TODO 15: Halaman Laporan Kinerja Moderasi & Metrik Kurator (`/dashboard/curator-performance`)
   - SLA & rata-rata waktu respons kurasi karya anti-AI.
