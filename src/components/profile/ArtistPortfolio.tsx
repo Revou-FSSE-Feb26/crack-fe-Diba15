@@ -35,9 +35,9 @@ export default function ArtistPortfolio({
 						<Link
 							key={artwork.id}
 							href={`/detail/${artwork.id}`}
-							className="group bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-200"
+							className="group bg-surface border border-content/10 rounded-2xl overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-200"
 						>
-							<div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+							<div className="relative aspect-4/3 bg-content/5 overflow-hidden">
 								{artwork.images_url[0] ? (
 									<Image
 										src={artwork.images_url[0]}

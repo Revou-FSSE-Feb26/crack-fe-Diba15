@@ -39,14 +39,14 @@ export default function ArtistDetailHeader({
 	if (isLoading) {
 		return (
 			<div className="flex flex-col gap-6">
-				<div className="h-6 w-20 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
-				<div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+				<div className="h-6 w-20 rounded bg-content/10 animate-pulse" />
+				<div className="flex-1 bg-surface border border-content/10 rounded-2xl p-6">
 					<div className="flex items-start gap-4">
-						<div className="w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse shrink-0" />
+						<div className="w-20 h-20 rounded-full bg-content/10 animate-pulse shrink-0" />
 						<div className="flex-1 space-y-3">
-							<div className="h-7 w-48 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
-							<div className="h-4 w-32 rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
-							<div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-700 animate-pulse" />
+							<div className="h-7 w-48 rounded bg-content/10 animate-pulse" />
+							<div className="h-4 w-32 rounded bg-content/10 animate-pulse" />
+							<div className="h-4 w-full rounded bg-content/10 animate-pulse" />
 						</div>
 					</div>
 				</div>
@@ -74,7 +74,7 @@ export default function ArtistDetailHeader({
 				Kembali
 			</button>
 
-			<div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+			<div className="flex-1 bg-surface border border-content/10 rounded-2xl p-6">
 				<div className="flex items-start gap-4">
 					<AvatarInitials
 						name={artist.user.name}
@@ -99,7 +99,7 @@ export default function ArtistDetailHeader({
 									onClick={handleFollowToggle}
 									className={`group px-3.5 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1.5 ${
 										isArtistFollowed
-											? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+											? "bg-content/5 border-content/10 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
 											: "bg-primary border-primary text-white font-semibold hover:bg-primary-hover shadow-sm"
 									}`}
 								>
@@ -175,7 +175,7 @@ export default function ArtistDetailHeader({
 			</div>
 
 			<div className="w-full">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-5 sticky top-24 space-y-4">
+				<div className="bg-surface border border-content/10 rounded-2xl p-5 sticky top-24 space-y-4">
 					<h2 className="font-heading font-semibold text-content">
 						Pesan Komisi
 					</h2>
@@ -209,7 +209,7 @@ export default function ArtistDetailHeader({
 						</div>
 					</div>
 
-					<hr className="border-slate-200 dark:border-slate-700" />
+					<hr className="border-content/10" />
 
 					{artist.is_verified ? (
 						artist.is_open_for_commission ? (

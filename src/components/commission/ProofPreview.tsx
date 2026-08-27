@@ -33,8 +33,8 @@ export default function ProofPreview({
 	};
 
 	return (
-		<div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-surface">
-			<div className="flex items-center justify-between px-3 py-2 border-b border-slate-100 dark:border-slate-800">
+		<div className="rounded-xl border border-content/10 overflow-hidden bg-surface">
+			<div className="flex items-center justify-between px-3 py-2 border-b border-content/10">
 				<p className="text-sm font-medium text-content">{title}</p>
 				<span className="text-xs text-content-muted">
 					{isVideo ? "Video WIP" : "Pratinjau Terproteksi"}

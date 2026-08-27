@@ -74,7 +74,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 	};
 
 	return (
-		<aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">
+		<aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-content/10 bg-surface p-4 text-content transition-colors duration-300">
 			{/* Bagian Atas: Logo & Navigasi */}
 			<div>
 				<div className="mb-6 flex items-center justify-between gap-2">
@@ -84,7 +84,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 						onClick={onClose}
 						title="Close sidebar"
 						aria-label="Close sidebar"
-						className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+						className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer"
 					>
 						<PanelLeftClose className="h-6 w-6 text-primary" />
 					</button>
@@ -127,7 +127,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 							<button
 								type="button"
 								onClick={() => setProfileMenuOpen((prev) => !prev)}
-								className="w-full flex items-center justify-between gap-3 rounded-full border border-slate-200/70 dark:border-slate-700/60 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+								className="w-full flex items-center justify-between gap-3 rounded-full border border-content/10 px-4 py-2 hover:bg-content/5 cursor-pointer"
 							>
 								<div className="flex items-center gap-2">
 									<AvatarInitials
@@ -184,7 +184,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 					<button
 						type="button"
 						onClick={toggleTheme}
-						className="group mb-4 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+						className="group mb-4 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-content/5"
 					>
 						<div className="flex items-center gap-3">
 							{theme === "dark" ? (
@@ -197,7 +197,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 							</span>
 						</div>
 						{/* Indikator Switch Mini */}
-						<div className="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-300 transition-colors dark:bg-slate-600">
+						<div className="relative inline-flex h-5 w-9 items-center rounded-full bg-content/20 transition-colors">
 							<span
 								className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ${
 									theme === "dark" ? "translate-x-4.5" : "translate-x-1"
@@ -207,7 +207,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 					</button>
 				)}
 
-				<footer className="border-t border-slate-200/70 pt-4 text-sm text-content-muted dark:border-slate-700/60">
+				<footer className="border-t border-content/10 pt-4 text-sm text-content-muted">
 					<div className="mb-3 flex flex-wrap gap-2 text-xs max-w-50">
 						<Link
 							href="/help"

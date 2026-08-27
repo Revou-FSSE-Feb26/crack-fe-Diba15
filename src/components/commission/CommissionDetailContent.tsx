@@ -43,7 +43,7 @@ const paymentStatusConfig: Record<
 > = {
 	unpaid: {
 		label: "Belum Dibayar",
-		className: "bg-slate-500/10 text-slate-500 border-slate-500/30",
+		className: "bg-content/5 text-content-muted border-content/20",
 	},
 	paid: {
 		label: "Escrow Aktif",
@@ -91,7 +91,7 @@ export function CommissionDetailContent({
 	if (!isAuthenticated || !user) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<Briefcase className="w-10 h-10 text-primary mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Login untuk melihat detail commission
@@ -108,7 +108,7 @@ export function CommissionDetailContent({
 	if (!commission) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<Briefcase className="w-10 h-10 text-content-muted mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Commission tidak ditemukan
@@ -136,7 +136,7 @@ export function CommissionDetailContent({
 	if (!hasAccess) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<AlertTriangle className="w-10 h-10 text-danger mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Kamu tidak punya akses
@@ -225,7 +225,7 @@ export function CommissionDetailContent({
 				Kembali ke list commission
 			</Link>
 
-			<article className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 xs:p-4 sm:p-5">
+			<article className="bg-surface border border-content/10 rounded-2xl p-3.5 xs:p-4 sm:p-5">
 				<div className="flex flex-col gap-4 w-full">
 					{/* Header */}
 					<div className="flex items-start gap-2.5 sm:gap-3 min-w-0 w-full">

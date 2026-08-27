@@ -137,7 +137,7 @@ export default function ClientProfile({
 			/>
 
 			<div className="flex flex-col lg:flex-row gap-6">
-				<div className="flex-1 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+				<div className="flex-1 bg-surface border border-content/10 rounded-2xl p-6">
 					<div className="flex items-start gap-4">
 						<div className="relative group cursor-pointer shrink-0">
 							<AvatarInitials
@@ -203,7 +203,7 @@ export default function ClientProfile({
 				</div>
 
 				<aside className="lg:w-72 shrink-0">
-					<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-5 sticky top-24 space-y-4">
+					<div className="bg-surface border border-content/10 rounded-2xl p-5 sticky top-24 space-y-4">
 						<h2 className="font-heading font-semibold text-content">
 							Ringkasan Client
 						</h2>
@@ -248,7 +248,7 @@ export default function ClientProfile({
 							</Link>
 						</div>
 
-						<hr className="border-slate-200 dark:border-slate-700" />
+						<hr className="border-content/10" />
 						<Button
 							className="w-full text-sm justify-center"
 							onClick={() => setIsEditOpen(true)}

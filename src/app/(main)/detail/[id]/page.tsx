@@ -158,7 +158,7 @@ export default function Detail() {
 						)}
 
 						{artwork.wip_proof_url && (
-							<div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-surface">
+							<div className="rounded-xl border border-content/10 overflow-hidden bg-surface">
 								<button
 									type="button"
 									onClick={() => setShowWip((prev: boolean) => !prev)}

@@ -15,7 +15,7 @@ export default function StaffProfile({ user }: StaffProfileProps) {
 				title="Akun internal TruBrush"
 				description="Role admin dan curator memiliki akses operasional yang berbeda dari artist dan client."
 			/>
-			<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+			<div className="bg-surface border border-content/10 rounded-2xl p-6">
 				<div className="flex items-start gap-4">
 					<AvatarInitials
 						name={user.name}

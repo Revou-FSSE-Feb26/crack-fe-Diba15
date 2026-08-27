@@ -29,7 +29,7 @@ export default function CommissionRevisionLogs({
 	};
 
 	return (
-		<div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+		<div className="rounded-xl border border-content/10 p-3">
 			<div className="flex items-center gap-2 mb-3">
 				<MessageSquare className="w-4 h-4 text-primary" />
 				<p className="font-medium text-sm text-content">Komentar dan revisi</p>
@@ -61,7 +61,7 @@ export default function CommissionRevisionLogs({
 					value={comment}
 					onChange={(event) => setComment(event.target.value)}
 					placeholder="Tulis komentar, negosiasi harga, atau balasan..."
-					className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-background px-3 py-2 text-sm outline-none focus:border-primary dark:border-slate-700"
+					className="min-w-0 flex-1 rounded-lg border border-content/10 bg-background px-3 py-2 text-sm outline-none focus:border-primary"
 				/>
 				<Button type="submit" className="justify-center text-sm">
 					Kirim

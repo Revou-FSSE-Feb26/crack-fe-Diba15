@@ -186,7 +186,7 @@ export default function HelpPage() {
 					<input
 						type="text"
 						placeholder="Cari pertanyaan, topik, atau panduan..."
-						className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface text-content placeholder:text-content-muted focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+						className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-content/10 bg-surface text-content placeholder:text-content-muted focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
 					/>
 				</div>
 			</div>
@@ -197,7 +197,7 @@ export default function HelpPage() {
 					<Link
 						key={title}
 						href={href}
-						className="group flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+						className="group flex flex-col rounded-2xl border border-content/10 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
 					>
 						<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 shrink-0">
 							<Icon className="w-5 h-5 text-primary" />
@@ -237,7 +237,7 @@ export default function HelpPage() {
 							</div>
 
 							{/* FAQ items */}
-							<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface divide-y divide-slate-200 dark:divide-slate-700 overflow-hidden">
+							<div className="rounded-2xl border border-content/10 bg-surface divide-y divide-content/10 overflow-hidden">
 								{category.faqs.map((faq) => {
 									return (
 										<details key={faq.q} className="group px-5">
@@ -280,7 +280,7 @@ export default function HelpPage() {
 						</p>
 					</div>
 
-					<div className="flex items-center gap-2 text-sm text-content-muted bg-surface rounded-xl px-4 py-2.5 border border-slate-200 dark:border-slate-700 shrink-0">
+					<div className="flex items-center gap-2 text-sm text-content-muted bg-surface rounded-xl px-4 py-2.5 border border-content/10 shrink-0">
 						<Clock className="w-4 h-4 text-accent" />
 						<span>
 							Respons <strong className="text-content">1–2 hari kerja</strong>

@@ -108,7 +108,7 @@ const sections: Section[] = [
 					dalam kondisi terbatas berikut:
 				</p>
 				<div className="space-y-4">
-					<div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+					<div className="rounded-xl border border-content/10 p-4">
 						<p className="font-semibold text-content mb-1">
 							Penyedia Layanan Pembayaran
 						</p>
@@ -117,14 +117,14 @@ const sections: Section[] = [
 							pembayaran escrow. Mereka tunduk pada standar keamanan PCI-DSS.
 						</p>
 					</div>
-					<div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+					<div className="rounded-xl border border-content/10 p-4">
 						<p className="font-semibold text-content mb-1">Kewajiban Hukum</p>
 						<p className="text-sm text-content-muted">
 							Kami dapat mengungkapkan data jika diwajibkan oleh hukum, perintah
 							pengadilan, atau otoritas berwenang di Indonesia.
 						</p>
 					</div>
-					<div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+					<div className="rounded-xl border border-content/10 p-4">
 						<p className="font-semibold text-content mb-1">
 							Profil Publik Artis
 						</p>
@@ -182,32 +182,32 @@ const sections: Section[] = [
 				<div className="overflow-x-auto">
 					<table className="w-full text-sm">
 						<thead>
-							<tr className="border-b border-slate-200 dark:border-slate-700">
+							<tr className="border-b border-content/10">
 								<th className="text-left py-2 pr-4 font-semibold text-content">
 									Jenis
 								</th>
 								<th className="text-left py-2 pr-4 font-semibold text-content">
 									Tujuan
 								</th>
-								<th className="text-left py-2 font-semibold text-content">
+								<th className="text-left py-2 pr-4 font-semibold text-content">
 									Durasi
 								</th>
 							</tr>
 						</thead>
 						<tbody className="text-content-muted">
-							<tr className="border-b border-slate-100 dark:border-slate-800">
+							<tr className="border-b border-content/5">
 								<td className="py-2.5 pr-4">Access Token</td>
 								<td className="py-2.5 pr-4">Autentikasi sesi login</td>
 								<td className="py-2.5">1 jam</td>
 							</tr>
-							<tr className="border-b border-slate-100 dark:border-slate-800">
+							<tr className="border-b border-content/5">
 								<td className="py-2.5 pr-4">Refresh Token</td>
 								<td className="py-2.5 pr-4">
 									Memperbarui sesi secara otomatis
 								</td>
 								<td className="py-2.5">7 hari</td>
 							</tr>
-							<tr className="border-b border-slate-100 dark:border-slate-800">
+							<tr className="border-b border-content/5">
 								<td className="py-2.5 pr-4">Preferensi Tema</td>
 								<td className="py-2.5 pr-4">
 									Menyimpan pilihan dark/light mode
@@ -298,7 +298,7 @@ const sections: Section[] = [
 					Jika Anda memiliki pertanyaan, kekhawatiran, atau permintaan terkait
 					kebijakan privasi ini, silakan hubungi:
 				</p>
-				<div className="rounded-xl border border-slate-200 dark:border-slate-700 p-5 space-y-2">
+				<div className="rounded-xl border border-content/10 p-5 space-y-2">
 					<p className="font-semibold text-content font-heading text-lg">
 						TruBrush Privacy Team
 					</p>
@@ -371,7 +371,7 @@ export default function PrivacyPage() {
 			</div>
 
 			{/* Daftar Isi */}
-			<nav className="mb-10 rounded-2xl bg-surface border border-slate-200 dark:border-slate-700 p-5">
+			<nav className="mb-10 rounded-2xl bg-surface border border-content/10 p-5">
 				<p className="font-semibold text-content mb-3 text-sm uppercase tracking-wide">
 					Daftar Isi
 				</p>
@@ -415,7 +415,7 @@ export default function PrivacyPage() {
 			</div>
 
 			{/* Divider */}
-			<hr className="my-12 border-slate-200 dark:border-slate-700" />
+			<hr className="my-12 border-content/10" />
 
 			{/* Footer note */}
 			<p className="text-center text-sm text-content-muted">

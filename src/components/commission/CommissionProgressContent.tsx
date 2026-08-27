@@ -40,7 +40,7 @@ export default function CommissionProgressContent() {
 	if (!isAuthenticated || !user) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<Briefcase className="w-10 h-10 text-primary mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Login untuk melihat commission
@@ -73,7 +73,7 @@ export default function CommissionProgressContent() {
 			</div>
 
 			{visibleCommissions.length === 0 ? (
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center">
 					<Briefcase className="w-10 h-10 text-content-muted mx-auto mb-3" />
 					<p className="font-semibold text-content">Belum ada commission</p>
 					<p className="mt-1 text-sm text-content-muted">
@@ -96,7 +96,7 @@ export default function CommissionProgressContent() {
 						return (
 							<article
 								key={commission.id}
-								className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5"
+								className="bg-surface border border-content/10 rounded-2xl p-4 sm:p-5"
 							>
 								<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 									<div className="flex items-start gap-3 min-w-0">

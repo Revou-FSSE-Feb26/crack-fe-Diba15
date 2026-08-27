@@ -47,7 +47,7 @@ export default function ClientCommissionHistory({
 								href={`/commissions/${commission.id}`}
 								className="block group"
 							>
-								<article className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-4 transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-sm">
+								<article className="bg-surface border border-content/10 rounded-2xl p-4 transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-sm">
 									<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 										<div className="flex items-start gap-3">
 											<AvatarInitials

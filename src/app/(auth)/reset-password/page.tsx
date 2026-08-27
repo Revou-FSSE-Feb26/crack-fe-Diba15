@@ -179,7 +179,7 @@ export default function ResetPasswordPage() {
 				<div className="deco-dot-mint"></div>
 			</div>
 
-			<div className="w-full max-w-md bg-surface border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+			<div className="w-full max-w-md bg-surface border border-content/10 rounded-2xl p-8 shadow-sm">
 				<h1 className="text-2xl font-bold font-display text-content mb-2">
 					Reset Password
 				</h1>

@@ -35,8 +35,8 @@ export function proxy(request: NextRequest) {
 		}
 	}
 
-	// Otorisasi rute autentikasi khusus tamu / guest (/login, /register)
-	if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+	// Otorisasi rute autentikasi khusus tamu / guest (/login, /signup)
+	if (pathname.startsWith("/login") || pathname.startsWith("/signup")) {
 		if (refreshToken) {
 			return NextResponse.redirect(new URL("/", request.url));
 		}
@@ -45,7 +45,7 @@ export function proxy(request: NextRequest) {
 	return NextResponse.next();
 }
 
-// Konfigurasi matcher tetap sama seperti sebelumnya
+// Konfigurasi matcher
 export const config = {
-	matcher: ["/dashboard/:path*", "/post-art", "/login", "/register"],
+	matcher: ["/dashboard/:path*", "/post-art", "/login", "/signup"],
 };

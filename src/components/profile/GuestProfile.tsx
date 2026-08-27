@@ -5,7 +5,7 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 export default function GuestProfile() {
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-			<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+			<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 				<AvatarInitials
 					name="Guest User"
 					className="w-20 h-20 text-2xl mx-auto"

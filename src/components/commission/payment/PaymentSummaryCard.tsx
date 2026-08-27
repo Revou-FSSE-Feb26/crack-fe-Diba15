@@ -32,7 +32,7 @@ export function PaymentSummaryCard({
 				Ringkasan Pesanan
 			</h2>
 
-			<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-5 shadow-sm">
+			<div className="bg-surface border border-content/10 rounded-2xl p-5 space-y-5 shadow-sm">
 				{/* Item info */}
 				<div className="flex items-start gap-3 pb-4 border-b border-content/10">
 					<AvatarInitials

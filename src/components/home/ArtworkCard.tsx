@@ -199,7 +199,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							onClick={handleFollowToggle}
 							className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
 								isArtistFollowed
-									? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+									? "bg-content/5 border-content/10 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
 									: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
 							}`}
 						>

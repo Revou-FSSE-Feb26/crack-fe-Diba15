@@ -74,7 +74,7 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 					onClick={onMenuToggle}
 					title="Open sidebar"
 					aria-label="Toggle sidebar"
-					className="hidden md:inline-flex rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer shrink-0"
+					className="hidden md:inline-flex rounded-full p-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer shrink-0"
 				>
 					<PanelLeftOpen className="w-6 h-6 text-primary" />
 				</button>
@@ -113,7 +113,7 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 						onClick={onSearchOpen}
 						title="Open search"
 						aria-label="Open search"
-						className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer shrink-0"
+						className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer shrink-0"
 					>
 						<Search className="w-5 h-5 text-primary" />
 					</button>
@@ -177,7 +177,7 @@ export default function Navbar({ onMenuToggle, onSearchOpen }: NavbarProps) {
 						<Link
 							href="/login"
 							title="Login Button"
-							className="hidden md:flex rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+							className="hidden md:flex rounded-full p-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer"
 						>
 							<LogIn className="w-6 h-6 text-primary" />
 						</Link>

@@ -75,7 +75,7 @@ function PreviewPanel({
 					</Link>
 				)}
 			</div>
-			<div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+			<div className="relative aspect-video overflow-hidden rounded-lg bg-content/5">
 				{src ? (
 					<Image
 						src={src}
