@@ -42,6 +42,8 @@ export type ReportStatus = "pending" | "resolved" | "dismissed";
 
 export type DisputeStatus = "pending" | "approved" | "rejected";
 
+export type AppealStatus = "pending" | "approved" | "rejected";
+
 export type TransactionType =
 	| "topup"
 	| "withdraw"
@@ -232,6 +234,97 @@ export interface FinancialSummary {
 export interface TransactionFilterParams {
 	type?: TransactionType;
 	userId?: string;
+	startDate?: string;
+	endDate?: string;
+	page?: number;
+	limit?: number;
+}
+
+export interface Appeal {
+	id: string;
+	artist_id?: string;
+	artistId?: string;
+	reason: string;
+	status: AppealStatus;
+	resolved_by_id?: string | null;
+	resolvedById?: string | null;
+	resolution_notes?: string | null;
+	resolutionNotes?: string | null;
+	created_at?: string;
+	createdAt?: string;
+	updated_at?: string;
+	updatedAt?: string;
+	artist?: {
+		id: string;
+		name: string;
+		email: string;
+		role: string;
+		profile?: {
+			strike_count?: number;
+			strikeCount?: number;
+			is_verified?: boolean;
+			isVerified?: boolean;
+			avatar_url?: string | null;
+			avatarUrl?: string | null;
+		};
+	};
+	resolved_by?: {
+		id: string;
+		name: string;
+		email: string;
+		role: string;
+	} | null;
+	resolvedBy?: {
+		id: string;
+		name: string;
+		email: string;
+		role: string;
+	} | null;
+}
+
+export interface CreateAppealDto {
+	reason: string;
+}
+
+export interface ResolveAppealDto {
+	approved: boolean;
+	resolution_notes?: string;
+}
+
+export type AuditLogCategory =
+	| "all"
+	| "curation"
+	| "report"
+	| "dispute"
+	| "appeal";
+
+export interface AuditLogActor {
+	id: string;
+	name: string;
+	email: string;
+	role: string;
+}
+
+export interface AuditLogItem {
+	id: string;
+	category: "curation" | "report" | "dispute" | "appeal";
+	action: string;
+	actor: AuditLogActor;
+	target_type?: string;
+	targetType?: string;
+	target_id?: string;
+	targetId?: string;
+	target_title?: string | null;
+	targetTitle?: string | null;
+	details?: string | null;
+	status: string;
+	created_at?: string;
+	createdAt?: string;
+}
+
+export interface AuditLogFilterParams {
+	category?: AuditLogCategory;
+	search?: string;
 	startDate?: string;
 	endDate?: string;
 	page?: number;

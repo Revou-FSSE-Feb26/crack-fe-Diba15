@@ -63,4 +63,16 @@ export const queryKeys = {
 		detail: (id: string) =>
 			[...queryKeys.transactions.all, "detail", id] as const,
 	},
+	appeals: {
+		all: ["appeals"] as const,
+		my: () => [...queryKeys.appeals.all, "my"] as const,
+		list: (status?: string) =>
+			[...queryKeys.appeals.all, "list", status] as const,
+		detail: (id: string) => [...queryKeys.appeals.all, "detail", id] as const,
+	},
+	auditLogs: {
+		all: ["audit-logs"] as const,
+		list: (filters?: Record<string, unknown>) =>
+			[...queryKeys.auditLogs.all, "list", filters] as const,
+	},
 };

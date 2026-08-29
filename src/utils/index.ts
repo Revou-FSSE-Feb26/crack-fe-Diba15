@@ -16,28 +16,41 @@ export function formatPrice(price: number | null): string {
 	}).format(price);
 }
 
-export function formatDate(date: string | Date) {
-	return new Date(date).toLocaleDateString("id-ID", {
+export function formatDate(date: string | Date | null | undefined): string {
+	if (!date) return "—";
+	const d = new Date(date);
+	if (Number.isNaN(d.getTime())) return "—";
+	return d.toLocaleDateString("id-ID", {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
 	});
 }
 
-export function formatShortDate(value: string | Date): string {
+export function formatShortDate(
+	value: string | Date | null | undefined,
+): string {
+	if (!value) return "—";
+	const d = new Date(value);
+	if (Number.isNaN(d.getTime())) return "—";
 	return new Intl.DateTimeFormat("id-ID", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
-	}).format(new Date(value));
+	}).format(d);
 }
 
-export function formatDateTime(value: string | Date): string {
+export function formatDateTime(
+	value: string | Date | null | undefined,
+): string {
+	if (!value) return "—";
+	const d = new Date(value);
+	if (Number.isNaN(d.getTime())) return "—";
 	return new Intl.DateTimeFormat("id-ID", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
 		hour: "2-digit",
 		minute: "2-digit",
-	}).format(new Date(value));
+	}).format(d);
 }

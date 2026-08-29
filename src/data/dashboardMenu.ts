@@ -4,6 +4,7 @@ import {
 	FileWarning,
 	Home,
 	ImageIcon,
+	ShieldCheck,
 	Users,
 } from "lucide-react";
 
@@ -36,6 +37,13 @@ export const adminMenu: DashboardMenuItem[] = [
 		description: "Kelola role dan status user",
 		icon: Users,
 		href: "/dashboard/manage-users",
+		enabled: true,
+	},
+	{
+		label: "Log Audit Moderasi",
+		description: "Rekam jejak kurasi, sengketa & banding",
+		icon: ShieldCheck,
+		href: "/dashboard/audit-logs",
 		enabled: true,
 	},
 ];

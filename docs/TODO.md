@@ -37,11 +37,12 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
   - **Frontend**: Monitoring perputaran saldo escrow dan riwayat penarikan dana (*withdraw*).
   - **Frontend**: Filter periode (bulan/rentang tanggal) dan fitur Export Laporan (*CSV / Print Summary*).
 
-[ ] TODO 14: Integrasi Backend & Halaman Log Audit Moderasi / Banding Akun (`/dashboard/audit-logs` & `Appeal`)
+[x] TODO 14: Integrasi Backend & Halaman Log Audit Moderasi / Banding Akun (`/dashboard/audit-logs` & `Appeal`) (Selesai - Prisma Appeal Model, AppealsModule & AuditLogsModule 100% Spec Pass, TanStack Query Hook useAppealQueries, & Interactive Audit Logs Page with Export CSV & Print).
   - **Backend**: Buat model Prisma `Appeal` (id, artistId, reason, status: pending/approved/rejected, resolvedById, resolutionNotes, createdAt, updatedAt).
-  - **Backend**: Endpoint REST API `/api/appeals` (pengajuan banding artis, peninjauan & approve/reject oleh admin).
+  - **Backend**: Endpoint REST API `/api/appeals` (pengajuan banding artis, peninjauan & approve/reject oleh admin, pemulihan akun & reset strike count).
+  - **Backend**: Endpoint REST API `/api/audit-logs` (agregasi rekam jejak kronologis kurasi karya, penindakan laporan, mediasi dispute, dan banding akun).
   - **Frontend**: Migrasi `AppealStore` (localStorage) ke TanStack Query hook (`useAppealQueries`).
-  - **Frontend**: Rekam jejak kronologis tindakan moderasi (kurasi karya, resolusi sengketa komisi, pembekuan/pemulihan akun user).
+  - **Frontend**: Halaman `/dashboard/audit-logs` dengan filter kategori, pencarian staf/subjek, preset tanggal, ekspor CSV, dan print summary.
   - **Frontend**: Transparansi dan akuntabilitas keputusan moderator/kurator.
 
 [ ] TODO 15: Halaman Laporan Kinerja Moderasi & Metrik Kurator (`/dashboard/curator-performance`)
