@@ -111,6 +111,15 @@ export interface Artwork {
 export interface Tag {
 	id: string;
 	tag_name: string;
+	count?: number;
+}
+
+export interface CreateTagDto {
+	tagName: string;
+}
+
+export interface UpdateTagDto {
+	tagName: string;
 }
 
 export interface ArtworkTag {

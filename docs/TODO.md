@@ -49,9 +49,9 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
   - SLA & rata-rata waktu respons kurasi karya anti-AI.
   - Distribusi beban kerja antar kurator dan rasio persetujuan vs penolakan karya.
 
-[ ] TODO 16: Halaman Manajemen Tag & Katalog Karya Global (`/dashboard/manage-tags`)
-  - Master tag & pembersihan tag duplikat/spam.
-  - Fitur *takedown* karya terpublikasi yang bermasalah secara sentral.
+[x] TODO 16: Halaman Manajemen Tag & Katalog Karya Global (`/dashboard/manage-tags`) (Selesai - CRUD Tag Endpoints & Unit Tests 100% Pass, Route Handlers, TagFormModal, Interactive Master Tag Table, & Global Artwork Catalog Takedown/Restore).
+  - **Backend**: Endpoint REST API CRUD tag (`POST /api/artworks/tags`, `PATCH /api/artworks/tags/:id`, `DELETE /api/artworks/tags/:id`) khusus Administrator dengan validasi class-validator & relasi counter karya.
+  - **Frontend**: Halaman `/dashboard/manage-tags` dengan 4 Kartu KPI, Tab Switcher Master Tag & Katalog Global, Modal Form Tambah/Ubah Tag, serta tombol Takedown/Pulihkan karya terpublikasi.
 
 ## TODO Test
 

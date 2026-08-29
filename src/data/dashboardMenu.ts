@@ -5,6 +5,7 @@ import {
 	Home,
 	ImageIcon,
 	ShieldCheck,
+	Tags,
 	Users,
 } from "lucide-react";
 
@@ -37,6 +38,13 @@ export const adminMenu: DashboardMenuItem[] = [
 		description: "Kelola role dan status user",
 		icon: Users,
 		href: "/dashboard/manage-users",
+		enabled: true,
+	},
+	{
+		label: "Manajemen Tag & Katalog",
+		description: "Master tag & katalog galeri karya global",
+		icon: Tags,
+		href: "/dashboard/manage-tags",
 		enabled: true,
 	},
 	{

@@ -12,9 +12,11 @@ import type {
 	Artwork,
 	ArtworkWithRelations,
 	CreateArtworkPayload,
+	CreateTagDto,
 	PaginatedArtworksResponse,
 	ProfileWithUser,
 	Tag,
+	UpdateTagDto,
 } from "@/types";
 
 // ─── Query Keys (Referencing Central Factory) ──────────────────────────────
@@ -181,8 +183,34 @@ export function useCreateArtwork() {
 			return res.data;
 		},
 		onSuccess: () => {
-			// Otomatis refresh cache daftar artwork
+			// Otomatis refresh cache daftar artwork dan tags
 			queryClient.invalidateQueries({ queryKey: artworkKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: artworkKeys.tagsList() });
+		},
+	});
+}
+
+export function useUpdateArtwork() {
+	const queryClient = useQueryClient();
+	return useMutation<
+		Artwork,
+		Error,
+		{
+			id: string;
+			isVisibleOnFeed?: boolean;
+			title?: string;
+			description?: string;
+		}
+	>({
+		mutationFn: async ({ id, ...body }) => {
+			const res = await axiosClient.patch(`/artwork/${id}`, body);
+			return res.data;
+		},
+		onSuccess: (_data, variables) => {
+			queryClient.invalidateQueries({ queryKey: artworkKeys.lists() });
+			queryClient.invalidateQueries({
+				queryKey: artworkKeys.detail(variables.id),
+			});
 		},
 	});
 }
@@ -220,6 +248,52 @@ export function useDeleteArtwork() {
 			return { success: true, message: "Artwork berhasil dihapus." };
 		},
 		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: artworkKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: artworkKeys.tagsList() });
+		},
+	});
+}
+
+// ─── Tag Mutation Hooks (Admin) ──────────────────────────────────────────────
+export function useCreateTag() {
+	const queryClient = useQueryClient();
+	return useMutation<Tag, Error, CreateTagDto>({
+		mutationFn: async (payload) => {
+			const res = await axiosClient.post("/artwork/tags", payload);
+			return res.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: artworkKeys.tagsList() });
+			queryClient.invalidateQueries({ queryKey: artworkKeys.popularTags() });
+		},
+	});
+}
+
+export function useUpdateTag() {
+	const queryClient = useQueryClient();
+	return useMutation<Tag, Error, { id: string; payload: UpdateTagDto }>({
+		mutationFn: async ({ id, payload }) => {
+			const res = await axiosClient.patch(`/artwork/tags/${id}`, payload);
+			return res.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: artworkKeys.tagsList() });
+			queryClient.invalidateQueries({ queryKey: artworkKeys.popularTags() });
+			queryClient.invalidateQueries({ queryKey: artworkKeys.lists() });
+		},
+	});
+}
+
+export function useDeleteTag() {
+	const queryClient = useQueryClient();
+	return useMutation<ActionResult, Error, string>({
+		mutationFn: async (id) => {
+			const res = await axiosClient.delete(`/artwork/tags/${id}`);
+			return res.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: artworkKeys.tagsList() });
+			queryClient.invalidateQueries({ queryKey: artworkKeys.popularTags() });
 			queryClient.invalidateQueries({ queryKey: artworkKeys.lists() });
 		},
 	});
