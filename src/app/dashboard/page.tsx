@@ -302,26 +302,6 @@ export default function DashboardPage() {
 					</div>
 				</div>
 			)}
-
-			<div className="rounded-2xl border border-content/10 bg-surface p-5">
-				<div className="flex items-start gap-3">
-					<div className="flex p-4 items-center justify-center rounded-xl bg-verified/10 text-verified">
-						<CheckCircle2 className="h-5 w-5" />
-					</div>
-					<div>
-						<h2 className="font-heading text-lg font-semibold text-content">
-							Platform Moderasi & Kurasi TruBrush
-						</h2>
-						<p className="mt-1 text-sm leading-relaxed text-content-muted">
-							Setiap karya yang diunggah dengan opsi kurasi akan melewati
-							peninjauan bukti proses pengerjaan (WIP) oleh kurator sebelum
-							dapat dilihat publik. Sistem ini menjamin seluruh karya seni di
-							TruBrush 100% dibuat secara autentik oleh seniman manusia tanpa
-							bantuan AI generatif.
-						</p>
-					</div>
-				</div>
-			</div>
 		</div>
 	);
 }
