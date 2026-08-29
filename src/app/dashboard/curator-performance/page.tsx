@@ -6,7 +6,6 @@ import {
 	Clock,
 	Download,
 	RefreshCw,
-	Search,
 	ShieldAlert,
 	ShieldCheck,
 	Users,
@@ -14,14 +13,16 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import PerformanceFilterToolbar, {
+	type DatePreset,
+} from "@/components/dashboard/curator-performance/PerformanceFilterToolbar";
+import TopModeratorSpotlight from "@/components/dashboard/curator-performance/TopModeratorSpotlight";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useCuratorPerformance } from "@/hooks/useCuratorPerformanceQueries";
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useUserStore } from "@/store/UserStore";
 import { createCuratorPerformanceTableColumns } from "@/utils/dashboard/curator-performance/curatorPerformanceTableColumns";
-
-type DatePreset = "all" | "today" | "7d" | "30d" | "this_month";
 
 function formatDuration(minutes: number): string {
 	if (minutes <= 0) return "—";
@@ -267,89 +268,18 @@ export default function CuratorPerformancePage() {
 			</div>
 
 			{/* Top Performer Spotlight Banner */}
-			{topPerformer && topPerformer.total_actions > 0 && (
-				<div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-					<div className="flex items-center gap-3">
-						<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 flex-shrink-0">
-							<Award className="h-6 w-6" />
-						</div>
-						<div>
-							<div className="flex items-center gap-1.5">
-								<span className="badge badge-xs badge-primary font-bold">
-									⭐ Top Moderator
-								</span>
-								<h3 className="font-bold text-sm text-content">
-									{topPerformer.name}
-								</h3>
-							</div>
-							<p className="text-xs text-content-muted mt-0.5">
-								Telah menyelesaikan{" "}
-								<span className="font-semibold text-content">
-									{topPerformer.total_actions} tindakan moderasi
-								</span>{" "}
-								dengan rata-rata SLA{" "}
-								<span className="font-semibold text-primary">
-									{formatDuration(topPerformer.avg_response_time_minutes)}
-								</span>
-								.
-							</p>
-						</div>
-					</div>
-
-					<div className="flex items-center gap-2">
-						<div className="text-right hidden sm:block">
-							<p className="text-[11px] text-content-muted">Rasio Kelolosan</p>
-							<p className="text-sm font-bold text-verified">
-								{topPerformer.approval_rate}%
-							</p>
-						</div>
-					</div>
-				</div>
-			)}
+			<TopModeratorSpotlight
+				topPerformer={topPerformer}
+				formatDuration={formatDuration}
+			/>
 
 			{/* Filter Toolbar */}
-			<div className="rounded-2xl border border-content/10 bg-surface p-4 space-y-3 print:hidden">
-				{/* Search Box */}
-				<div className="relative w-full max-w-md">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
-					<input
-						type="text"
-						value={search}
-						onChange={(event) => setSearch(event.target.value)}
-						placeholder="Cari nama kurator atau email..."
-						className="input input-sm w-full pl-9 bg-background border-content/10 text-xs"
-					/>
-				</div>
-
-				{/* Date Presets */}
-				<div className="flex flex-wrap items-center gap-2 pt-2 border-t border-content/5">
-					<span className="text-xs font-semibold text-content-muted mr-1">
-						Periode:
-					</span>
-					{(
-						[
-							{ id: "all", label: "Semua Waktu" },
-							{ id: "today", label: "Hari Ini" },
-							{ id: "7d", label: "7 Hari Terakhir" },
-							{ id: "30d", label: "30 Hari Terakhir" },
-							{ id: "this_month", label: "Bulan Ini" },
-						] as const
-					).map((preset) => (
-						<button
-							key={preset.id}
-							type="button"
-							onClick={() => setDatePreset(preset.id as DatePreset)}
-							className={`btn btn-xs rounded-lg ${
-								datePreset === preset.id
-									? "btn-primary"
-									: "btn-ghost border border-content/10"
-							}`}
-						>
-							{preset.label}
-						</button>
-					))}
-				</div>
-			</div>
+			<PerformanceFilterToolbar
+				search={search}
+				onSearchChange={setSearch}
+				datePreset={datePreset}
+				onDatePresetChange={setDatePreset}
+			/>
 
 			{/* Performance Metrics Table */}
 			<div className="rounded-2xl border border-content/10 bg-surface overflow-hidden">

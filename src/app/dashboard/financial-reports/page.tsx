@@ -1,21 +1,21 @@
 "use client";
 
 import {
-	Calendar,
 	CircleDollarSign,
 	Download,
-	Filter,
 	Lock,
 	Percent,
 	Printer,
 	RefreshCw,
-	Search,
 	ShieldAlert,
 	Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import FinancialFilterToolbar, {
+	type DatePreset,
+} from "@/components/dashboard/financial-reports/FinancialFilterToolbar";
 import TransactionDetailModal from "@/components/dashboard/financial-reports/TransactionDetailModal";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
@@ -31,8 +31,6 @@ import {
 	createFinancialTableColumns,
 	transactionTypeLabels,
 } from "@/utils/dashboard/financial-reports/financialTableColumns";
-
-type DatePreset = "all" | "today" | "7d" | "30d" | "this_month";
 
 export default function FinancialReportsPage() {
 	const { isAdmin } = useUserStore();
@@ -306,100 +304,18 @@ export default function FinancialReportsPage() {
 			</div>
 
 			{/* Filter Toolbar */}
-			<div className="rounded-2xl border border-content/10 bg-surface p-4 space-y-3 print:hidden">
-				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-					{/* Search Box */}
-					<div className="relative flex-1 max-w-md">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
-						<input
-							type="text"
-							placeholder="Cari transaksi berdasarkan nama, keterangan, ID..."
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-							className="input input-sm w-full pl-9 bg-background border-content/10 text-xs"
-						/>
-					</div>
-
-					{/* Type Filter */}
-					<div className="flex items-center gap-2">
-						<Filter className="h-4 w-4 text-content-muted hidden sm:block" />
-						<select
-							value={typeFilter}
-							onChange={(e) =>
-								setTypeFilter(e.target.value as "all" | TransactionType)
-							}
-							className="select select-sm bg-background border-content/10 text-xs font-medium"
-						>
-							<option value="all">Semua Tipe Transaksi</option>
-							<option value="topup">Top Up Saldo</option>
-							<option value="payment">Pembayaran Komisi (Escrow)</option>
-							<option value="release">Pencairan Komisi Artis</option>
-							<option value="platform_fee">Fee Platform (5%)</option>
-							<option value="refund">Pengembalian Dana</option>
-							<option value="withdraw">Penarikan Dana Artis</option>
-						</select>
-					</div>
-				</div>
-
-				{/* Date Range Presets & Custom Pickers */}
-				<div className="flex flex-wrap items-center gap-2 pt-2 border-t border-content/5">
-					<span className="text-xs font-semibold text-content-muted mr-1">
-						Periode:
-					</span>
-					{(
-						[
-							{ id: "all", label: "Semua Waktu" },
-							{ id: "today", label: "Hari Ini" },
-							{ id: "7d", label: "7 Hari Terakhir" },
-							{ id: "30d", label: "30 Hari Terakhir" },
-							{ id: "this_month", label: "Bulan Ini" },
-						] as const
-					).map((preset) => (
-						<button
-							key={preset.id}
-							type="button"
-							onClick={() => {
-								setDatePreset(preset.id);
-								setCustomStartDate("");
-								setCustomEndDate("");
-							}}
-							className={`btn btn-xs rounded-lg ${
-								datePreset === preset.id
-									? "btn-primary"
-									: "btn-ghost border border-content/10"
-							}`}
-						>
-							{preset.label}
-						</button>
-					))}
-
-					{/* Custom Date Inputs */}
-					<div className="flex items-center gap-1.5 ml-auto text-xs">
-						<Calendar className="h-3.5 w-3.5 text-content-muted hidden sm:block" />
-						<input
-							type="date"
-							value={customStartDate}
-							onChange={(e) => {
-								setCustomStartDate(e.target.value);
-								setDatePreset("all");
-							}}
-							className="input input-xs bg-background border-content/10 text-[11px]"
-							title="Tanggal Mulai"
-						/>
-						<span className="text-content-muted">-</span>
-						<input
-							type="date"
-							value={customEndDate}
-							onChange={(e) => {
-								setCustomEndDate(e.target.value);
-								setDatePreset("all");
-							}}
-							className="input input-xs bg-background border-content/10 text-[11px]"
-							title="Tanggal Selesai"
-						/>
-					</div>
-				</div>
-			</div>
+			<FinancialFilterToolbar
+				search={search}
+				onSearchChange={setSearch}
+				typeFilter={typeFilter}
+				onTypeFilterChange={setTypeFilter}
+				datePreset={datePreset}
+				onDatePresetChange={setDatePreset}
+				customStartDate={customStartDate}
+				onCustomStartDateChange={setCustomStartDate}
+				customEndDate={customEndDate}
+				onCustomEndDateChange={setCustomEndDate}
+			/>
 
 			{/* Transactions Table */}
 			<div className="rounded-2xl border border-content/10 bg-surface overflow-hidden">
