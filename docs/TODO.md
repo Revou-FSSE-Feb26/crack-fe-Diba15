@@ -45,9 +45,9 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
   - **Frontend**: Halaman `/dashboard/audit-logs` dengan filter kategori, pencarian staf/subjek, preset tanggal, ekspor CSV, dan print summary.
   - **Frontend**: Transparansi dan akuntabilitas keputusan moderator/kurator.
 
-[ ] TODO 15: Halaman Laporan Kinerja Moderasi & Metrik Kurator (`/dashboard/curator-performance`)
-  - SLA & rata-rata waktu respons kurasi karya anti-AI.
-  - Distribusi beban kerja antar kurator dan rasio persetujuan vs penolakan karya.
+[x] TODO 15: Halaman Laporan Kinerja Moderasi & Metrik Kurator (`/dashboard/curator-performance`) (Selesai - CuratorPerformanceModule & 100% Spec Pass, REST Endpoint /api/curator-performance, Route Handler, TanStack Query Hook useCuratorPerformance, & Interactive Performance Dashboard with Top Performer Spotlight & Export CSV).
+  - **Backend**: Modul NestJS `CuratorPerformanceModule` menghitung SLA waktu respons kurasi anti-AI, rasio kelolosan (*approval rate*), jumlah penyelesaian sengketa komisi, dan tindakan aduan laporan.
+  - **Frontend**: Halaman `/dashboard/curator-performance` dengan 4 Kartu KPI, Spotlight Top Moderator, Filter Periode Tanggal, Tabel Metrik Tim, dan Ekspor Laporan CSV.
 
 [x] TODO 16: Halaman Manajemen Tag & Katalog Karya Global (`/dashboard/manage-tags`) (Selesai - CRUD Tag Endpoints & Unit Tests 100% Pass, Route Handlers, TagFormModal, Interactive Master Tag Table, & Global Artwork Catalog Takedown/Restore).
   - **Backend**: Endpoint REST API CRUD tag (`POST /api/artworks/tags`, `PATCH /api/artworks/tags/:id`, `DELETE /api/artworks/tags/:id`) khusus Administrator dengan validasi class-validator & relasi counter karya.

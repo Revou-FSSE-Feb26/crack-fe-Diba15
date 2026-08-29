@@ -75,4 +75,9 @@ export const queryKeys = {
 		list: (filters?: Record<string, unknown>) =>
 			[...queryKeys.auditLogs.all, "list", filters] as const,
 	},
+	curatorPerformance: {
+		all: ["curator-performance"] as const,
+		metrics: (filters?: unknown) =>
+			[...queryKeys.curatorPerformance.all, "metrics", filters] as const,
+	},
 };

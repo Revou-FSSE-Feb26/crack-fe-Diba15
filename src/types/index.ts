@@ -743,3 +743,47 @@ export interface DataTableProps<T> {
 	onPerPageChange: (perPage: 5 | 10) => void;
 	itemLabel?: string;
 }
+
+// =============================================================================
+// BAGIAN 5: KINERJA KURATOR & METRIK MODERASI (TODO 15)
+// =============================================================================
+
+export interface CuratorMetricItem {
+	id: string;
+	name: string;
+	email: string;
+	role: string;
+	avatar_url: string | null;
+	artworks_reviewed: number;
+	artworks_approved: number;
+	artworks_rejected: number;
+	approval_rate: number;
+	disputes_resolved: number;
+	reports_resolved: number;
+	total_actions: number;
+	avg_response_time_minutes: number;
+	last_active_at: string | null;
+}
+
+export interface CuratorPerformanceSummary {
+	total_curators: number;
+	total_artworks_reviewed: number;
+	total_artworks_approved: number;
+	total_artworks_rejected: number;
+	overall_approval_rate: number;
+	total_disputes_resolved: number;
+	total_reports_resolved: number;
+	total_moderation_actions: number;
+	average_response_time_minutes: number;
+}
+
+export interface CuratorPerformanceResponse {
+	summary: CuratorPerformanceSummary;
+	curators: CuratorMetricItem[];
+}
+
+export interface CuratorPerformanceQuery {
+	search?: string;
+	startDate?: string;
+	endDate?: string;
+}

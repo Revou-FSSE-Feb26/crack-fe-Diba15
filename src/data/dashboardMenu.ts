@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+	Award,
 	CircleDollarSign,
 	FileWarning,
 	Home,
@@ -48,6 +49,13 @@ export const adminMenu: DashboardMenuItem[] = [
 		enabled: true,
 	},
 	{
+		label: "Kinerja Kurator",
+		description: "SLA respons & metrik tim moderasi",
+		icon: Award,
+		href: "/dashboard/curator-performance",
+		enabled: true,
+	},
+	{
 		label: "Log Audit Moderasi",
 		description: "Rekam jejak kurasi, sengketa & banding",
 		icon: ShieldCheck,
@@ -85,8 +93,17 @@ export const curatorMenu: DashboardMenuItem[] = [
 		href: "/dashboard/review-reports",
 		enabled: true,
 	},
+	{
+		label: "Kinerja Kurator",
+		description: "SLA respons & metrik evaluasi kerja",
+		icon: Award,
+		href: "/dashboard/curator-performance",
+		enabled: true,
+	},
 ];
 
 export function getDashboardMenu(role?: string): DashboardMenuItem[] {
-	return role === "admin" ? adminMenu : curatorMenu;
+	if (role === "admin") return adminMenu;
+	if (role === "curator") return curatorMenu;
+	return [];
 }
