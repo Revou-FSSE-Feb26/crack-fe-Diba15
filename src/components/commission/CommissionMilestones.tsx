@@ -26,7 +26,7 @@ export default function CommissionMilestones({
 				</div>
 				<div
 					className={`p-2 rounded-lg border text-center ${
-						commission.status === "accepted" &&
+						["accepted", "revision"].includes(commission.status) &&
 						commission.payment_status === "unpaid"
 							? "bg-primary/10 border-primary text-primary font-semibold"
 							: "bg-surface border-content/10 text-content-muted"

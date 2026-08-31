@@ -246,8 +246,8 @@ export function CommissionPaymentContent({
 		);
 	}
 
-	// Status Guard: Check if commission was not yet accepted
-	if (commission.status !== "accepted") {
+	// Status Guard: Check if commission is still pending artist acceptance
+	if (commission.status === "pending") {
 		return (
 			<div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
 				<AlertCircle className="w-12 h-12 text-warning mx-auto" />
@@ -255,8 +255,30 @@ export function CommissionPaymentContent({
 					Menunggu Persetujuan Artis
 				</h1>
 				<p className="text-sm text-content-muted">
-					Pesanan komisi ini belum diterima oleh artis atau saat ini tidak dalam
-					status menunggu pembayaran.
+					Pesanan komisi ini belum diterima oleh artis. Pembayaran dapat
+					dilakukan setelah artis menyetujui pesanan Anda.
+				</p>
+				<Link
+					href={`/commissions/${commission.id}`}
+					className="inline-flex items-center justify-center gap-2 rounded-xl bg-surface border border-content/10 px-5 py-2.5 text-sm font-semibold text-content hover:bg-content/5 transition-colors"
+				>
+					<ArrowLeft className="w-4 h-4" />
+					Kembali ke Detail Komisi
+				</Link>
+			</div>
+		);
+	}
+
+	// Status Guard: Check if commission is cancelled
+	if (commission.status === "cancelled") {
+		return (
+			<div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+				<AlertCircle className="w-12 h-12 text-danger mx-auto" />
+				<h1 className="text-2xl font-bold text-content">
+					Pesanan Komisi Dibatalkan
+				</h1>
+				<p className="text-sm text-content-muted">
+					Pesanan komisi ini telah dibatalkan sehingga tidak dapat dibayar.
 				</p>
 				<Link
 					href={`/commissions/${commission.id}`}

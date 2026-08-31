@@ -6,13 +6,12 @@ import {
 	Clock,
 	Download,
 	RefreshCw,
-	ShieldAlert,
 	ShieldCheck,
 	Users,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import AccessDenied from "@/components/dashboard/AccessDenied";
 import PerformanceFilterToolbar, {
 	type DatePreset,
 } from "@/components/dashboard/curator-performance/PerformanceFilterToolbar";
@@ -23,6 +22,8 @@ import { useCuratorPerformance } from "@/hooks/useCuratorPerformanceQueries";
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useUserStore } from "@/store/UserStore";
 import { createCuratorPerformanceTableColumns } from "@/utils/dashboard/curator-performance/curatorPerformanceTableColumns";
+import { getDatePresetRange } from "@/utils/datePresets";
+import { exportToCsv } from "@/utils/exportCsv";
 
 function formatDuration(minutes: number): string {
 	if (minutes <= 0) return "—";
@@ -44,27 +45,8 @@ export default function CuratorPerformancePage() {
 	const [search, setSearch] = useState("");
 	const [datePreset, setDatePreset] = useState<DatePreset>("all");
 
-	// Date range calculation based on preset
-	const dateRange = useMemo(() => {
-		const now = new Date();
-		if (datePreset === "today") {
-			const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "7d") {
-			const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "30d") {
-			const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "this_month") {
-			const start = new Date(now.getFullYear(), now.getMonth(), 1);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		return { startDate: undefined, endDate: undefined };
-	}, [datePreset]);
+	// Date range calculation based on preset utility
+	const dateRange = useMemo(() => getDatePresetRange(datePreset), [datePreset]);
 
 	const {
 		data: responseData,
@@ -121,7 +103,7 @@ export default function CuratorPerformancePage() {
 
 		const rows = curators.map((c) => [
 			c.id,
-			`"${c.name}"`,
+			c.name,
 			c.email,
 			c.role,
 			c.artworks_reviewed,
@@ -135,39 +117,16 @@ export default function CuratorPerformancePage() {
 			c.last_active_at || "—",
 		]);
 
-		const csvContent =
-			"data:text/csv;charset=utf-8," +
-			[headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-
-		const encodedUri = encodeURI(csvContent);
-		const link = document.createElement("a");
-		link.setAttribute("href", encodedUri);
-		link.setAttribute(
-			"download",
+		exportToCsv(
 			`laporan_kinerja_kurator_trubrush_${new Date().toISOString().slice(0, 10)}.csv`,
+			headers,
+			rows,
 		);
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
 	};
 
 	if (!isAdmin()) {
 		return (
-			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 text-danger">
-					<ShieldAlert className="h-8 w-8" />
-				</div>
-				<h1 className="text-xl font-bold text-content">Akses Dibatasi</h1>
-				<p className="max-w-sm text-xs text-content-muted">
-					Halaman Laporan Kinerja Kurator hanya dapat diakses oleh Administrator
-					platform TruBrush.
-				</p>
-				<Link href="/dashboard">
-					<button type="button" className="btn btn-primary btn-sm">
-						Kembali ke Dashboard
-					</button>
-				</Link>
-			</div>
+			<AccessDenied description="Halaman Laporan Kinerja Kurator hanya dapat diakses oleh Administrator platform TruBrush." />
 		);
 	}
 

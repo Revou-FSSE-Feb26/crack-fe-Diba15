@@ -34,6 +34,56 @@ export function parseSearchQuery(raw: string): ParsedQuery {
 	return { type: "title", value: trimmed, raw: trimmed };
 }
 
+/**
+ * Explicitly normalizes an artwork that already has backend-joined relations.
+ */
+export function normalizeBackendArtwork(
+	artwork: Artwork | ArtworkWithRelations,
+): ArtworkWithRelations {
+	const rel = artwork as ArtworkWithRelations;
+	return {
+		...artwork,
+		artist: rel.artist ?? { id: artwork.artists_id, name: "Unknown" },
+		artist_profile: rel.artist_profile ?? {
+			is_verified: false,
+			is_open_for_commission: false,
+			avatar_url: null,
+			base_price_idr: null,
+		},
+		tags: Array.isArray(rel.tags) ? rel.tags : [],
+	};
+}
+
+/**
+ * Explicitly assembles relations for raw/mock artwork from separate local entity collections.
+ */
+export function assembleLocalArtworkWithRelations(
+	artwork: Artwork,
+	sourceArtworkTags: ArtworkTag[] = [],
+	sourceTags: Tag[] = [],
+	sourceUsers: User[] = [],
+	sourceProfiles: Profile[] = [],
+): ArtworkWithRelations {
+	const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
+	const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
+	const tagIds = sourceArtworkTags
+		.filter((at) => at.artwork_id === artwork.id)
+		.map((at) => at.tag_id);
+	const artworkTagList = sourceTags.filter((t) => tagIds.includes(t.id));
+
+	return {
+		...artwork,
+		artist: { id: artist?.id ?? "", name: artist?.name ?? "Unknown" },
+		artist_profile: {
+			is_verified: artist_profile?.is_verified ?? false,
+			is_open_for_commission: artist_profile?.is_open_for_commission ?? false,
+			avatar_url: artist_profile?.avatar_url ?? null,
+			base_price_idr: artist_profile?.base_price_idr ?? null,
+		},
+		tags: artworkTagList as Tag[],
+	};
+}
+
 /** Assembles the full ArtworkWithRelations list from artwork data sources. */
 export function buildArtworkWithRelations(
 	sourceArtworks: Artwork[] = [],
@@ -45,31 +95,19 @@ export function buildArtworkWithRelations(
 	return sourceArtworks.map((artwork) => {
 		const anyArt = artwork as ArtworkWithRelations;
 
-		// Data dari backend sudah dinormalisasi oleh mapToFrontendArtwork (snake_case).
-		// Jika artist & tags sudah ada, langsung pakai tanpa transformasi.
+		// When artist and tags are already embedded from backend query
 		if (anyArt.artist && Array.isArray(anyArt.tags)) {
-			return artwork as ArtworkWithRelations;
+			return normalizeBackendArtwork(artwork);
 		}
 
-		// Fallback: rakit dari parameter sumber
-		const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
-		const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
-		const tagIds = sourceArtworkTags
-			.filter((at) => at.artwork_id === artwork.id)
-			.map((at) => at.tag_id);
-		const artworkTagList = sourceTags.filter((t) => tagIds.includes(t.id));
-
-		return {
-			...artwork,
-			artist: { id: artist?.id ?? "", name: artist?.name ?? "Unknown" },
-			artist_profile: {
-				is_verified: artist_profile?.is_verified ?? false,
-				is_open_for_commission: artist_profile?.is_open_for_commission ?? false,
-				avatar_url: artist_profile?.avatar_url ?? null,
-				base_price_idr: artist_profile?.base_price_idr ?? null,
-			},
-			tags: artworkTagList as Tag[],
-		};
+		// Otherwise assemble from disparate local tables/sources
+		return assembleLocalArtworkWithRelations(
+			artwork,
+			sourceArtworkTags,
+			sourceTags,
+			sourceUsers,
+			sourceProfiles,
+		);
 	});
 }
 

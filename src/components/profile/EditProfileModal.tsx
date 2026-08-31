@@ -10,7 +10,7 @@ import pixivIcon from "@/assets/pixiv.svg";
 import xIcon from "@/assets/x.svg";
 import Input from "@/components/ui/form/Input";
 import Textarea from "@/components/ui/form/Textarea";
-import { useModalStore } from "@/store/ModalStore";
+import { useFormModal } from "@/hooks/useFormModal";
 import type { Profile } from "@/types";
 
 export interface EditProfileFormValues {
@@ -26,7 +26,7 @@ export interface EditProfileFormValues {
 
 interface EditProfileModalProps {
 	userName: string;
-	profile: Profile | undefined;
+	profile?: Profile | null;
 	isOpen: boolean;
 	onClose: () => void;
 	onSubmit: (values: EditProfileFormValues) => void;
@@ -42,15 +42,16 @@ export default function EditProfileModal({
 	isArtist = true,
 }: EditProfileModalProps) {
 	const modalId = "edit-profile-form-modal";
-	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+	const { openModal, isCurrentModalOpen, onCloseRef } = useFormModal({
+		modalId,
+		isOpen,
+		onClose,
+	});
 
 	const onSubmitRef = useRef(onSubmit);
-	const onCloseRef = useRef(onClose);
-
 	useEffect(() => {
 		onSubmitRef.current = onSubmit;
-		onCloseRef.current = onClose;
-	}, [onSubmit, onClose]);
+	}, [onSubmit]);
 
 	const defaultValues: EditProfileFormValues = {
 		name: userName,
@@ -251,13 +252,7 @@ export default function EditProfileModal({
 	);
 
 	useEffect(() => {
-		if (!isOpen) {
-			if (globalOpen && config?.id === modalId) {
-				closeModal();
-			}
-			return;
-		}
-		if (!globalOpen || config?.id !== modalId) {
+		if (isOpen && !isCurrentModalOpen) {
 			openModal({
 				id: modalId,
 				type: "form",
@@ -280,14 +275,13 @@ export default function EditProfileModal({
 			});
 		}
 	}, [
-		closeModal,
-		config?.id,
 		content,
-		globalOpen,
 		handleSubmit,
-		isOpen,
-		openModal,
 		isArtist,
+		isCurrentModalOpen,
+		isOpen,
+		onCloseRef,
+		openModal,
 	]);
 
 	return null;

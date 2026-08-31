@@ -7,13 +7,12 @@ import {
 	Plus,
 	RefreshCw,
 	Search,
-	ShieldAlert,
 	Sparkles,
 	Tags,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 
+import AccessDenied from "@/components/dashboard/AccessDenied";
 import TagFormModal from "@/components/dashboard/manage-tags/TagFormModal";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
@@ -280,21 +279,7 @@ export default function ManageTagsPage() {
 
 	if (!isAdmin()) {
 		return (
-			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 text-danger">
-					<ShieldAlert className="h-8 w-8" />
-				</div>
-				<h1 className="text-xl font-bold text-content">Akses Dibatasi</h1>
-				<p className="max-w-sm text-xs text-content-muted">
-					Halaman Manajemen Tag & Katalog hanya dapat diakses oleh Administrator
-					platform TruBrush.
-				</p>
-				<Link href="/dashboard">
-					<button type="button" className="btn btn-primary btn-sm">
-						Kembali ke Dashboard
-					</button>
-				</Link>
-			</div>
+			<AccessDenied description="Halaman Manajemen Tag & Katalog hanya dapat diakses oleh Administrator platform TruBrush." />
 		);
 	}
 

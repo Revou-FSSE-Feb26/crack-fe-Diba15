@@ -7,6 +7,10 @@ import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { UploadType } from "@/types";
+import {
+	validateArtworkFiles,
+	validateWipFile,
+} from "@/utils/validation/artworkFileValidation";
 
 export interface PostArtworkForm {
 	title: string;
@@ -102,41 +106,15 @@ export function useArtworkUploadForm() {
 
 	const handleArtworkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = Array.from(e.target.files || []);
-		if (files.length === 0) return;
+		if (!files.length) return;
 
-		if (artworkFiles.length + files.length > 5) {
+		const validation = validateArtworkFiles(files, artworkFiles.length);
+		if (!validation.valid && validation.error) {
 			addToast({
-				message:
-					"Maksimal karya seni yang dapat diunggah adalah 5 file gambar.",
+				message: validation.error,
 				type: "error",
 			});
 			return;
-		}
-
-		const allowedMimes = [
-			"image/jpeg",
-			"image/png",
-			"image/webp",
-			"image/jpg",
-			"image/gif",
-		];
-		const maxBytes = 10 * 1024 * 1024; // 10MB
-
-		for (const file of files) {
-			if (!allowedMimes.includes(file.type)) {
-				addToast({
-					message: `Format berkas "${file.name}" tidak valid. Hanya png, jpg, jpeg, webp, dan gif yang diperbolehkan.`,
-					type: "error",
-				});
-				return;
-			}
-			if (file.size > maxBytes) {
-				addToast({
-					message: `Ukuran berkas "${file.name}" melebihi batas maksimal 10MB.`,
-					type: "error",
-				});
-				return;
-			}
 		}
 
 		setArtworkFiles((prev) => [...prev, ...files]);
@@ -146,40 +124,10 @@ export function useArtworkUploadForm() {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
-		const allowedImages = [
-			"image/jpeg",
-			"image/png",
-			"image/webp",
-			"image/jpg",
-			"image/gif",
-		];
-		const allowedVideos = ["video/mp4", "video/quicktime", "video/webm"];
-		const maxImageBytes = 10 * 1024 * 1024; // 10MB
-		const maxVideoBytes = 30 * 1024 * 1024; // 30MB
-
-		const isImg = allowedImages.includes(file.type);
-		const isVid = allowedVideos.includes(file.type);
-
-		if (!isImg && !isVid) {
+		const validation = validateWipFile(file);
+		if (!validation.valid && validation.error) {
 			addToast({
-				message:
-					"Format berkas WIP tidak valid. Hanya gambar (png, jpg, gif) dan video (mp4, webm, mov) yang diperbolehkan.",
-				type: "error",
-			});
-			return;
-		}
-
-		if (isImg && file.size > maxImageBytes) {
-			addToast({
-				message: "Ukuran gambar WIP melebihi batas maksimal 10MB.",
-				type: "error",
-			});
-			return;
-		}
-
-		if (isVid && file.size > maxVideoBytes) {
-			addToast({
-				message: "Ukuran video WIP melebihi batas maksimal 30MB.",
+				message: validation.error,
 				type: "error",
 			});
 			return;
