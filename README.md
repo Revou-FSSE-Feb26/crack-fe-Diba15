@@ -136,5 +136,5 @@ bun run build
 Untuk pemahaman alur kerja dan formula perhitungan lebih mendalam, silakan baca dokumentasi di folder `docs/`:
 - 📄 [**Alur Bisnis Lengkap (BUSINESS_PROCESS.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/BUSINESS_PROCESS.md)
 - 📐 [**Dokumentasi Logika & Formula Matematika (LOGIC_DOCS.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/LOGIC_DOCS.md)
-- 🧪 [**Matriks Skenario Pengujian (TEST_SCENARIO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TEST_SCENARIO.md)
+- 🧪 [**Naskah Skenario Pengujian Manual (TEST_SCENARIO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TEST_SCENARIO.md)
 - ✅ [**Daftar Capaian Fitur (TODO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TODO.md)

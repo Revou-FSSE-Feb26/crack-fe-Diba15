@@ -93,13 +93,6 @@ export const curatorMenu: DashboardMenuItem[] = [
 		href: "/dashboard/review-reports",
 		enabled: true,
 	},
-	{
-		label: "Kinerja Kurator",
-		description: "SLA respons & metrik evaluasi kerja",
-		icon: Award,
-		href: "/dashboard/curator-performance",
-		enabled: true,
-	},
 ];
 
 export function getDashboardMenu(role?: string): DashboardMenuItem[] {
