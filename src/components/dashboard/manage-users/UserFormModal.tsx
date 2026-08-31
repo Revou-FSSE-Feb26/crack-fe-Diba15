@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import Input from "@/components/ui/form/Input";
+import Select from "@/components/ui/form/Select";
 import { useModalStore } from "@/store/ModalStore";
 import type { User as AppUser, UserRole } from "@/types";
 
@@ -114,10 +115,7 @@ export default function UserFormModal({
 				</div>
 
 				<div>
-					<label
-						htmlFor="user-email"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
+					<label htmlFor="user-email" className="form-label">
 						Email
 					</label>
 					<Input
@@ -132,10 +130,10 @@ export default function UserFormModal({
 							},
 						})}
 					>
-						<Mail className="h-5 w-5 text-gray-400" />
+						<Mail className="form-input-icon" />
 					</Input>
 					{errors.email && (
-						<p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+						<p className="form-error-msg">{errors.email.message}</p>
 					)}
 				</div>
 
@@ -153,15 +151,9 @@ export default function UserFormModal({
 					</div>
 				) : (
 					<div>
-						<label
-							htmlFor="user-role"
-							className="mb-1.5 block text-sm font-semibold text-content"
-						>
-							Role
-						</label>
-						<select
+						<Select
 							id="user-role"
-							className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[#33658A] dark:border-gray-600 dark:bg-[#1D2D37] dark:focus:ring-[#86BBD8]"
+							label="Role"
 							{...register("role", { required: "Role wajib dipilih" })}
 						>
 							{roleOptions.map((option) => (
@@ -169,7 +161,7 @@ export default function UserFormModal({
 									{option.label}
 								</option>
 							))}
-						</select>
+						</Select>
 						{errors.role && (
 							<p className="mt-1 text-xs text-danger">{errors.role.message}</p>
 						)}

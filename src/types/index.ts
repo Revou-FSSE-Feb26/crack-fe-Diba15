@@ -40,6 +40,20 @@ export type ReportTargetType = "artwork" | "profile";
 
 export type ReportStatus = "pending" | "resolved" | "dismissed";
 
+export type DisputeStatus = "pending" | "approved" | "rejected";
+
+export type AppealStatus = "pending" | "approved" | "rejected";
+
+export type TransactionType =
+	| "topup"
+	| "withdraw"
+	| "payment"
+	| "release"
+	| "refund"
+	| "platform_fee";
+
+export type TransactionStatus = "pending" | "success" | "failed";
+
 export type Theme = "light" | "dark";
 
 // ── Core Entities (Prisma-like Models) ───────────────────────────────────────
@@ -53,13 +67,24 @@ export interface User {
 	balance: number;
 	created_at: string;
 	updated_at: string;
+	profile?: Profile;
 }
+
+export type SocialLinks = {
+	instagram?: string;
+	twitter?: string;
+	pixiv?: string;
+	website?: string;
+	[key: string]: string | undefined;
+};
 
 export interface Profile {
 	id: string;
 	user_id: string;
 	bio: string | null;
+	social_links?: SocialLinks | null;
 	is_verified: boolean;
+	avatar_url: string | null;
 	approved_portfolio_count: number;
 	is_open_for_commission: boolean;
 	base_price_idr: number | null;
@@ -86,6 +111,15 @@ export interface Artwork {
 export interface Tag {
 	id: string;
 	tag_name: string;
+	count?: number;
+}
+
+export interface CreateTagDto {
+	tagName: string;
+}
+
+export interface UpdateTagDto {
+	tagName: string;
 }
 
 export interface ArtworkTag {
@@ -100,12 +134,36 @@ export interface Commission {
 	commission_title: string;
 	description: string | null;
 	price: number;
+	platform_fee?: number;
+	net_artist_amount?: number;
 	status: CommissionStatus;
 	payment_status: PaymentStatus;
 	payment_method?: "wallet" | "credit_card";
 	card_last_four?: string;
 	created_at: string;
 	updated_at: string;
+	progress?: CommissionProgress | null;
+	revisions?: Revision[];
+	dispute?: DisputeLog | null;
+	disputes?: DisputeLog[];
+	artist?: {
+		id: string;
+		name: string;
+		email?: string;
+		profile?: {
+			avatarUrl?: string | null;
+			bio?: string | null;
+			isVerified?: boolean;
+		} | null;
+	};
+	client?: {
+		id: string;
+		name: string;
+		email?: string;
+		profile?: {
+			avatarUrl?: string | null;
+		} | null;
+	};
 }
 
 export interface CommissionProgress {
@@ -115,6 +173,7 @@ export interface CommissionProgress {
 	sketch_approved: boolean;
 	final_artwork_url: string | null;
 	final_artwork_approved: boolean;
+	final_file_url?: string | null;
 	updated_at: string;
 }
 
@@ -134,6 +193,8 @@ export interface DisputeLog {
 	status: "pending" | "approved" | "rejected";
 	mediator_id: string | null;
 	created_at: string;
+	commission?: Commission | null;
+	progress?: CommissionProgress | null;
 }
 
 export interface Report {
@@ -144,6 +205,139 @@ export interface Report {
 	reason: string;
 	status: ReportStatus;
 	created_at: string;
+	artwork?:
+		| (Artwork & {
+				artist?: Partial<User> | null;
+		  })
+		| null;
+	reporter?: User | Partial<User> | null;
+}
+
+export interface WalletTransaction {
+	id: string;
+	user_id: string;
+	type: TransactionType;
+	amount: number;
+	title: string;
+	status: TransactionStatus;
+	commission_id?: string | null;
+	metadata?: Record<string, unknown> | null;
+	created_at: string;
+	user?: Pick<User, "id" | "name" | "email" | "role">;
+	commission?: {
+		id: string;
+		commission_title: string;
+		price: number;
+		status: CommissionStatus;
+	};
+}
+
+export interface FinancialSummary {
+	total_gmv: number;
+	escrow_balance: number;
+	platform_fee_revenue: number;
+	total_withdrawals: number;
+	active_commissions_count: number;
+}
+
+export interface TransactionFilterParams {
+	type?: TransactionType;
+	userId?: string;
+	startDate?: string;
+	endDate?: string;
+	page?: number;
+	limit?: number;
+}
+
+export interface Appeal {
+	id: string;
+	artist_id?: string;
+	artistId?: string;
+	reason: string;
+	status: AppealStatus;
+	resolved_by_id?: string | null;
+	resolvedById?: string | null;
+	resolution_notes?: string | null;
+	resolutionNotes?: string | null;
+	created_at?: string;
+	createdAt?: string;
+	updated_at?: string;
+	updatedAt?: string;
+	artist?: {
+		id: string;
+		name: string;
+		email: string;
+		role: string;
+		profile?: {
+			strike_count?: number;
+			strikeCount?: number;
+			is_verified?: boolean;
+			isVerified?: boolean;
+			avatar_url?: string | null;
+			avatarUrl?: string | null;
+		};
+	};
+	resolved_by?: {
+		id: string;
+		name: string;
+		email: string;
+		role: string;
+	} | null;
+	resolvedBy?: {
+		id: string;
+		name: string;
+		email: string;
+		role: string;
+	} | null;
+}
+
+export interface CreateAppealDto {
+	reason: string;
+}
+
+export interface ResolveAppealDto {
+	approved: boolean;
+	resolution_notes?: string;
+}
+
+export type AuditLogCategory =
+	| "all"
+	| "curation"
+	| "report"
+	| "dispute"
+	| "appeal";
+
+export interface AuditLogActor {
+	id: string;
+	name: string;
+	email: string;
+	role: string;
+}
+
+export interface AuditLogItem {
+	id: string;
+	category: "curation" | "report" | "dispute" | "appeal";
+	action: string;
+	actor: AuditLogActor;
+	target_type?: string;
+	targetType?: string;
+	target_id?: string;
+	targetId?: string;
+	target_title?: string | null;
+	targetTitle?: string | null;
+	details?: string | null;
+	status: string;
+	created_at?: string;
+	createdAt?: string;
+}
+
+export interface AuditLogFilterParams {
+	category?: AuditLogCategory;
+	search?: string;
+	startDate?: string;
+	endDate?: string;
+	page?: number;
+	limit?: number;
 }
 
 // ── Relational / Joined Entities ─────────────────────────────────────────────
@@ -151,13 +345,70 @@ export interface Report {
 /** Artwork lengkap dengan data artist dan tags-nya — untuk feed & detail page */
 export interface ArtworkWithRelations extends Artwork {
 	artist: Pick<User, "id" | "name">;
-	artist_profile: Pick<Profile, "is_verified" | "is_open_for_commission">;
+	artist_profile: Pick<
+		Profile,
+		"is_verified" | "is_open_for_commission" | "avatar_url" | "base_price_idr"
+	>;
 	tags: Tag[];
+}
+
+export interface PaginatedArtworksResponse {
+	data: ArtworkWithRelations[];
+	meta: {
+		page: number;
+		limit: number;
+		total: number;
+		total_pages: number;
+		has_more: boolean;
+	};
 }
 
 /** Profile lengkap dengan data user — untuk halaman profil artist */
 export interface ProfileWithUser extends Profile {
 	user: Pick<User, "id" | "name" | "email" | "role">;
+}
+
+export interface ArtistDetailResponse {
+	id: string;
+	user_id: string;
+	avatar_url: string | null;
+	bio: string | null;
+	social_links?: SocialLinks | null;
+	is_verified: boolean;
+	is_open_for_commission: boolean;
+	base_price_idr: number | null;
+	approved_portfolio_count: number;
+	followersCount: number;
+	created_at?: string | Date;
+	user: Pick<User, "id" | "name" | "email" | "role">;
+}
+
+/** Response User dari NestJS Backend (camelCase dari Prisma) */
+export interface DbUserResponse {
+	id: string;
+	name: string;
+	email: string;
+	role: UserRole;
+	balance: number;
+	createdAt: string;
+	updatedAt: string;
+	profile?: {
+		id?: string;
+		userId?: string;
+		avatarUrl?: string | null;
+		bio?: string | null;
+		socialLinks?: SocialLinks | null;
+		instagramUrl?: string | null;
+		twitterUrl?: string | null;
+		pixivUrl?: string | null;
+		websiteUrl?: string | null;
+		isVerified?: boolean;
+		approvedPortfolioCount?: number;
+		isOpenForCommission?: boolean;
+		basePriceIdr?: number | null;
+		strikeCount?: number;
+		updatedAt?: string;
+	} | null;
 }
 
 /** Komisi lengkap dengan semua relasi — untuk commission detail page */
@@ -171,17 +422,45 @@ export interface CommissionWithRelations extends Commission {
 
 /** Sengketa lengkap dengan komisi, progress, client, dan artist — untuk tabel sengketa */
 export interface JoinedDispute extends DisputeLog {
-	commission?: Commission;
-	progress?: CommissionProgress;
-	client?: User;
-	artist?: User;
+	commission?: Commission | null;
+	progress?: CommissionProgress | null;
+	client?:
+		| User
+		| Partial<User>
+		| {
+				id: string;
+				name: string;
+				email?: string;
+				profile?: {
+					avatarUrl?: string | null;
+				} | null;
+		  }
+		| null;
+	artist?:
+		| User
+		| Partial<User>
+		| {
+				id: string;
+				name: string;
+				email?: string;
+				profile?: {
+					avatarUrl?: string | null;
+					bio?: string | null;
+					isVerified?: boolean;
+				} | null;
+		  }
+		| null;
 }
 
 /** Laporan lengkap dengan artwork, pelapor, dan artist — untuk tabel review laporan */
 export interface JoinedReport extends Report {
-	artwork?: Artwork;
-	reporter?: User;
-	artist?: User;
+	artwork?:
+		| (Artwork & {
+				artist?: Partial<User> | null;
+		  })
+		| null;
+	reporter?: User | Partial<User> | null;
+	artist?: User | Partial<User> | null;
 }
 
 // =============================================================================
@@ -259,37 +538,14 @@ export interface CreateArtworkPayload {
 	tag_names: string[];
 }
 
-export interface ArtworkState {
-	artworks: Artwork[];
-	artworkTags: ArtworkTag[];
-	tags: Tag[];
-	createArtwork: (payload: CreateArtworkPayload) => Artwork;
-	approveArtwork: (id: string, curatorId: string) => ActionResult;
-	rejectArtwork: (
-		id: string,
-		curatorId: string,
-		reason: string,
-	) => ActionResult;
-}
-
-// ── Profile Store ────────────────────────────────────────────────────────────
-
 export interface UpdateProfilePayload {
+	avatar_url?: string | null;
 	bio?: string | null;
 	is_open_for_commission?: boolean;
 	base_price_idr?: number | null;
 	is_verified?: boolean;
 	approved_portfolio_count?: number;
 	strike_count?: number;
-}
-
-export interface ProfileState {
-	profiles: Profile[];
-	getProfileByUserId: (userId: string) => Profile | undefined;
-	updateProfile: (
-		userId: string,
-		payload: UpdateProfilePayload,
-	) => ActionResult;
 }
 
 // ── Commission Store ─────────────────────────────────────────────────────────
@@ -330,8 +586,6 @@ export interface CommissionState {
 	) => ActionResult;
 }
 
-// ── Report Store ─────────────────────────────────────────────────────────────
-
 export interface CreateReportPayload {
 	reporter_id: string;
 	target_type: ReportTargetType;
@@ -339,42 +593,13 @@ export interface CreateReportPayload {
 	reason: string;
 }
 
-export interface ReportState {
-	reports: Report[];
-	createReport: (payload: CreateReportPayload) => ActionResult;
-	resolveReport: (reportId: string, curatorId: string) => ActionResult;
-	dismissReport: (reportId: string, curatorId: string) => ActionResult;
-}
-
-// ── Favorite Store ───────────────────────────────────────────────────────────
-
 export type FavoriteByUser = Record<string, string[]>;
-
-export interface FavoriteState {
-	favoritesByUser: FavoriteByUser;
-	getFavoriteIds: (userId: string) => string[];
-	isFavorite: (userId: string, artworkId: string) => boolean;
-	addFavorite: (userId: string, artworkId: string) => void;
-	removeFavorite: (userId: string, artworkId: string) => void;
-	toggleFavorite: (userId: string, artworkId: string) => boolean;
-	clearFavorites: (userId: string) => void;
-}
-
-// ── Follow Store ─────────────────────────────────────────────────────────────
 
 export interface FollowRecord {
 	id: string;
 	follower_id: string;
 	artist_id: string;
 	created_at: string;
-}
-
-export interface FollowState {
-	follows: FollowRecord[];
-	followArtist: (followerId: string, artistId: string) => ActionResult;
-	unfollowArtist: (followerId: string, artistId: string) => ActionResult;
-	isFollowing: (followerId: string, artistId: string) => boolean;
-	getFollowedArtistIds: (followerId: string) => string[];
 }
 
 // ── User Management Store ────────────────────────────────────────────────────
@@ -389,21 +614,35 @@ export interface UserPayload {
 
 export interface UserManagementState {
 	users: User[];
-	createUser: (payload: UserPayload) => ActionResult;
-	createCurator: (payload: Omit<UserPayload, "role">) => ActionResult;
-	updateUser: (id: string, payload: Partial<UserPayload>) => ActionResult;
-	deleteUser: (id: string) => ActionResult;
+	fetchUsers: () => Promise<void>;
+	createUser: (payload: UserPayload) => Promise<ActionResult>;
+	createCurator: (payload: Omit<UserPayload, "role">) => Promise<ActionResult>;
+	updateUser: (
+		id: string,
+		payload: Partial<UserPayload>,
+	) => Promise<ActionResult>;
+	deleteUser: (id: string) => Promise<ActionResult>;
 }
 
 // ── User Store (Auth) ────────────────────────────────────────────────────────
 
 export type SafeUser = Omit<User, "password">;
+export type ProfileUser = SafeUser;
 
 export interface UserState {
 	user: SafeUser | null;
 	isAuthenticated: boolean;
-	login: (email: string, password: string) => ActionResult;
-	logout: () => void;
+	checkAuth: () => Promise<void>;
+	login: (email: string, password: string) => Promise<ActionResult>;
+	register: (payload: UserPayload) => Promise<ActionResult>;
+	logout: () => Promise<void>;
+	topUp: (amount: number) => Promise<ActionResult>;
+	withdraw: (payload: {
+		amount: number;
+		bankName: string;
+		accountNumber: string;
+		accountName: string;
+	}) => Promise<ActionResult>;
 	updateCurrentUser: (payload: Partial<Omit<SafeUser, "id" | "role">>) => void;
 	hasRole: (role: UserRole) => boolean;
 	isArtist: () => boolean;
@@ -419,10 +658,12 @@ export interface LightboxState {
 	images: string[];
 	initialIndex: number;
 	title?: string;
+	isProtected?: boolean;
 	openLightbox: (
 		images: string[],
 		initialIndex?: number,
 		title?: string,
+		isProtected?: boolean,
 	) => void;
 	closeLightbox: () => void;
 }
@@ -501,4 +742,48 @@ export interface DataTableProps<T> {
 	onPageChange: (page: number) => void;
 	onPerPageChange: (perPage: 5 | 10) => void;
 	itemLabel?: string;
+}
+
+// =============================================================================
+// BAGIAN 5: KINERJA KURATOR & METRIK MODERASI (TODO 15)
+// =============================================================================
+
+export interface CuratorMetricItem {
+	id: string;
+	name: string;
+	email: string;
+	role: string;
+	avatar_url: string | null;
+	artworks_reviewed: number;
+	artworks_approved: number;
+	artworks_rejected: number;
+	approval_rate: number;
+	disputes_resolved: number;
+	reports_resolved: number;
+	total_actions: number;
+	avg_response_time_minutes: number;
+	last_active_at: string | null;
+}
+
+export interface CuratorPerformanceSummary {
+	total_curators: number;
+	total_artworks_reviewed: number;
+	total_artworks_approved: number;
+	total_artworks_rejected: number;
+	overall_approval_rate: number;
+	total_disputes_resolved: number;
+	total_reports_resolved: number;
+	total_moderation_actions: number;
+	average_response_time_minutes: number;
+}
+
+export interface CuratorPerformanceResponse {
+	summary: CuratorPerformanceSummary;
+	curators: CuratorMetricItem[];
+}
+
+export interface CuratorPerformanceQuery {
+	search?: string;
+	startDate?: string;
+	endDate?: string;
 }

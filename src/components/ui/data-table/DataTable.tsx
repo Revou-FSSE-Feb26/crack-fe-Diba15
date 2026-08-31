@@ -24,7 +24,7 @@ export default function DataTable<T>({
 			)}
 
 			<div className="overflow-x-auto">
-				<table className="min-w-full text-sm">
+				<table className="table table-zebra w-full text-sm">
 					<thead>
 						<tr className="border-b border-content/10 text-left text-content-muted">
 							{columns.map((column) => (

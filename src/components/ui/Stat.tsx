@@ -48,19 +48,21 @@ export default function Stat({
 	if (variant === "card") {
 		return (
 			<div
-				className={`rounded-2xl border border-content/10 bg-surface p-4 ${className}`}
+				className={`stats shadow bg-surface border border-content/10 w-full overflow-hidden ${className}`}
 			>
-				<div className="flex items-center justify-between gap-3">
-					<div>
-						{label && (
-							<p className="text-xs font-medium text-content-muted">{label}</p>
-						)}
-						<p className="mt-1 font-display text-2xl font-bold text-content">
-							{displayValue}
-						</p>
+				<div className="stat p-4 min-w-0">
+					<div className="stat-figure text-primary">
+						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+							<Icon className="h-5 w-5" />
+						</div>
 					</div>
-					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-						<Icon className="h-5 w-5" />
+					{label && (
+						<div className="stat-title text-xs font-medium text-content-muted whitespace-normal break-words leading-snug">
+							{label}
+						</div>
+					)}
+					<div className="stat-value font-display text-2xl font-bold text-content truncate mt-1">
+						{displayValue}
 					</div>
 				</div>
 			</div>
@@ -71,12 +73,14 @@ export default function Stat({
 		if (iconPlacement === "left") {
 			return (
 				<div
-					className={`flex items-center gap-2 rounded-xl px-3 py-2 ${toneBg} ${className}`}
+					className={`flex items-center gap-2 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 ${toneBg} ${className} min-w-0 flex-1`}
 				>
-					<Icon className={`w-4 h-4 shrink-0 ${toneIconColor}`} />
-					<div className="min-w-0">
-						<p className="text-xs text-content-muted">{label}</p>
-						<p className="truncate text-sm font-medium text-content capitalize">
+					<Icon
+						className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${toneIconColor}`}
+					/>
+					<div className="min-w-0 flex-1">
+						<p className="text-[11px] sm:text-xs text-content-muted">{label}</p>
+						<p className="truncate text-xs sm:text-sm font-medium text-content capitalize">
 							{displayValue}
 						</p>
 					</div>
@@ -86,11 +90,11 @@ export default function Stat({
 
 		return (
 			<div
-				className={`rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 ${toneBg} ${className}`}
+				className={`rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 ${toneBg} ${className} min-w-0 flex-1`}
 			>
 				<div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-content-muted">
-					<Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-					{label}
+					<Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+					<span className="truncate">{label}</span>
 				</div>
 				<p className="mt-1 text-xs sm:text-sm font-medium text-content truncate">
 					{displayValue}
@@ -102,10 +106,10 @@ export default function Stat({
 	// variant === "inline"
 	return (
 		<div
-			className={`flex items-center gap-1.5 text-content-muted ${className}`}
+			className={`flex items-center gap-1.5 text-content-muted min-w-0 max-w-full text-xs sm:text-sm ${className}`}
 		>
-			<Icon className="w-4 h-4 text-primary" />
-			<span>{displayValue}</span>
+			<Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+			<span className="truncate">{displayValue}</span>
 		</div>
 	);
 }

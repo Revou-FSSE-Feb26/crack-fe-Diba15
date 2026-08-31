@@ -1,12 +1,53 @@
 "use client";
 
-import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, ImageIcon, XCircle } from "lucide-react";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 import Button from "@/components/ui/Button";
 import type { DataTableColumn, JoinedDispute } from "@/types";
 import { formatDate, formatPrice } from "@/utils";
+
+function DisputeThumbnail({
+	src,
+	alt,
+	title,
+	openLightbox,
+}: {
+	src: string;
+	alt: string;
+	title: string;
+	openLightbox: (urls: string[], index: number, title?: string) => void;
+}) {
+	const [hasError, setHasError] = useState(false);
+
+	if (hasError) {
+		return (
+			<div className="relative w-16 aspect-video bg-content/5 rounded-md flex items-center justify-center border border-content/10">
+				<ImageIcon className="w-4 h-4 text-content-muted/40" />
+			</div>
+		);
+	}
+
+	return (
+		<button
+			type="button"
+			onClick={() => openLightbox([src], 0, title)}
+			className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block select-none focus:outline-none p-0"
+		>
+			<div className="relative w-full h-full">
+				<Image
+					src={src}
+					alt={alt}
+					fill
+					unoptimized
+					onError={() => setHasError(true)}
+					className="object-cover group-hover:scale-105 transition-transform"
+				/>
+			</div>
+		</button>
+	);
+}
 
 interface CreateDisputesTableColumnsOptions {
 	openLightbox: (urls: string[], index: number, title?: string) => void;
@@ -44,67 +85,50 @@ export function createDisputesTableColumns({
 		{
 			key: "artwork_previews",
 			header: "WIP / Preview",
-			cellClassName: "align-top",
-			cell: (row) => (
-				<div className="flex gap-2 py-1 select-none">
-					<div className="space-y-1">
-						<p className="text-[10px] font-bold text-content-muted">
-							WIP Proof
-						</p>
-						{row.progress?.sketch_url ? (
-							<button
-								type="button"
-								onClick={() =>
-									openLightbox(
-										[row.progress?.sketch_url ?? ""],
-										0,
-										`WIP Proof - ${row.commission?.commission_title}`,
-									)
-								}
-								className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
-							>
-								<Image
-									src={row.progress.sketch_url}
+			cellClassName: "align-top min-w-[140px]",
+			cell: (row) => {
+				const sketchUrl = row.progress?.sketch_url;
+				const finalArtworkUrl = row.progress?.final_artwork_url;
+
+				return (
+					<div className="flex gap-2 py-1 select-none">
+						<div className="space-y-1">
+							<p className="text-[10px] font-bold text-content-muted">
+								WIP Proof
+							</p>
+							{sketchUrl ? (
+								<DisputeThumbnail
+									src={sketchUrl}
 									alt="WIP Sketch"
-									fill
-									sizes="64px"
-									className="object-cover group-hover:scale-105 transition-transform"
+									title={`WIP Proof - ${row.commission?.commission_title}`}
+									openLightbox={openLightbox}
 								/>
-							</button>
-						) : (
-							<p className="text-[10px] text-content-muted italic">Tidak ada</p>
-						)}
-					</div>
-					<div className="space-y-1">
-						<p className="text-[10px] font-bold text-content-muted">
-							Final Art
-						</p>
-						{row.progress?.final_artwork_url ? (
-							<button
-								type="button"
-								onClick={() =>
-									openLightbox(
-										[row.progress?.final_artwork_url ?? ""],
-										0,
-										`Final Art - ${row.commission?.commission_title}`,
-									)
-								}
-								className="relative w-16 aspect-video bg-content/5 rounded-md overflow-hidden border border-content/10 group cursor-pointer block"
-							>
-								<Image
-									src={row.progress.final_artwork_url}
+							) : (
+								<p className="text-[10px] text-content-muted italic">
+									Tidak ada
+								</p>
+							)}
+						</div>
+						<div className="space-y-1">
+							<p className="text-[10px] font-bold text-content-muted">
+								Final Art
+							</p>
+							{finalArtworkUrl ? (
+								<DisputeThumbnail
+									src={finalArtworkUrl}
 									alt="Final Artwork"
-									fill
-									sizes="64px"
-									className="object-cover group-hover:scale-105 transition-transform"
+									title={`Final Art - ${row.commission?.commission_title}`}
+									openLightbox={openLightbox}
 								/>
-							</button>
-						) : (
-							<p className="text-[10px] text-content-muted italic">Tidak ada</p>
-						)}
+							) : (
+								<p className="text-[10px] text-content-muted italic">
+									Tidak ada
+								</p>
+							)}
+						</div>
 					</div>
-				</div>
-			),
+				);
+			},
 		},
 		{
 			key: "dispute_reason",

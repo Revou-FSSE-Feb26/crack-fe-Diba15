@@ -1,8 +1,3 @@
-import artworks from "@/data/artworks";
-import artworkTags from "@/data/artworkTags";
-import profiles from "@/data/profiles";
-import tags from "@/data/tags";
-import users from "@/data/users";
 import type {
 	Artwork,
 	ArtworkTag,
@@ -41,13 +36,22 @@ export function parseSearchQuery(raw: string): ParsedQuery {
 
 /** Assembles the full ArtworkWithRelations list from artwork data sources. */
 export function buildArtworkWithRelations(
-	sourceArtworks: Artwork[] = artworks,
-	sourceArtworkTags: ArtworkTag[] = artworkTags,
-	sourceTags: Tag[] = tags,
-	sourceUsers: User[] = users, // NEW
-	sourceProfiles: Profile[] = profiles, // NEW
+	sourceArtworks: Artwork[] = [],
+	sourceArtworkTags: ArtworkTag[] = [],
+	sourceTags: Tag[] = [],
+	sourceUsers: User[] = [],
+	sourceProfiles: Profile[] = [],
 ): ArtworkWithRelations[] {
 	return sourceArtworks.map((artwork) => {
+		const anyArt = artwork as ArtworkWithRelations;
+
+		// Data dari backend sudah dinormalisasi oleh mapToFrontendArtwork (snake_case).
+		// Jika artist & tags sudah ada, langsung pakai tanpa transformasi.
+		if (anyArt.artist && Array.isArray(anyArt.tags)) {
+			return artwork as ArtworkWithRelations;
+		}
+
+		// Fallback: rakit dari parameter sumber
 		const artist = sourceUsers.find((u) => u.id === artwork.artists_id);
 		const artist_profile = sourceProfiles.find((p) => p.user_id === artist?.id);
 		const tagIds = sourceArtworkTags
@@ -61,6 +65,8 @@ export function buildArtworkWithRelations(
 			artist_profile: {
 				is_verified: artist_profile?.is_verified ?? false,
 				is_open_for_commission: artist_profile?.is_open_for_commission ?? false,
+				avatar_url: artist_profile?.avatar_url ?? null,
+				base_price_idr: artist_profile?.base_price_idr ?? null,
 			},
 			tags: artworkTagList as Tag[],
 		};
@@ -70,11 +76,11 @@ export function buildArtworkWithRelations(
 /** Filters artworks based on a parsed search query. */
 export function searchArtworks(
 	query: ParsedQuery,
-	sourceArtworks?: Artwork[],
-	sourceArtworkTags?: ArtworkTag[],
-	sourceTags?: Tag[],
-	sourceUsers?: User[], // NEW
-	sourceProfiles?: Profile[], // NEW
+	sourceArtworks: Artwork[] = [],
+	sourceArtworkTags: ArtworkTag[] = [],
+	sourceTags: Tag[] = [],
+	sourceUsers: User[] = [],
+	sourceProfiles: Profile[] = [],
 ): ArtworkWithRelations[] {
 	const all = buildArtworkWithRelations(
 		sourceArtworks,

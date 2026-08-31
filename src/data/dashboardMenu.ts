@@ -1,5 +1,14 @@
 import type { LucideIcon } from "lucide-react";
-import { FileWarning, Home, ImageIcon, Users } from "lucide-react";
+import {
+	Award,
+	CircleDollarSign,
+	FileWarning,
+	Home,
+	ImageIcon,
+	ShieldCheck,
+	Tags,
+	Users,
+} from "lucide-react";
 
 export type DashboardMenuItem = {
 	label: string;
@@ -19,10 +28,38 @@ export const adminMenu: DashboardMenuItem[] = [
 		enabled: true,
 	},
 	{
+		label: "Laporan Finansial",
+		description: "Rekap transaksi dan fee platform",
+		icon: CircleDollarSign,
+		href: "/dashboard/financial-reports",
+		enabled: true,
+	},
+	{
 		label: "Manage User",
 		description: "Kelola role dan status user",
 		icon: Users,
 		href: "/dashboard/manage-users",
+		enabled: true,
+	},
+	{
+		label: "Manajemen Tag & Katalog",
+		description: "Master tag & katalog galeri karya global",
+		icon: Tags,
+		href: "/dashboard/manage-tags",
+		enabled: true,
+	},
+	{
+		label: "Kinerja Kurator",
+		description: "SLA respons & metrik tim moderasi",
+		icon: Award,
+		href: "/dashboard/curator-performance",
+		enabled: true,
+	},
+	{
+		label: "Log Audit Moderasi",
+		description: "Rekam jejak kurasi, sengketa & banding",
+		icon: ShieldCheck,
+		href: "/dashboard/audit-logs",
 		enabled: true,
 	},
 ];
@@ -59,5 +96,7 @@ export const curatorMenu: DashboardMenuItem[] = [
 ];
 
 export function getDashboardMenu(role?: string): DashboardMenuItem[] {
-	return role === "admin" ? adminMenu : curatorMenu;
+	if (role === "admin") return adminMenu;
+	if (role === "curator") return curatorMenu;
+	return [];
 }

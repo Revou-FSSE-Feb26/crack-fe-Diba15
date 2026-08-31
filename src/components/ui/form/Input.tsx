@@ -3,23 +3,29 @@ export default function Input({
 	placeholder = "",
 	type = "text",
 	children,
+	className = "",
 	...props
 }: React.InputHTMLAttributes<HTMLInputElement> & {
 	className?: string;
 	label?: string;
 	placeholder?: string;
 } & { children?: React.ReactNode }) {
-	const inputClass =
-		"w-full pl-10 pr-4 py-2.5 bg-background border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#33658A] dark:focus:ring-[#86BBD8] focus:border-transparent outline-none transition-all";
+	const paddingClass = children ? "pl-10 pr-4" : "px-4";
+	const inputClass = `input input-bordered w-full ${paddingClass}`;
 
 	return (
 		<div>
-			<label htmlFor={props.id} className="block text-sm font-semibold mb-1.5">
-				{label}
-			</label>
+			{label && (
+				<label
+					htmlFor={props.id}
+					className="block text-sm font-semibold mb-1.5 text-content"
+				>
+					{label}
+				</label>
+			)}
 			<div className="relative">
 				{children && (
-					<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+					<div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10 text-content-muted">
 						{children}
 					</div>
 				)}
@@ -27,7 +33,7 @@ export default function Input({
 					{...props}
 					type={type}
 					placeholder={placeholder}
-					className={`${inputClass}·${props.className}`}
+					className={`${inputClass} ${className}`}
 				/>
 			</div>
 		</div>

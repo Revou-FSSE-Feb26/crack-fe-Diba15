@@ -64,7 +64,7 @@ function PreviewPanel({
 			<div className="mb-2 flex items-center justify-between gap-2">
 				<p className="text-xs font-semibold text-content">{label}</p>
 				{href && (
-					<a
+					<Link
 						href={href}
 						target="_blank"
 						rel="noreferrer"
@@ -72,15 +72,16 @@ function PreviewPanel({
 					>
 						Buka
 						<ExternalLink className="h-3 w-3" />
-					</a>
+					</Link>
 				)}
 			</div>
-			<div className="relative aspect-video overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+			<div className="relative aspect-video overflow-hidden rounded-lg bg-content/5">
 				{src ? (
 					<Image
 						src={src}
 						alt={alt}
 						fill
+						quality={95}
 						sizes="(max-width: 640px) 100vw, 50vw"
 						className="object-cover"
 					/>

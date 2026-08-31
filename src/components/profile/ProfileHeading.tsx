@@ -10,10 +10,14 @@ export default function ProfileHeading({
 	description,
 }: ProfileHeadingProps) {
 	return (
-		<div className="flex flex-col gap-2">
-			<p className="text-sm font-medium text-primary">{eyebrow}</p>
-			<h1 className="font-display text-3xl font-bold text-content">{title}</h1>
-			<p className="text-sm text-content-muted max-w-2xl">{description}</p>
+		<div className="flex flex-col gap-1.5 sm:gap-2 w-full">
+			<p className="text-xs sm:text-sm font-medium text-primary">{eyebrow}</p>
+			<h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-content">
+				{title}
+			</h1>
+			<p className="text-xs sm:text-sm text-content-muted w-full leading-relaxed">
+				{description}
+			</p>
 		</div>
 	);
 }

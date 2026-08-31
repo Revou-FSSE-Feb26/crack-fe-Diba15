@@ -8,7 +8,7 @@ export function getInitials(name: string): string {
 }
 
 export function formatPrice(price: number | null): string {
-	if (!price) return "—";
+	if (price === null || price === undefined) return "—";
 	return new Intl.NumberFormat("id-ID", {
 		style: "currency",
 		currency: "IDR",
@@ -16,35 +16,41 @@ export function formatPrice(price: number | null): string {
 	}).format(price);
 }
 
-export function formatDate(date: string) {
-	return new Date(date).toLocaleDateString("id-ID", {
+export function formatDate(date: string | Date | null | undefined): string {
+	if (!date) return "—";
+	const d = new Date(date);
+	if (Number.isNaN(d.getTime())) return "—";
+	return d.toLocaleDateString("id-ID", {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
 	});
 }
 
-export function formatShortDate(value: string): string {
+export function formatShortDate(
+	value: string | Date | null | undefined,
+): string {
+	if (!value) return "—";
+	const d = new Date(value);
+	if (Number.isNaN(d.getTime())) return "—";
 	return new Intl.DateTimeFormat("id-ID", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
-	}).format(new Date(value));
+	}).format(d);
 }
 
-export function formatDateTime(value: string): string {
+export function formatDateTime(
+	value: string | Date | null | undefined,
+): string {
+	if (!value) return "—";
+	const d = new Date(value);
+	if (Number.isNaN(d.getTime())) return "—";
 	return new Intl.DateTimeFormat("id-ID", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
 		hour: "2-digit",
 		minute: "2-digit",
-	}).format(new Date(value));
-}
-
-export function randomKey(): string {
-	const key =
-		Math.random().toString(36).substring(2, 15) +
-		Math.random().toString(36).substring(2, 15);
-	return key;
+	}).format(d);
 }

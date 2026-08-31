@@ -2,9 +2,12 @@
 
 import { Lock, Mail, MoveLeft, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
+import { useToastStore } from "@/store/ToastStore";
+import { useUserStore } from "@/store/UserStore";
 
 interface Signup {
 	name: string;
@@ -15,6 +18,10 @@ interface Signup {
 }
 
 export default function Signup() {
+	const router = useRouter();
+	const { register: registerUser } = useUserStore();
+	const { addToast } = useToastStore();
+
 	const {
 		register,
 		handleSubmit,
@@ -32,17 +39,31 @@ export default function Signup() {
 
 	const password = useWatch({ control, name: "password" });
 
-	const onSubmit = (data: Signup) => {
-		console.log(data);
+	const onSubmit = async (data: Signup) => {
+		const res = await registerUser({
+			name: data.name,
+			email: data.email,
+			password: data.password,
+			role: data.role,
+		});
+
+		addToast({
+			message: res.message,
+			type: res.success ? "success" : "error",
+		});
+
+		if (res.success) {
+			router.push("/profile");
+		}
 	};
 
 	return (
 		<section className="flex flex-1 justify-center relative">
 			{/* Palette accent dots decorator */}
 			<div className="absolute top-5 right-5 flex gap-1.5">
-				<div className="w-3 h-3 rounded-full bg-[#e8a87c] opacity-70"></div>
-				<div className="w-3 h-3 rounded-full bg-[#88ccdd] opacity-70"></div>
-				<div className="w-3 h-3 rounded-full bg-[#a8d8b0] opacity-70"></div>
+				<div className="deco-dot-warm"></div>
+				<div className="deco-dot-accent"></div>
+				<div className="deco-dot-mint"></div>
 			</div>
 
 			<div className="flex flex-col justify-center items-center gap-4 h-screen text-primary p-12 w-full max-w-md">

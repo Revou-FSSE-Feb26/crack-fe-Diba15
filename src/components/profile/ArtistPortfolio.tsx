@@ -7,19 +7,21 @@ import type { ArtworkWithRelations } from "@/types";
 
 interface ArtistPortfolioProps {
 	artworksWithTags: ArtworkWithRelations[];
+	title?: string;
 }
 
 export default function ArtistPortfolio({
 	artworksWithTags,
+	title = "Portfolio Saya",
 }: ArtistPortfolioProps) {
 	return (
-		<section>
-			<div className="flex items-center justify-between mb-5">
-				<h2 className="font-heading text-xl font-semibold text-content">
-					Portfolio Saya
+		<section className="space-y-4 w-full min-w-0">
+			<div className="flex items-center justify-between mb-3 sm:mb-4">
+				<h2 className="font-heading text-lg sm:text-xl font-semibold text-content">
+					{title}
 				</h2>
-				<span className="text-sm text-content-muted">
-					{artworksWithTags.length} karya
+				<span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-content/5 text-content-muted">
+					Total {artworksWithTags.length} karya
 				</span>
 			</div>
 
@@ -30,19 +32,20 @@ export default function ArtistPortfolio({
 					description="Karya yang sudah lolos kurasi akan tampil di bagian ini."
 				/>
 			) : (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
 					{artworksWithTags.map((artwork) => (
 						<Link
 							key={artwork.id}
 							href={`/detail/${artwork.id}`}
-							className="group bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-200"
+							className="group bg-surface border border-content/10 rounded-2xl overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-200"
 						>
-							<div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+							<div className="relative aspect-4/3 bg-content/5 overflow-hidden">
 								{artwork.images_url[0] ? (
 									<Image
 										src={artwork.images_url[0]}
 										alt={artwork.title}
 										fill
+										quality={90}
 										sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
 										className="object-cover group-hover:scale-105 transition-transform duration-300"
 									/>
@@ -96,7 +99,7 @@ export default function ArtistPortfolio({
 							</div>
 
 							<div className="p-3 space-y-2">
-								<p className="text-sm font-semibold text-content leading-snug line-clamp-1 group-hover:text-primary transition-colors">
+								<p className="text-xs sm:text-sm font-semibold text-content leading-snug line-clamp-1 group-hover:text-primary transition-colors">
 									{artwork.title}
 								</p>
 
@@ -105,13 +108,13 @@ export default function ArtistPortfolio({
 										{artwork.tags.slice(0, 3).map((tag) => (
 											<span
 												key={tag.id}
-												className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary"
+												className="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
 											>
 												{tag.tag_name}
 											</span>
 										))}
 										{artwork.tags.length > 3 && (
-											<span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+											<span className="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
 												+{artwork.tags.length - 3}
 											</span>
 										)}

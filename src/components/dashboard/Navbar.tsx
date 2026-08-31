@@ -14,6 +14,7 @@ import { useUserStore } from "@/store/UserStore";
 export default function Navbar() {
 	const router = useRouter();
 	const { isAdmin, isCurator, logout, user } = useUserStore();
+	const avatarUrl = user?.profile?.avatar_url;
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const mounted = useMounted();
 	const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,8 +44,8 @@ export default function Navbar() {
 			document.removeEventListener("mousedown", handleClickDropdownOutside);
 	}, [isDropdownOpen]);
 
-	const handleLogout = () => {
-		logout();
+	const handleLogout = async () => {
+		await logout();
 		router.push("/login");
 		setIsDropdownOpen(false);
 	};
@@ -70,9 +71,13 @@ export default function Navbar() {
 								<button
 									type="button"
 									onClick={() => setIsDropdownOpen((prev) => !prev)}
-									className="flex items-center gap-2 rounded-full px-3 py-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+									className="flex items-center gap-2 rounded-full px-3 py-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer"
 								>
-									<AvatarInitials className="w-9 h-9" name={user?.name || ""} />
+									<AvatarInitials
+										className="w-9 h-9"
+										name={user?.name || ""}
+										src={avatarUrl}
+									/>
 									<div className="flex flex-col items-start gap-0 text-left">
 										<span className="text-sm font-medium text-primary">
 											{user?.name}
@@ -89,11 +94,11 @@ export default function Navbar() {
 								</button>
 
 								{isDropdownOpen && (
-									<div className="absolute right-0 mt-2 w-40 rounded-xl bg-background shadow-lg border border-slate-100 dark:border-slate-700 z-50 overflow-hidden flex flex-col">
+									<div className="absolute right-0 mt-2 w-40 rounded-xl bg-surface shadow-lg border border-content/10 z-50 overflow-hidden flex flex-col">
 										<button
 											type="button"
 											onClick={handleLogout}
-											className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors duration-200 cursor-pointer"
+											className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-error hover:bg-content/5 rounded-xl transition-colors duration-200 cursor-pointer"
 										>
 											<LogOut className="w-5 h-5" />
 											<span className="text-sm font-medium">Logout</span>
@@ -106,7 +111,7 @@ export default function Navbar() {
 						<Link
 							href="/login"
 							title="Login Button"
-							className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+							className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer"
 						>
 							<LogOut className="w-6 h-6 text-primary" />
 						</Link>

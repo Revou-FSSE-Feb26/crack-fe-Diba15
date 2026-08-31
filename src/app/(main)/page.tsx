@@ -5,7 +5,9 @@ import SidebarHome from "@/components/home/SidebarHome";
 export default function Home() {
 	return (
 		<div className="flex flex-col max-w-6xl w-full mx-auto">
-			<HomeHero />
+			<div className="p-4">
+				<HomeHero />
+			</div>
 			<div className="flex flex-col-reverse lg:flex-row justify-center gap-6 p-6 w-full max-w-6xl mx-auto">
 				<div className="flex-1 max-w-3xl">
 					<ArtworkList />

@@ -6,26 +6,30 @@ import {
 	Briefcase,
 	CheckCircle2,
 	Clock3,
-	CreditCard,
-	MessageSquare,
-	Upload,
-	XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import CommissionActionControls from "@/components/commission/CommissionActionControls";
+import CommissionDeliverables from "@/components/commission/CommissionDeliverables";
+import CommissionMilestones from "@/components/commission/CommissionMilestones";
+import CommissionRevisionLogs from "@/components/commission/CommissionRevisionLogs";
 import FileDisputeModal from "@/components/commission/FileDisputeModal";
-import PaymentMethodModal from "@/components/commission/PaymentMethodModal";
-import ProofPreview from "@/components/commission/ProofPreview";
 import AvatarInitials from "@/components/home/AvatarInitials";
-import Button from "@/components/ui/Button";
 import Stat from "@/components/ui/Stat";
-import users from "@/data/users";
+import {
+	useAddRevision,
+	useApproveStep,
+	useCancelCommission,
+	useCommissionDetail,
+	useCompleteCommission,
+	useRespondCommission,
+	useUpdateProgress,
+} from "@/hooks/useCommissionQueries";
+import { useCopyProtection } from "@/hooks/useCopyProtection";
+import { useCreateDispute } from "@/hooks/useDisputeQueries";
 import { useMounted } from "@/hooks/useMounted";
-import { useCommissionStore } from "@/store/CommissionStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import type { Commission } from "@/types";
 import { formatDate, formatPrice } from "@/utils";
 import { commissionStatusConfig } from "@/utils/commissionStatus";
 
@@ -33,43 +37,51 @@ interface CommissionDetailContentProps {
 	commissionId: string;
 }
 
-export default function CommissionDetailContent({
+const paymentStatusConfig: Record<
+	string,
+	{ label: string; className: string }
+> = {
+	unpaid: {
+		label: "Belum Dibayar",
+		className: "bg-content/5 text-content-muted border-content/20",
+	},
+	paid: {
+		label: "Escrow Aktif",
+		className: "bg-primary/10 text-primary border-primary/30",
+	},
+	refunded: {
+		label: "Di-refund",
+		className: "bg-danger/10 text-danger border-danger/30",
+	},
+	released: {
+		label: "Escrow Dicairkan",
+		className: "bg-success/10 text-success border-success/30",
+	},
+};
+
+export function CommissionDetailContent({
 	commissionId,
 }: CommissionDetailContentProps) {
+	useCopyProtection();
+	const mounted = useMounted();
 	const { user, isAuthenticated } = useUserStore();
 	const { openModal } = useModalStore();
-	const { addToast } = useToastStore();
-	const {
-		commissions,
-		progress,
-		revisions,
-		disputes,
-		setCommissionStatus,
-		setPaymentStatus,
-		uploadDummyResult,
-		approveResult,
-		addRevision,
-		fileDispute,
-	} = useCommissionStore();
-	const mounted = useMounted();
-	const [comment, setComment] = useState("");
-	const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+
 	const [isDisputeOpen, setIsDisputeOpen] = useState(false);
 
-	const commission = useMemo(
-		() => commissions.find((item) => item.id === commissionId),
-		[commissionId, commissions],
-	);
+	const { data: commission, isLoading } = useCommissionDetail(commissionId);
+	const respondMutation = useRespondCommission();
+	const updateProgressMutation = useUpdateProgress();
+	const approveStepMutation = useApproveStep();
+	const addRevisionMutation = useAddRevision();
+	const cancelMutation = useCancelCommission();
+	const completeMutation = useCompleteCommission();
+	const createDisputeMutation = useCreateDispute();
 
-	const commissionDispute = useMemo(
-		() => disputes?.find((d) => d.commission_id === commissionId),
-		[commissionId, disputes],
-	);
-
-	if (!mounted) {
+	if (!mounted || isLoading) {
 		return (
-			<div className="max-w-6xl mx-auto px-4 py-8">
-				<p className="text-sm text-content-muted">
+			<div className="max-w-3xl mx-auto px-4 py-12 text-center">
+				<p className="text-sm text-content-muted animate-pulse">
 					Memuat detail commission...
 				</p>
 			</div>
@@ -79,7 +91,7 @@ export default function CommissionDetailContent({
 	if (!isAuthenticated || !user) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<Briefcase className="w-10 h-10 text-primary mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Login untuk melihat detail commission
@@ -96,7 +108,7 @@ export default function CommissionDetailContent({
 	if (!commission) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<Briefcase className="w-10 h-10 text-content-muted mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Commission tidak ditemukan
@@ -124,7 +136,7 @@ export default function CommissionDetailContent({
 	if (!hasAccess) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<AlertTriangle className="w-10 h-10 text-danger mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Kamu tidak punya akses
@@ -138,54 +150,73 @@ export default function CommissionDetailContent({
 		);
 	}
 
-	const artist = users.find((item) => item.id === commission.artists_id);
-	const client = users.find((item) => item.id === commission.client_id);
-	const progressItem = progress.find(
-		(item) => item.commission_id === commission.id,
-	);
-	const thread = revisions.filter(
-		(item) => item.commission_id === commission.id,
-	);
+	const artist = commission.artist;
+	const client = commission.client;
+	const progressItem = commission.progress ?? null;
+	const thread = commission.revisions ?? [];
+	const commissionDispute =
+		commission.disputes?.[0] ?? commission.dispute ?? null;
 	const status = commissionStatusConfig[commission.status];
-	const canCancel =
-		!["completed", "cancelled", "disputed"].includes(commission.status) &&
-		!commissionDispute;
-	const canApprove =
-		Boolean(progressItem?.final_artwork_url) &&
-		commission.status !== "completed" &&
-		!commissionDispute;
-	const canPay =
-		!isArtistView &&
-		commission.payment_status === "unpaid" &&
-		["accepted", "in_progress", "revision"].includes(commission.status);
-	const canUploadResult =
-		isArtistView &&
-		commission.payment_status === "paid" &&
-		["accepted", "in_progress", "revision"].includes(commission.status);
+	const paymentBadge = paymentStatusConfig[commission.payment_status] ?? {
+		label: commission.payment_status,
+		className: "bg-content/5 text-content-muted border-content/10",
+	};
+
 	const counterpartName = isArtistView
 		? (client?.name ?? "Client")
 		: (artist?.name ?? "Artist");
 
-	const confirmStatus = (
-		selectedCommission: Commission,
-		statusValue: Commission["status"],
+	const handleRespond = (
+		statusValue: "accepted" | "cancelled",
 		title: string,
 	) => {
 		openModal({
 			title,
-			description: `Status "${selectedCommission.commission_title}" akan diubah menjadi ${commissionStatusConfig[statusValue].label}.`,
+			description: `Status "${commission.commission_title}" akan diubah menjadi ${
+				statusValue === "accepted" ? "Diterima" : "Ditolak"
+			}.`,
 			type: "confirm",
-			variant:
-				statusValue === "cancelled" || statusValue === "disputed"
-					? "danger"
-					: "default",
+			variant: statusValue === "cancelled" ? "danger" : "default",
 			confirmLabel: "Konfirmasi",
-			onConfirm: () => setCommissionStatus(selectedCommission.id, statusValue),
+			onConfirm: () =>
+				respondMutation.mutate({
+					id: commission.id,
+					status: statusValue,
+				}),
+		});
+	};
+
+	const handleApproveFinal = () => {
+		openModal({
+			title: "Approve Pratinjau Final?",
+			description: `Apakah Anda menyetujui pratinjau hasil karya untuk "${commission.commission_title}"? Artist akan diizinkan mengirimkan berkas asli dan dana sebesar ${formatPrice(
+				commission.price,
+			)} akan dilepaskan setelah pengiriman berkas.`,
+			type: "confirm",
+			confirmLabel: "Approve Pratinjau",
+			onConfirm: () => {
+				approveStepMutation.mutate({
+					id: commission.id,
+					step: "final",
+				});
+			},
+		});
+	};
+
+	const handleCancel = () => {
+		openModal({
+			title: "Batalkan commission?",
+			description: `Apakah Anda yakin ingin membatalkan pesanan "${commission.commission_title}"?`,
+			type: "confirm",
+			variant: "danger",
+			confirmLabel: "Ya, Batalkan",
+			cancelLabel: "Batal",
+			onConfirm: () => cancelMutation.mutate(commission.id),
 		});
 	};
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+		<div className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
 			<Link
 				href="/commissions"
 				className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover"
@@ -194,8 +225,9 @@ export default function CommissionDetailContent({
 				Kembali ke list commission
 			</Link>
 
-			<article className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 xs:p-4 sm:p-5">
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between w-full">
+			<article className="bg-surface border border-content/10 rounded-2xl p-3.5 xs:p-4 sm:p-5">
+				<div className="flex flex-col gap-4 w-full">
+					{/* Header */}
 					<div className="flex items-start gap-2.5 sm:gap-3 min-w-0 w-full">
 						<AvatarInitials
 							name={counterpartName}
@@ -203,13 +235,18 @@ export default function CommissionDetailContent({
 						/>
 						<div className="min-w-0 flex-1">
 							<div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-								<h1 className="font-heading text-xl sm:text-2xl font-bold text-content break-words min-w-0">
+								<h1 className="font-heading text-xl sm:text-2xl font-bold text-content wrap-break-word min-w-0">
 									{commission.commission_title}
 								</h1>
 								<span
 									className={`rounded-full px-2 py-0.5 text-xs font-medium shrink-0 ${status.className}`}
 								>
 									{status.label}
+								</span>
+								<span
+									className={`rounded-full border px-2 py-0.5 text-xs font-medium shrink-0 ${paymentBadge.className}`}
+								>
+									{paymentBadge.label}
 								</span>
 							</div>
 							<p className="mt-1 text-xs sm:text-sm text-content-muted">
@@ -218,19 +255,15 @@ export default function CommissionDetailContent({
 									: `Artist: ${counterpartName}`}
 							</p>
 							{commission.description && (
-								<p className="mt-3 text-xs sm:text-sm leading-relaxed text-content-muted break-words">
+								<p className="mt-3 text-xs sm:text-sm leading-relaxed text-content-muted wrap-break-word">
 									{commission.description}
 								</p>
 							)}
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-1.5 xs:gap-2 sm:grid-cols-4 lg:w-107.5 w-full">
-						<Stat
-							icon={CreditCard}
-							label="Bayar"
-							value={commission.payment_status}
-						/>
+					{/* Stats Row */}
+					<div className="grid grid-cols-3 gap-2 sm:gap-3">
 						<Stat
 							icon={Clock3}
 							label="Update"
@@ -238,8 +271,28 @@ export default function CommissionDetailContent({
 						/>
 						<Stat
 							icon={CheckCircle2}
-							label="Harga"
-							value={formatPrice(commission.price)}
+							label={isArtistView ? "Pendapatan Bersih" : "Harga"}
+							value={
+								isArtistView ? (
+									<span className="flex flex-col">
+										<span>
+											{formatPrice(
+												commission.net_artist_amount ??
+													Math.round(commission.price * 0.95),
+											)}
+										</span>
+										<span className="text-[10px] text-content-muted font-normal">
+											Fee 5%: -
+											{formatPrice(
+												commission.platform_fee ??
+													Math.round(commission.price * 0.05),
+											)}
+										</span>
+									</span>
+								) : (
+									formatPrice(commission.price)
+								)
+							}
 						/>
 						<Stat
 							icon={Briefcase}
@@ -249,307 +302,75 @@ export default function CommissionDetailContent({
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-5">
+				<div className="flex flex-col gap-5 mt-5">
 					<div className="space-y-3">
-						{/*Artwork Preview Section*/}
-						<div className="grid gap-3 sm:grid-cols-2">
-							<ProofPreview
-								title="WIP Proof"
-								src={
-									!isArtistView && commissionDispute?.status === "approved"
-										? null
-										: progressItem?.sketch_url
-								}
-								empty={
-									!isArtistView && commissionDispute?.status === "approved"
-										? "WIP proof tidak dapat diakses karena sengketa disetujui."
-										: "Artist belum upload WIP proof."
-								}
-							/>
-							<ProofPreview
-								title="Preview Final"
-								src={
-									!isArtistView && commissionDispute?.status === "approved"
-										? null
-										: progressItem?.final_artwork_url
-								}
-								empty={
-									!isArtistView && commissionDispute?.status === "approved"
-										? "Hasil tidak dapat diakses karena sengketa disetujui."
-										: "Final artwork belum tersedia."
-								}
-							/>
-						</div>
+						{/* 1. Deliverables Previews & Master File */}
+						<CommissionDeliverables
+							commission={commission}
+							progressItem={progressItem}
+							commissionDispute={commissionDispute}
+							isArtistView={isArtistView}
+						/>
 
-						{/*Button Section*/}
-						<div className="space-y-2">
-							{!isArtistView && commission.status === "pending" && (
-								<p className="rounded-lg bg-content/5 px-3 py-2 text-xs text-content-muted">
-									Menunggu artist menerima pengajuan. Diskusikan harga dan
-									detail lewat komentar sebelum pembayaran.
-								</p>
-							)}
+						{/* 2. Step Progress Milestones */}
+						<CommissionMilestones
+							commission={commission}
+							progressItem={progressItem}
+						/>
 
-							{canPay && (
-								<Button
-									className="flex gap-1 items-center w-full justify-center text-sm"
-									onClick={() => setIsPaymentOpen(true)}
-								>
-									<CreditCard className="w-4 h-4" />
-									Bayar Uang Muka
-								</Button>
-							)}
+						{/* 3. Action Controls */}
+						<CommissionActionControls
+							commission={commission}
+							progressItem={progressItem}
+							commissionDispute={commissionDispute}
+							isArtistView={isArtistView}
+							onRespond={handleRespond}
+							onApproveFinal={handleApproveFinal}
+							onCancel={handleCancel}
+							onOpenDispute={() => setIsDisputeOpen(true)}
+							onUpdateProgress={(payload) =>
+								updateProgressMutation.mutateAsync({
+									id: commission.id,
+									...payload,
+								})
+							}
+							onCompleteCommission={() =>
+								completeMutation.mutateAsync(commission.id)
+							}
+						/>
 
-							{isArtistView && commission.status === "pending" && (
-								<>
-									<Button
-										className="flex items-center gap-1 w-full justify-center text-sm"
-										onClick={() =>
-											confirmStatus(
-												commission,
-												"accepted",
-												"Terima commission?",
-											)
-										}
-									>
-										<CheckCircle2 className="w-4 h-4" />
-										Terima
-									</Button>
-									<Button
-										variant="danger"
-										className="flex items-center gap-1 w-full justify-center text-sm"
-										onClick={() =>
-											confirmStatus(
-												commission,
-												"cancelled",
-												"Tolak commission?",
-											)
-										}
-									>
-										<XCircle className="w-4 h-4" />
-										Tolak
-									</Button>
-								</>
-							)}
-
-							{isArtistView &&
-								commission.status === "accepted" &&
-								commission.payment_status === "paid" && (
-									<Button
-										className="flex items-center gap-1 w-full justify-center text-sm"
-										onClick={() =>
-											setCommissionStatus(commission.id, "in_progress")
-										}
-									>
-										Mulai Kerjakan
-									</Button>
-								)}
-
-							{isArtistView &&
-								commission.status === "accepted" &&
-								commission.payment_status === "unpaid" && (
-									<p className="rounded-lg bg-content/5 px-3 py-2 text-xs text-content-muted">
-										Menunggu client membayar uang muka sebelum artist bisa mulai
-										kerja atau upload hasil.
-									</p>
-								)}
-
-							{canUploadResult && (
-								<Button
-									variant="secondary"
-									className="flex items-center gap-1 w-full justify-center text-sm"
-									onClick={() => uploadDummyResult(commission.id)}
-								>
-									<Upload className="w-4 h-4" />
-									Upload Hasil Dummy
-								</Button>
-							)}
-
-							{!isArtistView && canApprove && (
-								<>
-									<Button
-										className="flex gap-1 items-center w-full justify-center text-sm"
-										onClick={() => {
-											openModal({
-												title: "Approve hasil?",
-												description: `Dengan menyetujui hasil, dana sebesar ${formatPrice(commission.price)} akan dilepaskan ke wallet artist.`,
-												type: "confirm",
-												confirmLabel: "Approve",
-												onConfirm: () => {
-													approveResult(commission.id);
-													addToast({
-														message: "Hasil komisi disetujui.",
-														type: "success",
-													});
-												},
-											});
-										}}
-									>
-										<CheckCircle2 className="w-4 h-4" />
-										Approve Hasil
-									</Button>
-									<Button
-										variant="danger"
-										className="flex gap-1 items-center w-full justify-center text-sm"
-										onClick={() => setIsDisputeOpen(true)}
-									>
-										<AlertTriangle className="w-4 h-4" />
-										Ajukan Dispute
-									</Button>
-								</>
-							)}
-
-							{!isArtistView && canCancel && (
-								<Button
-									variant="secondary"
-									className="flex gap-1 items-center w-full justify-center text-sm"
-									onClick={() =>
-										confirmStatus(
-											commission,
-											"cancelled",
-											"Batalkan commission?",
-										)
-									}
-								>
-									Batalkan Commission
-								</Button>
-							)}
-
-							{/* Dispute status banner */}
-							{commissionDispute && (
-								<div
-									className={`rounded-xl border p-4 text-xs leading-relaxed ${
-										commissionDispute.status === "pending"
-											? "bg-premium/10 border-premium/30 text-premium"
-											: commissionDispute.status === "approved"
-												? "bg-verified/10 border-verified/30 text-verified"
-												: "bg-content/5 border-content/10 text-content-muted"
-									}`}
-								>
-									<div className="flex items-center gap-1.5 font-bold mb-1">
-										<AlertTriangle className="w-4 h-4 shrink-0" />
-										<span>
-											{commissionDispute.status === "pending" &&
-												"Komisi dalam Sengketa (Dispute)"}
-											{commissionDispute.status === "approved" &&
-												"Sengketa Disetujui Kurator"}
-											{commissionDispute.status === "rejected" &&
-												"Sengketa Ditolak Kurator"}
-										</span>
-									</div>
-									<p className="font-semibold text-content mb-1">
-										Alasan dispute: &ldquo;{commissionDispute.reason}&rdquo;
-									</p>
-									<p className="text-content-muted mt-1">
-										{commissionDispute.status === "pending" &&
-											"Laporan sengketa sedang ditinjau oleh Kurator TruBrush. Keputusan sengketa bersifat mutlak."}
-										{commissionDispute.status === "approved" &&
-											(commission.payment_method === "wallet"
-												? isArtistView
-													? `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke saldo E-Wallet Klien.`
-													: `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke saldo E-Wallet Anda.`
-												: isArtistView
-													? `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke kartu kredit Klien (berakhir di ${commission.card_last_four ?? "••••"}).`
-													: `Dana sebesar ${formatPrice(commission.price)} telah di-refund ke kartu kredit Anda (berakhir di ${commission.card_last_four ?? "••••"}).`)}
-										{commissionDispute.status === "rejected" &&
-											(isArtistView
-												? `Dana sebesar ${formatPrice(commission.price)} telah dilepaskan ke dompet E-Wallet Anda karena dispute ditolak.`
-												: `Dana sebesar ${formatPrice(commission.price)} telah dilepaskan ke dompet Artist karena dispute ditolak.`)}
-									</p>
-								</div>
-							)}
-						</div>
-
-						{/*Comments Section*/}
-						<div className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-							<div className="flex items-center gap-2 mb-3">
-								<MessageSquare className="w-4 h-4 text-primary" />
-								<p className="font-medium text-sm text-content">
-									Komentar dan revisi
-								</p>
-							</div>
-							<div className="space-y-2">
-								{thread.length === 0 ? (
-									<p className="text-sm text-content-muted">
-										Belum ada komentar.
-									</p>
-								) : (
-									thread.map((item) => {
-										const author = users.find(
-											(entry) => entry.id === item.user_id,
-										);
-										return (
-											<div
-												key={item.id}
-												className="rounded-lg bg-content/5 px-3 py-2"
-											>
-												<p className="text-xs text-content-muted">
-													{author?.name ?? "User"} ·{" "}
-													{formatDate(item.created_at)}
-												</p>
-												<p className="mt-1 text-sm text-content">
-													{item.comment}
-												</p>
-											</div>
-										);
-									})
-								)}
-							</div>
-							<form
-								className="mt-3 flex flex-col gap-2 sm:flex-row"
-								onSubmit={(event) => {
-									event.preventDefault();
-									addRevision(commission.id, user.id, comment);
-									setComment("");
-								}}
-							>
-								<input
-									value={comment}
-									onChange={(event) => setComment(event.target.value)}
-									placeholder="Tulis komentar, negosiasi harga, atau balasan..."
-									className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-background px-3 py-2 text-sm outline-none focus:border-primary dark:border-slate-700"
-								/>
-								<Button type="submit" className="justify-center text-sm">
-									Kirim
-								</Button>
-							</form>
-						</div>
+						{/* 4. Revision Logs & Comments */}
+						<CommissionRevisionLogs
+							thread={thread}
+							artistName={artist?.name}
+							clientName={client?.name}
+							artistId={commission.artists_id}
+							onAddComment={(commentText) =>
+								addRevisionMutation.mutate({
+									id: commission.id,
+									comment: commentText,
+								})
+							}
+						/>
 					</div>
 				</div>
 			</article>
 
-			{/* Modals for payment and dispute */}
-			<PaymentMethodModal
-				commissionId={commission.id}
-				commissionTitle={commission.commission_title}
-				price={commission.price}
-				isOpen={isPaymentOpen}
-				onClose={() => setIsPaymentOpen(false)}
-				onSubmitSuccess={(method, lastFour) => {
-					const res = setPaymentStatus(commission.id, "paid", method, lastFour);
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
-					setIsPaymentOpen(false);
-				}}
-			/>
-
+			{/* Dispute Modal */}
 			<FileDisputeModal
 				commissionTitle={commission.commission_title}
 				isOpen={isDisputeOpen}
 				onClose={() => setIsDisputeOpen(false)}
 				onSubmit={(reason) => {
-					const res = fileDispute(commission.id, reason);
-					if (res.success) {
-						addToast({ message: res.message, type: "success" });
-					} else {
-						addToast({ message: res.message, type: "error" });
-					}
+					createDisputeMutation.mutate({
+						commission_id: commission.id,
+						reason,
+					});
 					setIsDisputeOpen(false);
 				}}
 			/>
 		</div>
 	);
 }
+
+export default CommissionDetailContent;

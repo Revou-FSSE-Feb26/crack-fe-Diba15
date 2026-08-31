@@ -1,452 +1,227 @@
 "use client";
 
-import {
-	ArrowLeft,
-	ImageIcon,
-	LinkIcon,
-	Palette,
-	ShieldCheck,
-	Tags,
-	X,
-} from "lucide-react";
+import { ArrowLeft, Loader2, Palette, Tags, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-
+import ArtworkCuratorToggle from "@/components/post-art/ArtworkCuratorToggle";
+import ArtworkMediaUploader from "@/components/post-art/ArtworkMediaUploader";
+import ArtworkWipUploader from "@/components/post-art/ArtworkWipUploader";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
-import { useArtworkStore } from "@/store/ArtworkStore";
-import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
-import { useUserStore } from "@/store/UserStore";
-import type { UploadType } from "@/types";
-
-interface PostArtworkForm {
-	title: string;
-	description: string;
-	images: string;
-	wipProofUrl: string;
-	uploadType: UploadType;
-	tags: string;
-	reviewByCurator: boolean;
-}
-
-const splitLines = (value: string) =>
-	value
-		.split(/\r?\n/)
-		.map((item) => item.trim())
-		.filter(Boolean);
-
-const splitTags = (value: string) =>
-	value
-		.split(",")
-		.map((item) => item.trim())
-		.filter(Boolean);
+import Select from "@/components/ui/form/Select";
+import Textarea from "@/components/ui/form/Textarea";
+import { useArtworkUploadForm } from "@/hooks/useArtworkUploadForm";
 
 export default function PostArtPage() {
-	const router = useRouter();
-	const { user, isAuthenticated } = useUserStore();
-	const { createArtwork, tags: existingTags } = useArtworkStore();
-	const { openModal } = useModalStore();
-	const [tagInput, setTagInput] = useState("");
-	const { profiles } = useProfileStore();
-	const profile = profiles.find((item) => item.user_id === user?.id);
-
-	useEffect(() => {
-		if (profile && profile.strike_count >= 5) {
-			openModal({
-				title: "Akun Ditangguhkan (Blocked)",
-				description:
-					"Akun Anda telah ditangguhkan karena melanggar aturan TruBrush (Strike Count mencapai 5/5). Anda tidak dapat mengunggah karya baru.",
-				type: "alert",
-				variant: "danger",
-				onConfirm: () => router.push("/profile"),
-				onCancel: () => router.push("/profile"),
-			});
-		}
-	}, [profile, openModal, router]);
 	const {
 		register,
 		handleSubmit,
-		setValue,
-		control,
-		formState: { errors },
-	} = useForm<PostArtworkForm>({
-		defaultValues: {
-			title: "",
-			description: "",
-			images: "",
-			wipProofUrl: "",
-			uploadType: "original",
-			tags: "",
-			reviewByCurator: true,
-		},
-	});
-
-	const selectedTags = splitTags(useWatch({ control, name: "tags" }) ?? "");
-	const normalizedSelectedTags = selectedTags.map((tag) => tag.toLowerCase());
-	const tagQuery = tagInput.trim().toLowerCase();
-	const tagSuggestions = existingTags
-		.filter(
-			(tag) => !normalizedSelectedTags.includes(tag.tag_name.toLowerCase()),
-		)
-		.filter((tag) => !tagQuery || tag.tag_name.toLowerCase().includes(tagQuery))
-		.slice(0, 6);
-
-	const updateTags = (nextTags: string[]) => {
-		const uniqueTags = Array.from(
-			new Set(nextTags.map((tag) => tag.trim()).filter(Boolean)),
-		);
-		setValue("tags", uniqueTags.join(", "), {
-			shouldDirty: true,
-			shouldValidate: true,
-		});
-	};
-
-	const addTag = (tagName: string) => {
-		const trimmed = tagName.trim();
-		if (!trimmed) return;
-
-		updateTags([...selectedTags, trimmed]);
-		setTagInput("");
-	};
-
-	const removeTag = (tagName: string) => {
-		updateTags(
-			selectedTags.filter((tag) => tag.toLowerCase() !== tagName.toLowerCase()),
-		);
-	};
-
-	const onSubmit = (data: PostArtworkForm) => {
-		if (!isAuthenticated || !user) {
-			openModal({
-				title: "Login diperlukan",
-				description: "Silakan login sebagai artist untuk post artwork.",
-				type: "confirm",
-				confirmLabel: "Login",
-				cancelLabel: "Batal",
-				onConfirm: () => router.push("/login"),
-			});
-			return;
-		}
-
-		if (user.role !== "artist") {
-			openModal({
-				title: "Hanya artist yang bisa post art",
-				description:
-					"Gunakan akun artist untuk mengunggah artwork ke TruBrush.",
-			});
-			return;
-		}
-
-		if (profile && profile.strike_count >= 5) {
-			openModal({
-				title: "Akun Ditangguhkan (Blocked)",
-				description:
-					"Akun Anda telah ditangguhkan karena melanggar aturan TruBrush (Strike Count mencapai 5/5). Anda tidak dapat mengunggah karya baru.",
-				type: "alert",
-				variant: "danger",
-				onConfirm: () => router.push("/profile"),
-			});
-			return;
-		}
-
-		const images = splitLines(data.images);
-		const shouldReview = data.reviewByCurator;
-		const artwork = createArtwork({
-			artists_id: user.id,
-			title: data.title.trim(),
-			description: data.description.trim() || null,
-			images_url: images,
-			wip_proof_url: data.wipProofUrl.trim() || undefined,
-			upload_type: data.uploadType,
-			curation_status: shouldReview ? "pending" : "unapproved",
-			is_visible_on_feed: !shouldReview,
-			tag_names: splitTags(data.tags),
-		});
-
-		openModal({
-			title: shouldReview
-				? "Artwork dikirim ke kurator"
-				: "Artwork berhasil dipost",
-			description: shouldReview
-				? "Karya tersimpan dengan status pending dan belum tampil di feed sampai lolos kurasi."
-				: "Karya sudah tampil di feed karena kamu memilih tidak diperiksa kurator.",
-			type: "confirm",
-			confirmLabel: shouldReview ? "Lihat Profil" : "Lihat Artwork",
-			cancelLabel: "Tetap di sini",
-			onConfirm: () =>
-				router.push(shouldReview ? "/profile" : `/detail/${artwork.id}`),
-		});
-	};
+		errors,
+		artworkFiles,
+		wipFile,
+		isSubmitting,
+		tagInput,
+		setTagInput,
+		selectedTags,
+		tagSuggestions,
+		addTag,
+		removeTag,
+		handleArtworkFileChange,
+		handleWipFileChange,
+		removeArtworkFile,
+		removeWipFile,
+		onSubmit,
+	} = useArtworkUploadForm();
 
 	return (
-		<main className="min-h-screen bg-background text-content pb-16">
-			<div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-				<Link
-					href="/"
-					className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover"
-				>
-					<ArrowLeft className="w-4 h-4" />
-					Kembali ke Feed
-				</Link>
+		<div className="min-h-screen bg-background pb-20 pt-8">
+			<div className="container max-w-3xl mx-auto px-4">
+				{/* Top Bar */}
+				<div className="flex items-center justify-between mb-8">
+					<Link
+						href="/"
+						className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+					>
+						<ArrowLeft className="h-4 w-4" />
+						Kembali ke Beranda
+					</Link>
+				</div>
 
-				<div className="mt-6">
-					<div className="mb-6">
-						<h1 className="font-heading text-2xl font-bold text-content">
-							Post Art
+				<div className="space-y-6">
+					<div>
+						<h1 className="font-heading text-2xl sm:text-3xl font-bold text-content">
+							Unggah Karya Seni Baru
 						</h1>
-						<p className="mt-1 text-sm text-content-muted">
-							Unggah karya, bukti WIP, dan tentukan apakah karya perlu diperiksa
-							kurator.
+						<p className="text-sm text-content-muted mt-1">
+							Bagikan karya ilustrasi orisinal Anda dan dapatkan apresiasi dari
+							komunitas TruBrush.
 						</p>
 					</div>
 
-					<form
-						onSubmit={handleSubmit(onSubmit)}
-						className="bg-surface border border-content/10 rounded-2xl p-5 sm:p-6 space-y-5"
-					>
-						<div>
-							<label
-								htmlFor="title"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
-								Judul Artwork <span className="text-sm text-danger">*</span>
-							</label>
-							<Input
-								id="title"
-								className="bg-background"
-								placeholder="Contoh: Neon Samurai"
-								{...register("title", {
-									required: "Judul artwork wajib diisi",
-									validate: (value) =>
-										value.trim().length > 0 || "Judul artwork wajib diisi",
-								})}
-							>
-								<Palette className="h-5 w-5 text-gray-400" />
-							</Input>
-							{errors.title && (
-								<p className="text-danger text-xs mt-1">
-									{errors.title.message}
-								</p>
-							)}
-						</div>
+					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+						{/* 1. Media Uploader */}
+						<ArtworkMediaUploader
+							artworkFiles={artworkFiles}
+							onFileChange={handleArtworkFileChange}
+							onRemoveFile={removeArtworkFile}
+						/>
 
-						<div>
-							<label
-								htmlFor="description"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
-								Deskripsi
-							</label>
-							<textarea
-								id="description"
-								placeholder="Ceritakan konsep, medium, style, atau proses karya."
-								className="min-h-28 w-full resize-none rounded-lg border border-content/10 bg-background px-3 py-2.5 text-sm text-content outline-none focus:border-primary"
-								{...register("description")}
-							/>
-						</div>
+						{/* 2. Form Details */}
+						<div className="bg-surface border border-content/10 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+							<h2 className="font-heading text-base font-bold text-content flex items-center gap-2">
+								<Palette className="h-5 w-5 text-primary" />
+								Informasi Karya
+							</h2>
 
-						<div>
-							<label
-								htmlFor="images"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
-								URL Gambar <span className="text-sm text-danger">*</span>
-							</label>
-							<textarea
-								id="images"
-								placeholder={
-									"Masukkan satu URL gambar per baris\nhttps://picsum.photos/seed/karya-baru/900/650"
-								}
-								className="min-h-24 w-full resize-none rounded-lg border border-content/10 bg-background px-3 py-2.5 text-sm text-content outline-none focus:border-primary"
-								{...register("images", {
-									required: "Minimal satu URL gambar wajib diisi",
-									validate: (value) =>
-										splitLines(value).length > 0 ||
-										"Minimal satu URL gambar wajib diisi",
-								})}
-							/>
-							{errors.images && (
-								<p className="text-danger text-xs mt-1">
-									{errors.images.message}
-								</p>
-							)}
-						</div>
-
-						<div>
-							<label
-								htmlFor="wipProofUrl"
-								className="block text-sm font-semibold mb-1.5 text-content"
-							>
-								URL WIP Proof
-							</label>
-							<Input
-								id="wipProofUrl"
-								placeholder="https://picsum.photos/seed/wip-proof/900/650"
-								{...register("wipProofUrl")}
-							>
-								<LinkIcon className="h-5 w-5 text-gray-400" />
-							</Input>
-						</div>
-
-						<div className="grid gap-4 sm:grid-cols-2">
+							{/* Title */}
 							<div>
-								<label
-									htmlFor="uploadType"
-									className="block text-sm font-semibold mb-1.5 text-content"
-								>
-									Tipe Upload <span className="text-sm text-danger">*</span>
+								<label htmlFor="title" className="form-label">
+									Judul Artwork <span className="text-danger">*</span>
 								</label>
-								<select
-									id="uploadType"
-									className="w-full rounded-lg border border-content/10 bg-background px-3 py-2.5 text-sm text-content outline-none focus:border-primary"
-									{...register("uploadType")}
-								>
-									<option value="original">Original</option>
-									<option value="fanart">Fan Art</option>
-									<option value="commission">Commission</option>
-								</select>
+								<Input
+									id="title"
+									placeholder="Contoh: Cyberpunk Katana Girl 2077"
+									{...register("title", {
+										required: "Judul artwork wajib diisi.",
+									})}
+								/>
+								{errors.title && (
+									<p className="form-error-msg">{errors.title.message}</p>
+								)}
 							</div>
 
+							{/* Description */}
 							<div>
-								<label
-									htmlFor="tag-picker"
-									className="block text-sm font-semibold mb-1.5 text-content"
-								>
-									Tags
+								<label htmlFor="description" className="form-label">
+									Deskripsi / Cerita Singkat
 								</label>
-								<input type="hidden" {...register("tags")} />
-								<div className="rounded-lg border border-content/10 bg-background px-3 py-2.5 focus-within:border-primary">
-									{selectedTags.length > 0 && (
-										<div className="mb-2 flex flex-wrap gap-1.5">
-											{selectedTags.map((tag) => (
-												<span
-													key={tag}
-													className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-												>
-													{tag}
-													<button
-														type="button"
-														onClick={() => removeTag(tag)}
-														className="rounded-full p-0.5 hover:bg-primary/10"
-														aria-label={`Hapus tag ${tag}`}
-													>
-														<X className="h-3 w-3" />
-													</button>
-												</span>
-											))}
-										</div>
-									)}
+								<Textarea
+									id="description"
+									rows={3}
+									placeholder="Ceritakan latar belakang, tools yang digunakan, atau konsep di balik karya ini..."
+									{...register("description")}
+								/>
+							</div>
 
-									<div className="flex items-center gap-2">
-										<Tags className="h-5 w-5 shrink-0 text-gray-400" />
-										<input
-											id="tag-picker"
+							{/* Upload Type */}
+							<div>
+								<label htmlFor="uploadType" className="form-label">
+									Kategori Karya
+								</label>
+								<Select id="uploadType" {...register("uploadType")}>
+									<option value="original">Original Art (Karya Asli)</option>
+									<option value="fanart">Fanart (Karakter Populer / IP)</option>
+									<option value="commission">Hasil Komisi Klien</option>
+								</Select>
+							</div>
+
+							{/* Tags */}
+							<div className="space-y-2">
+								<label htmlFor="tagsInput" className="form-label">
+									Tag & Topik
+								</label>
+								<div className="flex gap-2">
+									<div className="flex-1">
+										<Input
+											id="tagsInput"
+											type="text"
 											value={tagInput}
-											onChange={(event) => setTagInput(event.target.value)}
-											onKeyDown={(event) => {
-												if (event.key === "Enter" || event.key === ",") {
-													event.preventDefault();
+											onChange={(e) => setTagInput(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
 													addTag(tagInput);
 												}
-
-												if (
-													event.key === "Backspace" &&
-													!tagInput &&
-													selectedTags.length > 0
-												) {
-													removeTag(selectedTags[selectedTags.length - 1]);
-												}
 											}}
-											placeholder="Cari atau buat tag baru"
-											className="min-w-0 flex-1 bg-transparent text-sm text-content outline-none placeholder:text-content-muted"
-										/>
-										{tagInput.trim() && (
-											<button
-												type="button"
-												onClick={() => addTag(tagInput)}
-												className="text-xs font-semibold text-primary hover:text-primary-hover"
-											>
-												Tambah
-											</button>
-										)}
+											placeholder="Ketik tag lalu tekan Enter..."
+										>
+											<Tags className="h-4 w-4" />
+										</Input>
 									</div>
+									<Button
+										type="button"
+										variant="secondary"
+										onClick={() => addTag(tagInput)}
+										disabled={!tagInput.trim()}
+									>
+										Tambah Tag
+									</Button>
 								</div>
 
-								{(tagSuggestions.length > 0 || tagInput.trim()) && (
-									<div className="mt-2 flex flex-wrap gap-1.5">
+								{/* Selected Tags */}
+								{selectedTags.length > 0 && (
+									<div className="flex flex-wrap gap-1.5 pt-1">
+										{selectedTags.map((tag) => (
+											<span
+												key={tag}
+												className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-content/5 text-content border border-content/10"
+											>
+												#{tag}
+												<button
+													type="button"
+													onClick={() => removeTag(tag)}
+													className="text-content-muted hover:text-content"
+												>
+													<X className="h-3 w-3" />
+												</button>
+											</span>
+										))}
+									</div>
+								)}
+
+								{/* Suggestions */}
+								{tagSuggestions.length > 0 && (
+									<div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs text-content-muted">
+										<span>Saran:</span>
 										{tagSuggestions.map((tag) => (
 											<button
 												key={tag.id}
 												type="button"
 												onClick={() => addTag(tag.tag_name)}
-												className="rounded-full bg-content/5 px-2.5 py-1 text-xs font-medium text-content-muted transition-colors hover:bg-primary/10 hover:text-primary"
+												className="px-2.5 py-1 rounded-lg bg-content/5 hover:bg-content/10 text-content-muted hover:text-content font-medium transition-colors"
 											>
-												{tag.tag_name}
+												+{tag.tag_name}
 											</button>
 										))}
-										{tagInput.trim() &&
-											!existingTags.some(
-												(tag) =>
-													tag.tag_name.toLowerCase() ===
-													tagInput.trim().toLowerCase(),
-											) &&
-											!normalizedSelectedTags.includes(
-												tagInput.trim().toLowerCase(),
-											) && (
-												<button
-													type="button"
-													onClick={() => addTag(tagInput)}
-													className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
-												>
-													Buat &quot;{tagInput.trim()}&quot;
-												</button>
-											)}
 									</div>
 								)}
 							</div>
 						</div>
 
-						<label className="flex items-start gap-3 rounded-xl border border-content/10 bg-content/5 px-4 py-3 cursor-pointer">
-							<input
-								type="checkbox"
-								className="mt-1 h-4 w-4 accent-primary"
-								{...register("reviewByCurator")}
-							/>
-							<span>
-								<span className="flex items-center gap-2 text-sm font-semibold text-content">
-									<ShieldCheck className="h-4 w-4 text-verified" />
-									Periksa oleh curator
-								</span>
-								<span className="mt-1 block text-xs text-content-muted">
-									Jika aktif, artwork masuk status pending dan belum tampil di
-									feed sampai lolos kurasi.
-								</span>
-							</span>
-						</label>
+						{/* 3. WIP Proof Uploader */}
+						<ArtworkWipUploader
+							wipFile={wipFile}
+							onFileChange={handleWipFileChange}
+							onRemoveFile={removeWipFile}
+						/>
 
-						<div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-							<Button
-								type="button"
-								variant="secondary"
-								className="justify-center"
-								onClick={() => router.push("/")}
-							>
-								Batal
-							</Button>
+						{/* 4. Curator Review Toggle */}
+						<ArtworkCuratorToggle register={register} />
+
+						{/* Submit Button */}
+						<div className="flex items-center justify-end gap-3 pt-4">
+							<Link href="/">
+								<Button type="button" variant="secondary">
+									Batal
+								</Button>
+							</Link>
 							<Button
 								type="submit"
-								className="flex items-center gap-1 justify-center"
+								disabled={isSubmitting}
+								className="min-w-37.5"
 							>
-								<ImageIcon className="h-4 w-4" />
-								Post Artwork
+								{isSubmitting ? (
+									<>
+										<Loader2 className="h-4 w-4 animate-spin mr-2" />
+										Mengunggah...
+									</>
+								) : (
+									"Publikasikan Artwork"
+								)}
 							</Button>
 						</div>
 					</form>
 				</div>
 			</div>
-		</main>
+		</div>
 	);
 }

@@ -9,17 +9,18 @@ import {
 	ZoomOut,
 } from "lucide-react";
 import Image from "next/image";
+import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useLightboxStore } from "@/store/LightboxStore";
-import { randomKey } from "@/utils/index";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 const ZOOM_STEP = 0.5;
 
 function LightboxContent() {
-	const { images, initialIndex, title, closeLightbox } = useLightboxStore();
+	const { images, initialIndex, title, isProtected, closeLightbox } =
+		useLightboxStore();
 	const [index, setIndex] = useState(initialIndex);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -87,28 +88,28 @@ function LightboxContent() {
 	}, [hasMultiple, zoomIn, goNext, zoomOut, goPrev, closeLightbox]);
 
 	// Wheel to zoom
-	const handleWheel = (e: React.WheelEvent) => {
+	const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		if (e.deltaY < 0) zoomIn();
 		else zoomOut();
 	};
 
 	// Drag to pan when zoomed in
-	const handleMouseDown = (e: React.MouseEvent) => {
+	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (scale <= 1) return;
 		setIsDragging(true);
 		dragStart.current = { x: e.clientX, y: e.clientY };
 		posStart.current = position;
 	};
 
-	const handleMouseMove = (e: React.MouseEvent) => {
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (!isDragging) return;
 		const dx = e.clientX - dragStart.current.x;
 		const dy = e.clientY - dragStart.current.y;
 		setPosition({ x: posStart.current.x + dx, y: posStart.current.y + dy });
 	};
 
-	const handleTouchStart = (e: React.TouchEvent) => {
+	const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
 		if (scale <= 1) return;
 		setIsDragging(true);
 		const touch = e.touches[0];
@@ -116,7 +117,7 @@ function LightboxContent() {
 		posStart.current = position;
 	};
 
-	const handleTouchMove = (e: React.TouchEvent) => {
+	const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
 		if (!isDragging) return;
 		const touch = e.touches[0];
 		const dx = touch.clientX - dragStart.current.x;
@@ -208,8 +209,9 @@ function LightboxContent() {
 			</div>
 
 			{/* Image stage */}
-			{/* biome-ignore lint/a11y/noStaticElementInteractions: image stage handles drag and zoom gestures */}
 			<div
+				role="application"
+				aria-label="Image viewer"
 				className="relative z-10 flex flex-1 items-center justify-center overflow-hidden px-4 pb-4 sm:px-10"
 				onWheel={handleWheel}
 				onMouseDown={handleMouseDown}
@@ -235,10 +237,15 @@ function LightboxContent() {
 					</button>
 				)}
 
-				<div
+				<section
+					aria-label="Area pratinjau gambar"
 					className="relative h-full w-full select-none"
+					onContextMenu={(e) => e.preventDefault()}
+					onDragStart={(e) => e.preventDefault()}
 					style={{
 						cursor: scale > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+						WebkitTouchCallout: "none",
+						userSelect: "none",
 					}}
 				>
 					{currentImage && (
@@ -246,15 +253,42 @@ function LightboxContent() {
 							src={currentImage}
 							alt={title ?? `Gambar ${index + 1}`}
 							fill
-							sizes="100vw"
+							unoptimized
+							priority
 							draggable={false}
-							className="object-contain transition-transform duration-150 ease-out"
+							onContextMenu={(e) => e.preventDefault()}
+							className="object-contain transition-transform duration-150 ease-out pointer-events-none"
 							style={{
 								transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
 							}}
 						/>
 					)}
-				</div>
+
+					{/* Watermark Diagonal Overlay for Protected Images */}
+					{isProtected && (
+						<>
+							<div
+								className="absolute inset-0 pointer-events-none opacity-25 mix-blend-overlay z-15"
+								style={{
+									backgroundImage:
+										"repeating-linear-gradient(45deg, #ffffff 0, #ffffff 1.5px, transparent 0, transparent 36px)",
+									backgroundSize: "36px 36px",
+								}}
+							/>
+							<div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-15 gap-4">
+								<span className="text-white/30 font-extrabold tracking-widest text-xl sm:text-3xl uppercase select-none font-display drop-shadow text-center px-4">
+									TRUBRUSH PREVIEW ONLY
+								</span>
+								<span className="text-white/20 font-bold tracking-wider text-xs sm:text-sm uppercase select-none font-display text-center px-4">
+									PROTECTED ARTWORK • DO NOT DISTRIBUTE
+								</span>
+							</div>
+						</>
+					)}
+
+					{/* Transparent cover overlay for anti-right click & anti-touch save */}
+					<div className="absolute inset-0 z-20 bg-transparent pointer-events-none" />
+				</section>
 
 				{hasMultiple && (
 					<button
@@ -277,7 +311,7 @@ function LightboxContent() {
 					{images.map((img, i) => {
 						return (
 							<button
-								key={`${img}-${randomKey()}`}
+								key={img}
 								type="button"
 								onClick={() => setIndex(i)}
 								className={[

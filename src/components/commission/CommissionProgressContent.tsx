@@ -6,31 +6,25 @@ import { useMemo } from "react";
 
 import AvatarInitials from "@/components/home/AvatarInitials";
 import Stat from "@/components/ui/Stat";
-import users from "@/data/users";
+import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useMounted } from "@/hooks/useMounted";
-import { useCommissionStore } from "@/store/CommissionStore";
 import { useUserStore } from "@/store/UserStore";
 import { formatDate, formatPrice } from "@/utils";
 import { commissionStatusConfig } from "@/utils/commissionStatus";
 
 export default function CommissionProgressContent() {
 	const { user, isAuthenticated } = useUserStore();
-	const { commissions } = useCommissionStore();
+	const roleFilter = user?.role === "artist" ? "artist" : "client";
+	const { data: commissions = [] } = useUserCommissions(roleFilter);
 	const mounted = useMounted();
 
 	const visibleCommissions = useMemo(() => {
 		if (!user) return [];
 
-		return commissions
-			.filter((commission) =>
-				user.role === "artist"
-					? commission.artists_id === user.id
-					: commission.client_id === user.id,
-			)
-			.sort(
-				(a, b) =>
-					new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
-			);
+		return [...commissions].sort(
+			(a, b) =>
+				new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+		);
 	}, [commissions, user]);
 
 	if (!mounted) {
@@ -46,7 +40,7 @@ export default function CommissionProgressContent() {
 	if (!isAuthenticated || !user) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-6 text-center">
 					<Briefcase className="w-10 h-10 text-primary mx-auto mb-3" />
 					<h1 className="font-heading text-2xl font-semibold text-content">
 						Login untuk melihat commission
@@ -63,28 +57,23 @@ export default function CommissionProgressContent() {
 	const isArtistView = user.role === "artist";
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+		<div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<p className="text-sm font-medium text-primary">
-						{isArtistView ? "Artist POV" : "Client POV"}
-					</p>
-					<h1 className="font-heading text-3xl font-bold text-content">
+					<h1 className="font-heading text-2xl font-bold text-content">
 						Progress Commission
 					</h1>
-					<p className="mt-1 text-sm text-content-muted">
-						{isArtistView
-							? "Lihat daftar commission dari client dan buka detail untuk mengelola progress."
-							: "Lihat daftar commission kamu dan buka detail untuk pembayaran, revisi, approval, atau dispute."}
+					<p className="text-sm text-content-muted">
+						Lacak proses kerja, preview karya, dan riwayat pesanan aktif Anda.
 					</p>
 				</div>
-				<span className="text-sm text-content-muted">
-					{visibleCommissions.length} order
+				<span className="self-start rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:self-auto">
+					Mode: {isArtistView ? "Artist (Penerima)" : "Client (Pemesan)"}
 				</span>
 			</div>
 
 			{visibleCommissions.length === 0 ? (
-				<div className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-8 text-center">
+				<div className="bg-surface border border-content/10 rounded-2xl p-8 text-center">
 					<Briefcase className="w-10 h-10 text-content-muted mx-auto mb-3" />
 					<p className="font-semibold text-content">Belum ada commission</p>
 					<p className="mt-1 text-sm text-content-muted">
@@ -94,26 +83,26 @@ export default function CommissionProgressContent() {
 			) : (
 				<div className="space-y-4">
 					{visibleCommissions.map((commission) => {
-						const artist = users.find(
-							(item) => item.id === commission.artists_id,
-						);
-						const client = users.find(
-							(item) => item.id === commission.client_id,
-						);
+						const artist = commission.artist;
+						const client = commission.client;
 						const status = commissionStatusConfig[commission.status];
 						const counterpartName = isArtistView
 							? (client?.name ?? "Client")
 							: (artist?.name ?? "Artist");
+						const counterpartAvatar = isArtistView
+							? client?.profile?.avatarUrl
+							: artist?.profile?.avatarUrl;
 
 						return (
 							<article
 								key={commission.id}
-								className="bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5"
+								className="bg-surface border border-content/10 rounded-2xl p-4 sm:p-5"
 							>
 								<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 									<div className="flex items-start gap-3 min-w-0">
 										<AvatarInitials
 											name={counterpartName}
+											src={counterpartAvatar ?? undefined}
 											className="w-12 h-12 text-sm shrink-0"
 										/>
 										<div className="min-w-0">
@@ -156,22 +145,14 @@ export default function CommissionProgressContent() {
 											label="Harga"
 											value={formatPrice(commission.price)}
 										/>
-										<Stat
-											icon={Briefcase}
-											label="Dibuat"
-											value={formatDate(commission.created_at)}
-										/>
+										<Link
+											href={`/commissions/${commission.id}`}
+											className="flex flex-col items-center justify-center rounded-xl bg-primary text-white p-2.5 transition-colors hover:bg-primary-hover col-span-2 sm:col-span-1 shadow-xs"
+										>
+											<Eye className="w-4 h-4 mb-1" />
+											<span className="text-xs font-semibold">Buka Order</span>
+										</Link>
 									</div>
-								</div>
-
-								<div className="mt-4 flex justify-end">
-									<Link
-										href={`/commissions/${commission.id}`}
-										className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-background shadow-sm transition-colors hover:bg-primary-hover"
-									>
-										<Eye className="w-4 h-4" />
-										Detail
-									</Link>
 								</div>
 							</article>
 						);

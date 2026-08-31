@@ -23,75 +23,29 @@ import ReportArtModal from "@/components/home/ReportArtModal";
 import Button from "@/components/ui/Button";
 import Pill from "@/components/ui/Pill";
 import { useCopyLink } from "@/hooks/useCopyLink";
-import { useFavoriteStore } from "@/store/FavoriteStore";
-import { useFollowStore } from "@/store/FollowStore";
+import { useFavoriteArtwork } from "@/hooks/useFavoriteArtwork";
+import { useFollowArtist } from "@/hooks/useFollowArtist";
+import { useCreateReport } from "@/hooks/useReportQueries";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
-import { useReportStore } from "@/store/ReportStore";
-import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import type { ArtworkWithRelations } from "@/types";
-import { randomKey } from "@/utils";
+import type { ArtworkWithRelations, User } from "@/types";
 
 export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const { artist, artist_profile, tags } = artwork;
 	const router = useRouter();
 	const { copyPath } = useCopyLink();
-	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
 	const { user, isAuthenticated } = useUserStore();
-	const { isFavorite, toggleFavorite } = useFavoriteStore();
-	const { profiles } = useProfileStore();
-	const isArtworkFavorite = user ? isFavorite(user.id, artwork.id) : false;
-
-	const { followArtist, unfollowArtist, isFollowing } = useFollowStore();
-	const isArtistFollowed = user ? isFollowing(user.id, artist.id) : false;
-
-	const handleFollowToggle = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-
-			if (!isAuthenticated || !user) {
-				openModal({
-					title: "Login diperlukan",
-					description: "Silakan login terlebih dahulu untuk mengikuti artist.",
-					type: "confirm",
-					confirmLabel: "Login",
-					cancelLabel: "Batal",
-					onConfirm: () => router.push("/login"),
-				});
-				return;
-			}
-
-			if (user.role !== "artist" && user.role !== "client") {
-				openModal({
-					title: "Akses Terbatas",
-					description:
-						"Hanya akun client dan artist yang dapat mengikuti artis.",
-				});
-				return;
-			}
-
-			if (isArtistFollowed) {
-				unfollowArtist(user.id, artist.id);
-			} else {
-				followArtist(user.id, artist.id);
-			}
-		},
-		[
-			isAuthenticated,
-			user,
-			isArtistFollowed,
-			artist.id,
-			followArtist,
-			unfollowArtist,
-			openModal,
-			router,
-		],
+	const { isArtworkFavorite, handleFavoriteToggle } = useFavoriteArtwork(
+		artwork.id,
+		artwork.title,
 	);
+
+	const { isArtistFollowed, handleFollowToggle } = useFollowArtist(artist.id);
+	const createReportMutation = useCreateReport();
 	const basePrice =
-		profiles.find((profile) => profile.user_id === artist.id)?.base_price_idr ??
+		artist_profile?.base_price_idr ??
+		(artist as Partial<User>)?.profile?.base_price_idr ??
 		null;
 
 	const images = artwork.images_url || [
@@ -102,7 +56,6 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [isReportOpen, setIsReportOpen] = useState(false);
-	const { createReport } = useReportStore();
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const [touchStartX, setTouchStartX] = useState<number | null>(null);
 	const [touchEndX, setTouchEndX] = useState<number | null>(null);
@@ -140,67 +93,39 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 		setTouchEndX(e.targetTouches[0].clientX);
 	};
 
-	const handleTouchEnd = (e: React.TouchEvent) => {
+	const handleTouchEnd = (_e: React.TouchEvent) => {
 		if (!touchStartX || !touchEndX) return;
 		const distance = touchStartX - touchEndX;
 		const isLeftSwipe = distance > minSwipeDistance;
 		const isRightSwipe = distance < -minSwipeDistance;
 
-		if (isLeftSwipe || isRightSwipe) {
-			// Prevent navigation on swipe gesture
-			if (e.cancelable) {
-				e.preventDefault();
-			}
-			// Prevent event propagation to avoid closing the dropdown prematurely
-			e.stopPropagation();
-
-			if (isLeftSwipe && currentImageIndex < imageCount - 1) {
-				setCurrentImageIndex((prev) => prev + 1);
-			} else if (isRightSwipe && currentImageIndex > 0) {
-				setCurrentImageIndex((prev) => prev - 1);
-			}
+		if (isLeftSwipe && currentImageIndex < imageCount - 1) {
+			setCurrentImageIndex((prev) => prev + 1);
+		}
+		if (isRightSwipe && currentImageIndex > 0) {
+			setCurrentImageIndex((prev) => prev - 1);
 		}
 	};
 
 	useEffect(() => {
-		function handleClickOutside(event: MouseEvent) {
+		const handleClickOutside = (event: MouseEvent) => {
 			if (
 				dropdownRef.current &&
 				!dropdownRef.current.contains(event.target as Node)
 			) {
 				setIsDropdownOpen(false);
 			}
-		}
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
 		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
-
-	const handleFavorite = () => {
-		if (!isAuthenticated || !user) {
-			addToast({
-				message: "Login terlebih dahulu untuk menambahkan favorite.",
-				type: "warning",
-			});
-			return;
-		}
-
-		const addedToFavorite = toggleFavorite(user.id, artwork.id);
-
-		addToast({
-			message: addedToFavorite
-				? `Berhasil ditambahkan ke favorite: ${artwork.title}.`
-				: `Dihapus dari favorite: ${artwork.title}.`,
-			type: addedToFavorite ? "success" : "info",
-		});
-	};
 
 	const handleReport = () => {
 		if (!isAuthenticated || !user) {
 			openModal({
 				title: "Login diperlukan",
-				description: "Silakan login terlebih dahulu untuk melaporkan karya.",
+				description:
+					"Silakan login terlebih dahulu untuk melaporkan karya ini.",
 				type: "confirm",
 				confirmLabel: "Login",
 				cancelLabel: "Batal",
@@ -208,11 +133,11 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 			});
 			return;
 		}
+
 		if (user.role !== "artist" && user.role !== "client") {
 			openModal({
-				title: "Hanya client dan artist yang bisa melapor",
-				description:
-					"Akun dengan peran curator atau admin tidak diperbolehkan melaporkan karya.",
+				title: "Akses Terbatas",
+				description: "Hanya client dan artist yang bisa melapor",
 			});
 			return;
 		}
@@ -226,20 +151,14 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 	const handleReportSubmit = useCallback(
 		(reason: string) => {
 			if (!user) return;
-			const res = createReport({
-				reporter_id: user.id,
+			createReportMutation.mutate({
 				target_type: "artwork",
 				target_id: artwork.id,
 				reason,
 			});
-			if (res.success) {
-				addToast({ message: res.message, type: "success" });
-			} else {
-				addToast({ message: res.message, type: "error" });
-			}
 			setIsReportOpen(false);
 		},
-		[user, artwork.id, createReport, addToast],
+		[user, artwork.id, createReportMutation],
 	);
 
 	const handleCopyLink = (id: string) => {
@@ -255,7 +174,11 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					href={`/artists/${artist.id}`}
 					className="flex items-center gap-2.5 flex-1 min-w-0"
 				>
-					<AvatarInitials name={artist.name} className="w-9 h-9" />
+					<AvatarInitials
+						name={artist.name}
+						className="w-9 h-9"
+						src={artist_profile.avatar_url}
+					/>
 					<div className="min-w-0 flex-1">
 						<div className="flex items-center gap-1.5">
 							<p className="text-sm font-semibold text-content truncate">
@@ -268,71 +191,77 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</div>
 				</Link>
 
-				{/* Follow Button */}
-				{(!user || user.id !== artist.id) && (
-					<button
-						type="button"
-						onClick={handleFollowToggle}
-						className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
-							isArtistFollowed
-								? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
-								: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
-						}`}
-					>
-						{isArtistFollowed ? (
-							<>
-								<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
-								<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
-								<span className="group-hover:hidden">Mengikuti</span>
-								<span className="hidden group-hover:inline text-red-500">
-									Batal Ikuti
-								</span>
-							</>
-						) : (
-							<>
-								<UserPlus className="w-3.5 h-3.5" />
-								<span>Ikuti</span>
-							</>
-						)}
-					</button>
-				)}
-
-				{/* Dropdown Container */}
-				<div className="relative" ref={dropdownRef}>
-					<button
-						type="button"
-						title="More"
-						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-						className={`p-2 rounded-full transition-colors duration-150 -mr-1 cursor-pointer ${isDropdownOpen ? "bg-content/5" : "hover:bg-content/5"}`}
-					>
-						<MoreHorizontal size={18} className="text-content-muted" />
-					</button>
-
-					{isDropdownOpen && (
-						<div className="absolute right-0 mt-1 w-40 bg-background border border-content/10 rounded-lg shadow-lg z-20 overflow-hidden py-1">
-							<button
-								type="button"
-								className="w-full text-left px-4 py-2.5 text-sm text-content hover:bg-content/5 flex items-center gap-2.5 transition-colors"
-								onClick={() => {
-									handleCopyLink(artwork.id);
-								}}
-							>
-								<LinkIcon size={16} className="text-content-muted" />
-								Salin Tautan
-							</button>
-							<button
-								type="button"
-								className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
-								onClick={() => {
-									handleReport();
-									setIsDropdownOpen(false);
-								}}
-							>
-								<Flag size={16} />
-								Laporkan
-							</button>
-						</div>
+				<div className="flex items-center gap-2 shrink-0">
+					{/* Follow Button */}
+					{(!user || user.id !== artist.id) && (
+						<button
+							type="button"
+							onClick={handleFollowToggle}
+							className={`group px-3 py-1 text-xs font-bold rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+								isArtistFollowed
+									? "bg-content/5 border-content/10 text-content hover:bg-red-50 hover:border-red-200 hover:text-red-500 dark:hover:bg-red-950/20 dark:hover:border-red-900/30"
+									: "bg-primary border-primary text-background hover:bg-primary-hover shadow-sm"
+							}`}
+						>
+							{isArtistFollowed ? (
+								<>
+									<UserCheck className="w-3.5 h-3.5 group-hover:hidden" />
+									<UserX className="w-3.5 h-3.5 hidden group-hover:inline text-red-500" />
+									<span className="group-hover:hidden">Mengikuti</span>
+									<span className="hidden group-hover:inline text-red-500">
+										Batal Ikuti
+									</span>
+								</>
+							) : (
+								<>
+									<UserPlus className="w-3.5 h-3.5" />
+									<span>Ikuti</span>
+								</>
+							)}
+						</button>
 					)}
+
+					{/* Dropdown Container */}
+					<div className="dropdown dropdown-end" ref={dropdownRef}>
+						<button
+							type="button"
+							title="More"
+							onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+							className={`btn btn-ghost btn-circle btn-xs -mr-1 ${isDropdownOpen ? "bg-content/5" : ""}`}
+						>
+							<MoreHorizontal size={18} className="text-content-muted" />
+						</button>
+
+						{isDropdownOpen && (
+							<ul className="dropdown-content menu p-1 shadow-lg bg-surface rounded-box w-40 border border-content/10 z-20 mt-1">
+								<li>
+									<button
+										type="button"
+										className="flex items-center gap-2 text-xs text-content"
+										onClick={() => {
+											handleCopyLink(artwork.id);
+										}}
+									>
+										<LinkIcon size={15} className="text-content-muted" />
+										Salin Tautan
+									</button>
+								</li>
+								<li>
+									<button
+										type="button"
+										className="flex items-center gap-2 text-xs text-error"
+										onClick={() => {
+											handleReport();
+											setIsDropdownOpen(false);
+										}}
+									>
+										<Flag size={15} />
+										Laporkan
+									</button>
+								</li>
+							</ul>
+						)}
+					</div>
 				</div>
 			</div>
 
@@ -352,9 +281,10 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 							src={images[currentImageIndex]}
 							alt={`${artwork.title} - Image ${currentImageIndex + 1}`}
 							fill
-							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px"
+							quality={90}
+							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 700px, 800px"
 							className="object-cover transition-opacity duration-300"
-							loading="eager"
+							priority={currentImageIndex === 0}
 						/>
 					) : (
 						<div className="w-full h-full flex items-center justify-center text-content-muted">
@@ -364,7 +294,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 				</Link>
 
 				{artwork.curation_status === "approved" && (
-					<div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-verified/90 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-full pointer-events-none">
+					<div className="absolute top-2 left-2 z-10 badge badge-success badge-sm gap-1 text-white backdrop-blur-sm pointer-events-none">
 						<ShieldCheck className="w-3 h-3" />
 						Terkurasi
 					</div>
@@ -401,9 +331,9 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 						)}
 
 						<div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 items-center">
-							{images.map((_, index) => (
+							{images.map((imgUrl, index) => (
 								<button
-									key={randomKey()}
+									key={`${artwork.id}-dot-${imgUrl}`}
 									type="button"
 									onClick={(e) => handleDotClick(e, index)}
 									className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
@@ -430,7 +360,7 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkWithRelations }) {
 					</Link>
 					<button
 						type="button"
-						onClick={handleFavorite}
+						onClick={handleFavoriteToggle}
 						title={
 							isArtworkFavorite ? "Hapus dari favorite" : "Tambah ke favorite"
 						}

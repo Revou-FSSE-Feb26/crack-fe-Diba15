@@ -44,6 +44,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 	const router = useRouter();
 	const { isAuthenticated, user, logout, isArtist, isAdmin, isCurator } =
 		useUserStore();
+	const avatarUrl = user?.profile?.avatar_url;
 	const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
 	const roles = {
@@ -73,7 +74,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 	};
 
 	return (
-		<aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-slate-200/70 bg-surface p-4 text-content transition-colors duration-300 dark:border-slate-700/60">
+		<aside className="flex justify-between h-full min-h-screen z-50 w-72 flex-col gap-6 border-r border-content/10 bg-surface p-4 text-content transition-colors duration-300">
 			{/* Bagian Atas: Logo & Navigasi */}
 			<div>
 				<div className="mb-6 flex items-center justify-between gap-2">
@@ -83,28 +84,29 @@ export default function Sidebar({ onClose }: SidebarProps) {
 						onClick={onClose}
 						title="Close sidebar"
 						aria-label="Close sidebar"
-						className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-slate-100 hover:text-primary dark:hover:bg-slate-700 cursor-pointer"
+						className="rounded-full p-2 text-content transition-colors duration-200 hover:bg-content/5 hover:text-primary cursor-pointer"
 					>
 						<PanelLeftClose className="h-6 w-6 text-primary" />
 					</button>
 				</div>
 
-				<nav className="space-y-2">
+				<ul className="menu w-full p-0 space-y-1">
 					{menu.map((item) => {
 						const Icon = item.icon;
 						return (
-							<Link
-								key={item.label}
-								href={item.href}
-								onClick={onClose}
-								className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-							>
-								<Icon className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
-								{item.label}
-							</Link>
+							<li key={item.label}>
+								<Link
+									href={item.href}
+									onClick={onClose}
+									className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-primary/10 hover:text-primary active:bg-primary/20"
+								>
+									<Icon className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
+									{item.label}
+								</Link>
+							</li>
 						);
 					})}
-				</nav>
+				</ul>
 			</div>
 
 			{/* Bagian Bawah: Toggle Tema & Footer */}
@@ -125,12 +127,13 @@ export default function Sidebar({ onClose }: SidebarProps) {
 							<button
 								type="button"
 								onClick={() => setProfileMenuOpen((prev) => !prev)}
-								className="w-full flex items-center justify-between gap-3 rounded-full border border-slate-200/70 dark:border-slate-700/60 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+								className="w-full flex items-center justify-between gap-3 rounded-full border border-content/10 px-4 py-2 hover:bg-content/5 cursor-pointer"
 							>
 								<div className="flex items-center gap-2">
 									<AvatarInitials
 										className="w-8 h-8 shrink-0"
 										name={user?.name || ""}
+										src={avatarUrl}
 									/>
 									<div className="flex flex-col items-start gap-0 text-left">
 										<span className="text-sm font-medium text-primary">
@@ -147,26 +150,26 @@ export default function Sidebar({ onClose }: SidebarProps) {
 							</button>
 
 							{profileMenuOpen && (
-								<div className="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-white dark:bg-[#1D2D37] shadow-lg border border-slate-100 dark:border-slate-700 z-50 overflow-hidden flex flex-col">
+								<div className="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-surface shadow-xl border border-content/10 z-50 overflow-hidden flex flex-col">
 									<Link
 										href="/profile"
 										onClick={() => {
 											setProfileMenuOpen(false);
 											onClose();
 										}}
-										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-content hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
+										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-content hover:bg-content/5 transition-colors duration-200 cursor-pointer"
 									>
 										<User className="h-5 w-5 text-content-muted" />
 										<span className="font-semibold">Profil Saya</span>
 									</Link>
-									<div className="border-t border-slate-100 dark:border-slate-800" />
+									<div className="border-t border-content/10" />
 									<button
 										type="button"
 										onClick={() => {
 											handleLogout();
 											onClose();
 										}}
-										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 cursor-pointer"
+										className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-danger hover:bg-danger/10 transition-colors duration-200 cursor-pointer"
 									>
 										<LogOut className="h-5 w-5" />
 										<span className="font-semibold">Logout</span>
@@ -181,7 +184,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 					<button
 						type="button"
 						onClick={toggleTheme}
-						className="group mb-4 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+						className="group mb-4 flex w-full items-center justify-between rounded-2xl px-4 py-3 text-base font-medium text-content transition-all duration-200 hover:bg-content/5"
 					>
 						<div className="flex items-center gap-3">
 							{theme === "dark" ? (
@@ -194,7 +197,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 							</span>
 						</div>
 						{/* Indikator Switch Mini */}
-						<div className="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-300 transition-colors dark:bg-slate-600">
+						<div className="relative inline-flex h-5 w-9 items-center rounded-full bg-content/20 transition-colors">
 							<span
 								className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ${
 									theme === "dark" ? "translate-x-4.5" : "translate-x-1"
@@ -204,7 +207,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 					</button>
 				)}
 
-				<footer className="border-t border-slate-200/70 pt-4 text-sm text-content-muted dark:border-slate-700/60">
+				<footer className="border-t border-content/10 pt-4 text-sm text-content-muted">
 					<div className="mb-3 flex flex-wrap gap-2 text-xs max-w-50">
 						<Link
 							href="/help"

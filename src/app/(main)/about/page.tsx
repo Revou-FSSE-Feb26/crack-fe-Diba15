@@ -155,7 +155,7 @@ export default function AboutPage() {
 					{stats.map(({ value, label }) => (
 						<div
 							key={label}
-							className="flex flex-col items-center text-center rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-warm/40 bg-surface px-4 py-5 transition-colors"
+							className="flex flex-col items-center text-center rounded-2xl border border-content/10 hover:border-warm/40 bg-surface px-4 py-5 transition-colors"
 						>
 							<span className="font-display text-2xl md:text-3xl font-bold text-primary mb-1">
 								{value}
@@ -204,7 +204,7 @@ export default function AboutPage() {
 					</div>
 
 					{/* Kanan: Highlight masalah */}
-					<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-6 space-y-1">
+					<div className="rounded-2xl border border-content/10 bg-surface p-6 space-y-1">
 						{/* Pull quote */}
 						<blockquote className="border-l-4 border-primary pl-4 mb-5">
 							<p className="font-heading text-base font-medium text-content italic leading-relaxed">
@@ -257,7 +257,7 @@ export default function AboutPage() {
 					{steps.map(({ number, icon: Icon, title, description }) => (
 						<div
 							key={number}
-							className="flex gap-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+							className="flex gap-5 rounded-2xl border border-content/10 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
 						>
 							{/* Number + Icon stack */}
 							<div className="flex flex-col items-center gap-2 shrink-0">
@@ -302,7 +302,7 @@ export default function AboutPage() {
 					{values.map(({ icon: Icon, title, description }) => (
 						<div
 							key={title}
-							className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+							className="flex flex-col rounded-2xl border border-content/10 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
 						>
 							<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 shrink-0">
 								<Icon className="w-5 h-5 text-primary" />
@@ -353,7 +353,7 @@ export default function AboutPage() {
 					</div>
 
 					{/* Card: Kolektor */}
-					<div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-6">
+					<div className="flex flex-col rounded-2xl border border-content/10 bg-surface p-6">
 						<div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-4 shrink-0">
 							<Search className="w-5 h-5 text-accent" />
 						</div>

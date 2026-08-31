@@ -1,12 +1,12 @@
 "use client";
 
 import {
-	ArrowLeft,
 	BadgeCheck,
 	Check,
 	ChevronDown,
 	Flag,
 	ImageIcon,
+	Loader2,
 	PenTool,
 	Share2,
 	ShieldCheck,
@@ -19,42 +19,30 @@ import CommissionButton from "@/components/detail/CommissionButton";
 import FavoriteButton from "@/components/detail/FavoriteButton";
 import AvatarInitials from "@/components/home/AvatarInitials";
 import ReportArtModal from "@/components/home/ReportArtModal";
+import { useArtworkDetail } from "@/hooks/useArtworkQueries";
 import { useCopyLink } from "@/hooks/useCopyLink";
-import { useArtworkStore } from "@/store/ArtworkStore";
+import { useCreateReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
-import { useProfileStore } from "@/store/ProfileStore";
-import { useReportStore } from "@/store/ReportStore";
-import { useToastStore } from "@/store/ToastStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
-import { randomKey } from "@/utils/index";
-import { buildArtworkWithRelations } from "@/utils/search";
+import type { User } from "@/types";
 
 export default function Detail() {
 	const params = useParams();
 	const router = useRouter();
 	const id = params.id as string;
-	const { artworks, artworkTags, tags } = useArtworkStore();
 	const { openLightbox } = useLightboxStore();
 	const [showWip, setShowWip] = useState(false);
-	const { users } = useUserManagementStore();
-	const { profiles } = useProfileStore();
 	const { copied, copyPath } = useCopyLink({
 		successMessage: "Link karya berhasil disalin.",
 	});
 	const { user, isAuthenticated } = useUserStore();
-	const { addToast } = useToastStore();
 	const { openModal } = useModalStore();
-	const { createReport } = useReportStore();
+	const createReportMutation = useCreateReport();
 	const [isReportOpen, setIsReportOpen] = useState(false);
 
-	const artwork = buildArtworkWithRelations(
-		artworks,
-		artworkTags,
-		tags,
-		users,
-	).find((item) => item.id === id);
+	// Menggunakan TanStack Query v5 untuk mengambil detail karya
+	const { data: artwork, isLoading } = useArtworkDetail(id);
 
 	const handleReport = () => {
 		if (!isAuthenticated || !user) {
@@ -86,35 +74,27 @@ export default function Detail() {
 	const handleReportSubmit = useCallback(
 		(reason: string) => {
 			if (!user || !artwork) return;
-			const res = createReport({
-				reporter_id: user.id,
+			createReportMutation.mutate({
 				target_type: "artwork",
 				target_id: artwork.id,
 				reason,
 			});
-			if (res.success) {
-				addToast({ message: res.message, type: "success" });
-			} else {
-				addToast({ message: res.message, type: "error" });
-			}
 			setIsReportOpen(false);
 		},
-		[user, artwork, createReport, addToast],
+		[user, artwork, createReportMutation],
 	);
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background text-content">
+				<Loader2 className="w-8 h-8 text-primary animate-spin" />
+			</div>
+		);
+	}
 
 	if (!artwork) {
 		return (
 			<main className="min-h-screen bg-background text-content pb-20">
-				<nav className="sticky top-0 z-45 bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
-					<Link
-						href="/"
-						className="inline-flex items-center gap-2 p-2 hover:bg-content/5 rounded-full transition-colors duration-200"
-					>
-						<ArrowLeft size={20} />
-						<span className="text-sm font-medium">Kembali</span>
-					</Link>
-				</nav>
-
 				<div className="max-w-3xl mx-auto px-4 py-16 text-center">
 					<div className="bg-surface border border-content/10 rounded-2xl p-8">
 						<ImageIcon className="w-10 h-10 text-content-muted mx-auto mb-3" />
@@ -130,10 +110,9 @@ export default function Detail() {
 		);
 	}
 
-	const artist = users.find((user) => user.id === artwork.artists_id);
-	const artistProfile = profiles.find(
-		(profile) => profile.user_id === artist?.id,
-	);
+	const artist = artwork.artist;
+	const artistProfile =
+		artwork.artist_profile || (artist as Partial<User>)?.profile;
 
 	const handleCopyLink = (id: string) => {
 		copyPath(id);
@@ -141,27 +120,14 @@ export default function Detail() {
 
 	return (
 		<main className="min-h-screen bg-background text-content pb-20">
-			<nav className="bg-background/80 backdrop-blur-md border-b border-content/10 p-4">
-				<div className=" flex items-center gap-4">
-					<button
-						type="button"
-						onClick={() => router.back()}
-						className="p-2 hover:bg-content/5 rounded-full transition-colors duration-200 cursor-pointer"
-					>
-						<ArrowLeft size={20} />
-					</button>
-					<h1 className="font-semibold truncate">{artwork.title}</h1>
-				</div>
-			</nav>
-
 			<div className="max-w-6xl mx-auto px-4 py-6">
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 					<div className="lg:col-span-2 space-y-4">
 						{artwork.images_url.length > 0 ? (
-							artwork.images_url.map((imgUrl, index) => {
+							artwork.images_url.map((imgUrl: string, index: number) => {
 								return (
 									<div
-										key={`${imgUrl}-${randomKey()}`}
+										key={imgUrl}
 										className="relative w-full rounded-xl overflow-hidden shadow-sm"
 									>
 										<button
@@ -178,7 +144,8 @@ export default function Detail() {
 												height={0}
 												sizes="100vw"
 												className="w-full h-auto"
-												loading={index === 0 ? "eager" : "lazy"}
+												priority={index === 0}
+												unoptimized
 											/>
 										</button>
 									</div>
@@ -191,7 +158,7 @@ export default function Detail() {
 						)}
 
 						{artwork.wip_proof_url && (
-							<div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-surface">
+							<div className="rounded-xl border border-content/10 overflow-hidden bg-surface">
 								<button
 									type="button"
 									onClick={() => setShowWip((prev: boolean) => !prev)}
@@ -231,7 +198,7 @@ export default function Detail() {
 													src={artwork.wip_proof_url}
 													alt={`WIP proof ${artwork.title}`}
 													fill
-													sizes="(max-width: 1024px) 100vw, 700px"
+													unoptimized
 													className="object-cover"
 												/>
 											</button>
@@ -250,6 +217,7 @@ export default function Detail() {
 							>
 								<AvatarInitials
 									name={artwork.artist.name}
+									src={artistProfile?.avatar_url}
 									className="w-12 h-12 text-lg"
 								/>
 								<div>
@@ -273,13 +241,22 @@ export default function Detail() {
 							)}
 
 							{artwork.artist_profile.is_open_for_commission && (
-								<CommissionButton
-									artworkId={artwork.id}
-									artworkTitle={artwork.title}
-									artistId={artwork.artist.id}
-									artistName={artwork.artist.name}
-									basePrice={artistProfile?.base_price_idr ?? null}
-								/>
+								<div className="space-y-2">
+									<CommissionButton
+										artworkId={artwork.id}
+										artworkTitle={artwork.title}
+										artistId={artwork.artist.id}
+										artistName={artwork.artist.name}
+										basePrice={artistProfile?.base_price_idr ?? null}
+										isVerified={artwork.artist_profile.is_verified}
+									/>
+									{!artwork.artist_profile.is_verified && (
+										<p className="text-[11px] text-content-muted text-center leading-tight">
+											Artis belum terverifikasi kurator (min. 5 portofolio lolos
+											kurasi).
+										</p>
+									)}
+								</div>
 							)}
 						</div>
 
@@ -291,7 +268,7 @@ export default function Detail() {
 								</p>
 							</div>
 
-							{artwork.tags.length > 0 && (
+							{artwork.tags && artwork.tags.length > 0 && (
 								<div className="flex flex-wrap gap-2 pt-2">
 									{artwork.tags.map((tag) => (
 										<Link

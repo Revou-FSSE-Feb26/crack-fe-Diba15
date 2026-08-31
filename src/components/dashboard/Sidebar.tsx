@@ -22,18 +22,40 @@ export default function DashboardSidebar() {
 		<>
 			{/* Desktop View: Vertical Sidebar */}
 			<aside className="hidden lg:block rounded-2xl border border-content/10 bg-surface p-3">
-				<nav className="space-y-2">
+				<ul className="menu w-full p-0 gap-1">
 					{menu.map((item) => {
 						const Icon = item.icon;
 						const isActive = pathname === item.href;
 
 						if (!item.enabled) {
 							return (
-								<button
-									key={item.label}
-									type="button"
-									disabled
-									className="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left text-content-muted opacity-70 cursor-not-allowed transition-colors"
+								<li key={item.label}>
+									<button
+										type="button"
+										disabled
+										className="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left text-content-muted opacity-70 cursor-not-allowed transition-colors"
+									>
+										<Icon className="mt-0.5 h-5 w-5 shrink-0" />
+										<span>
+											<span className="block text-sm font-semibold">
+												{item.label}
+											</span>
+											<span className="block text-xs">{item.description}</span>
+										</span>
+									</button>
+								</li>
+							);
+						}
+
+						return (
+							<li key={item.label}>
+								<Link
+									href={item.href}
+									className={`flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
+										isActive
+											? "bg-primary/10 text-primary font-semibold"
+											: "text-content-muted hover:bg-content/5"
+									}`}
 								>
 									<Icon className="mt-0.5 h-5 w-5 shrink-0" />
 									<span>
@@ -42,31 +64,11 @@ export default function DashboardSidebar() {
 										</span>
 										<span className="block text-xs">{item.description}</span>
 									</span>
-								</button>
-							);
-						}
-
-						return (
-							<Link
-								key={item.label}
-								href={item.href}
-								className={`flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors ${
-									isActive
-										? "bg-primary/10 text-primary"
-										: "text-content-muted hover:bg-content/5"
-								}`}
-							>
-								<Icon className="mt-0.5 h-5 w-5 shrink-0" />
-								<span>
-									<span className="block text-sm font-semibold">
-										{item.label}
-									</span>
-									<span className="block text-xs">{item.description}</span>
-								</span>
-							</Link>
+								</Link>
+							</li>
 						);
 					})}
-				</nav>
+				</ul>
 			</aside>
 
 			{/* Mobile View: Horizontal Scrollable Sub-Navbar */}
@@ -93,7 +95,7 @@ export default function DashboardSidebar() {
 						<Link
 							key={item.label}
 							href={item.href}
-							className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+							className={`pill-tab ${
 								isActive
 									? "bg-primary text-white shadow-sm"
 									: "bg-surface border border-content/10 text-content-muted hover:bg-content/5"

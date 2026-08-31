@@ -22,6 +22,7 @@ import {
 	Wifi,
 } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 /* ─── SEO Metadata ───────────────────────────────────────────────────────── */
 
@@ -229,7 +230,7 @@ export default function CareersPage() {
 					].map(({ icon: Icon, label }) => (
 						<div
 							key={label}
-							className="inline-flex items-center gap-2 text-sm text-content-muted bg-surface border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-full"
+							className="inline-flex items-center gap-2 text-sm text-content-muted bg-surface border border-content/10 px-4 py-2 rounded-full"
 						>
 							<Icon className="w-4 h-4 text-primary shrink-0" />
 							{label}
@@ -257,7 +258,7 @@ export default function CareersPage() {
 					{cultureValues.map(({ icon: Icon, title, description }) => (
 						<div
 							key={title}
-							className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+							className="flex flex-col rounded-2xl border border-content/10 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
 						>
 							<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4 shrink-0">
 								<Icon className="w-5 h-5 text-primary" />
@@ -300,7 +301,7 @@ export default function CareersPage() {
 									<h3 className="font-heading font-semibold text-content text-lg">
 										{dept}
 									</h3>
-									<span className="text-xs font-medium text-content-muted bg-surface border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full">
+									<span className="text-xs font-medium text-content-muted bg-surface border border-content/10 px-2.5 py-1 rounded-full">
 										{deptPositions.length} posisi
 									</span>
 								</div>
@@ -319,7 +320,7 @@ export default function CareersPage() {
 										}) => (
 											<div
 												key={id}
-												className="flex flex-col sm:flex-row sm:items-start gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+												className="flex flex-col sm:flex-row sm:items-start gap-4 rounded-2xl border border-content/10 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
 											>
 												{/* Icon */}
 												<div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -361,13 +362,13 @@ export default function CareersPage() {
 
 												{/* CTA */}
 												<div className="shrink-0 self-start sm:self-center">
-													<a
+													<Link
 														href="#apply"
 														className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-background bg-primary hover:bg-primary-hover transition-colors shadow-sm whitespace-nowrap"
 													>
 														Lamar Sekarang
 														<ArrowRight className="w-3.5 h-3.5" />
-													</a>
+													</Link>
 												</div>
 											</div>
 										),
@@ -399,7 +400,7 @@ export default function CareersPage() {
 					{benefits.map(({ icon: Icon, title, description }) => (
 						<div
 							key={title}
-							className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+							className="flex flex-col rounded-2xl border border-content/10 bg-surface p-5 hover:border-primary/40 hover:shadow-sm transition-all"
 						>
 							<div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-3 shrink-0">
 								<Icon className="w-5 h-5 text-accent" />
@@ -432,7 +433,7 @@ export default function CareersPage() {
 				</p>
 
 				{/* Steps */}
-				<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-surface p-6 mb-6">
+				<div className="rounded-2xl border border-content/10 bg-surface p-6 mb-6">
 					<p className="font-heading font-semibold text-content text-base mb-5">
 						Langkah-langkah Melamar
 					</p>
@@ -516,13 +517,13 @@ export default function CareersPage() {
 							Tim Rekrutmen TruBrush
 						</p>
 					</div>
-					<a
+					<Link
 						href="mailto:careers@trubrush.id"
 						className="inline-flex items-center gap-2 text-primary font-semibold text-lg hover:underline underline-offset-4 transition-colors mb-1"
 					>
 						careers@trubrush.id
 						<ArrowRight className="w-4 h-4" />
-					</a>
+					</Link>
 					<p className="text-sm text-content-muted mt-1">
 						Jam respons: Senin–Jumat, 09.00–17.00 WIB · Respons rata-rata: 3–5
 						hari kerja
