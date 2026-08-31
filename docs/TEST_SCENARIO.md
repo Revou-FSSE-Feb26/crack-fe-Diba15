@@ -21,6 +21,7 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
 |---|---|---|---|---|
 | **Admin** | Admin TruBrush (`u-007`) | `admin@trubrush.com` | `admin123` | Rp 0 |
 | **Curator** | Hendra Kurniawan (`u-008`) | `hendra@trubrush.com` | `curator123` | Rp 0 |
+| **Artist (Verified)** | Nadia Suryani (`u-002`) | `nadia@example.com` | `artist123` | Rp 0 |
 | **Artist (Verified)** | Ari Ramadan (`u-001`) | `ari@example.com` | `artist123` | Rp 0 |
 | **Artist (Unverified)** | Rina Pertiwi (`u-004`) | `rina@example.com` | `artist123` | Rp 0 |
 | **Artist (Banned / 5 Strikes)** | Fajar Nugroho (`u-009`) | `fajar@example.com` | `artist123` | Rp 0 |
@@ -313,9 +314,9 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
 ---
 
 ### TC-COM-02: Seniman Menerima Pesanan Komisi
-* **Aktor / Role:** Artist (`ari@example.com`)
+* **Aktor / Role:** Artist (`nadia@example.com`)
 * **Langkah-Langkah Pengujian:**
-  1. Login sebagai `ari@example.com`.
+  1. Login sebagai `nadia@example.com`.
   2. Buka menu **Komisi Saya** (`/commissions`).
   3. Temukan pesanan komisi baru yang berstatus `Menunggu Respon Artis`.
   4. Klik tombol **Terima Komisi (Accept)**.
@@ -347,11 +348,11 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
 ---
 
 ### TC-COM-04: Seniman Mengunggah Sketsa Awal (Sketch Progress)
-* **Aktor / Role:** Artist (`ari@example.com`)
+* **Aktor / Role:** Artist (`nadia@example.com`)
 * **Langkah-Langkah Pengujian:**
-  1. Login sebagai artist `ari@example.com` dan buka detail komisi terkait.
+  1. Login sebagai artist `nadia@example.com` dan buka detail komisi terkait.
   2. Pada tahapan *Progress Komisi*, klik **Unggah Sketsa Awal**.
-  3. Masukkan URL sketsa: `https://picsum.photos/seed/sketsanew/800/600`.
+  3. Masukkan URL sketsa: `https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=80`.
   4. Klik **Simpan & Kirim ke Klien**.
 * **Hasil yang Diharapkan:**
   - Pratinjau gambar sketsa muncul pada linimasa komisi.
@@ -380,7 +381,7 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
 * **Langkah-Langkah Pengujian:**
   1. Klien mengklik **Setujui Sketsa (Approve Sketch)** $\rightarrow$ Status sketsa menjadi terverifikasi hijau.
   2. Artist login dan mengunggah berkas final:
-     - URL Preview Hasil Akhir: `https://picsum.photos/seed/finalartwork/1200/900`
+     - URL Preview Hasil Akhir: `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000&q=80`
      - URL Master File (PSD/ZIP): `https://example.com/storage/final-master.zip`
   3. Klik **Kirim Hasil Akhir**.
 * **Hasil yang Diharapkan:**
@@ -390,7 +391,7 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
 ---
 
 ### TC-COM-07: Klien Menyetujui Hasil Akhir & Pelepasan Dana Escrow (95/5%)
-* **Aktor / Role:** Client (`dimas@example.com`) & Artist (`ari@example.com`)
+* **Aktor / Role:** Client (`dimas@example.com`) & Artist (`nadia@example.com`)
 * **Langkah-Langkah Pengujian:**
   1. Klien membuka halaman komisi dan mengklik tombol hijau **Setujui & Selesaikan Komisi**.
   2. Artis login dan mengklik **Klaim Penyelesaian & Rilis Escrow** (`/complete`).
@@ -398,8 +399,8 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
   - Status komisi berubah menjadi **`completed`** dan status pembayaran menjadi **`released`**.
   - **Kalkulasi Finansial Escrow Cair:**
     - Platform Fee 5%: $500.000 \times 5\% =$ **Rp 25.000** (masuk ke pendapatan platform).
-    - Net Payout Seniman 95%: $500.000 - 25.000 =$ **Rp 475.000** (otomatis bertambah ke saldo dompet seniman `ari@example.com`).
-  - Saldo dompet seniman `ari@example.com` bertambah dari Rp 0 menjadi **Rp 475.000**.
+    - Net Payout Seniman 95%: $500.000 - 25.000 =$ **Rp 475.000** (otomatis bertambah ke saldo dompet seniman `nadia@example.com`).
+  - Saldo dompet seniman `nadia@example.com` bertambah dari Rp 0 menjadi **Rp 475.000**.
 * **Kriteria Sukses:** Dana escrow terdistribusi 95% ke artis dan 5% ke platform secara akurat.
 
 ---
@@ -421,9 +422,9 @@ Dokumen ini merupakan panduan skenario pengujian manual langkah demi langkah (*S
 ---
 
 ### TC-WAL-02: Seniman Menarik Dana Penghasilan (Withdraw $\ge$ Rp 100.000)
-* **Aktor / Role:** Artist (`ari@example.com`, Saldo Dompet Rp 475.000)
+* **Aktor / Role:** Artist (`nadia@example.com`, Saldo Dompet Rp 475.000)
 * **Langkah-Langkah Pengujian:**
-  1. Login sebagai `ari@example.com`.
+  1. Login sebagai `nadia@example.com`.
   2. Akses halaman pencairan dana: `http://localhost:3000/withdraw`.
   3. Masukkan rincian penarikan:
      - Nominal Penarikan: `Rp 200.000` (memenuhi minimal Rp 100.000)
