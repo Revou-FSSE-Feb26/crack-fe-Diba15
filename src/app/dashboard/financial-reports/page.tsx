@@ -7,12 +7,11 @@ import {
 	Percent,
 	Printer,
 	RefreshCw,
-	ShieldAlert,
 	Wallet,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import AccessDenied from "@/components/dashboard/AccessDenied";
 import FinancialFilterToolbar, {
 	type DatePreset,
 } from "@/components/dashboard/financial-reports/FinancialFilterToolbar";
@@ -31,6 +30,8 @@ import {
 	createFinancialTableColumns,
 	transactionTypeLabels,
 } from "@/utils/dashboard/financial-reports/financialTableColumns";
+import { getDatePresetRange } from "@/utils/datePresets";
+import { exportToCsv } from "@/utils/exportCsv";
 
 export default function FinancialReportsPage() {
 	const { isAdmin } = useUserStore();
@@ -46,25 +47,8 @@ export default function FinancialReportsPage() {
 	const [search, setSearch] = useState<string>("");
 	const [selectedTx, setSelectedTx] = useState<WalletTransaction | null>(null);
 
-	// Date Range Calculation based on Preset
+	// Date Range Calculation based on Preset Utility
 	const computedDateRange = useMemo(() => {
-		const now = new Date();
-		if (datePreset === "today") {
-			const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "7d") {
-			const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "30d") {
-			const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "this_month") {
-			const start = new Date(now.getFullYear(), now.getMonth(), 1);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
 		if (customStartDate || customEndDate) {
 			return {
 				startDate: customStartDate
@@ -75,7 +59,7 @@ export default function FinancialReportsPage() {
 					: undefined,
 			};
 		}
-		return { startDate: undefined, endDate: undefined };
+		return getDatePresetRange(datePreset);
 	}, [datePreset, customStartDate, customEndDate]);
 
 	// Backend Queries
@@ -148,30 +132,21 @@ export default function FinancialReportsPage() {
 		];
 
 		const rows = filteredTransactions.map((tx) => [
-			`"${tx.id}"`,
-			`"${formatDateTime(tx.created_at)}"`,
-			`"${tx.user?.name || "System"}"`,
-			`"${tx.user?.role || "—"}"`,
-			`"${transactionTypeLabels[tx.type] || tx.type}"`,
+			tx.id,
+			formatDateTime(tx.created_at),
+			tx.user?.name || "System",
+			tx.user?.role || "—",
+			transactionTypeLabels[tx.type] || tx.type,
 			tx.amount,
-			`"${tx.title.replaceAll('"', '""')}"`,
-			`"${tx.status}"`,
+			tx.title,
+			tx.status,
 		]);
 
-		const csvContent =
-			"data:text/csv;charset=utf-8," +
-			[headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-		const encodedUri = encodeURI(csvContent);
-		const link = document.createElement("a");
-		link.setAttribute("href", encodedUri);
-		link.setAttribute(
-			"download",
+		exportToCsv(
 			`laporan-finansial-trubrush-${new Date().toISOString().split("T")[0]}.csv`,
+			headers,
+			rows,
 		);
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
 	};
 
 	// Print Summary Handler
@@ -186,21 +161,7 @@ export default function FinancialReportsPage() {
 
 	if (!isAdmin()) {
 		return (
-			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 text-danger">
-					<ShieldAlert className="h-8 w-8" />
-				</div>
-				<h1 className="text-xl font-bold text-content">Akses Dibatasi</h1>
-				<p className="max-w-sm text-xs text-content-muted">
-					Halaman Laporan Finansial hanya dapat diakses oleh Administrator
-					platform TruBrush.
-				</p>
-				<Link href="/dashboard">
-					<button type="button" className="btn btn-primary btn-sm">
-						Kembali ke Dashboard
-					</button>
-				</Link>
-			</div>
+			<AccessDenied description="Halaman Laporan Finansial hanya dapat diakses oleh Administrator platform TruBrush." />
 		);
 	}
 

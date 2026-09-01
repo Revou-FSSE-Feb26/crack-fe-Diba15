@@ -6,7 +6,6 @@ import { useForm, useWatch } from "react-hook-form";
 
 import Input from "@/components/ui/form/Input";
 import Select from "@/components/ui/form/Select";
-import { useModalStore } from "@/store/ModalStore";
 import type { User as AppUser, UserRole } from "@/types";
 
 type FormMode = "create" | "edit";
@@ -34,6 +33,8 @@ const roleOptions: { value: UserRole; label: string }[] = [
 	{ value: "admin", label: "Admin" },
 ];
 
+import { useFormModal } from "@/hooks/useFormModal";
+
 export default function UserFormModal({
 	mode,
 	user,
@@ -42,15 +43,16 @@ export default function UserFormModal({
 	onSubmit,
 }: UserFormModalProps) {
 	const modalId = "manage-user-form-modal";
-	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+	const { openModal, isCurrentModalOpen, onCloseRef } = useFormModal({
+		modalId,
+		isOpen,
+		onClose,
+	});
 
 	const onSubmitRef = useRef(onSubmit);
-	const onCloseRef = useRef(onClose);
-
 	useEffect(() => {
 		onSubmitRef.current = onSubmit;
-		onCloseRef.current = onClose;
-	}, [onSubmit, onClose]);
+	}, [onSubmit]);
 
 	const {
 		register,
@@ -241,13 +243,7 @@ export default function UserFormModal({
 	);
 
 	useEffect(() => {
-		if (!isOpen) {
-			if (globalOpen && config?.id === modalId) {
-				closeModal();
-			}
-			return;
-		}
-		if (!globalOpen || config?.id !== modalId) {
+		if (isOpen && !isCurrentModalOpen) {
 			openModal({
 				id: modalId,
 				type: "form",
@@ -269,23 +265,16 @@ export default function UserFormModal({
 			});
 		}
 	}, [
-		closeModal,
-		config?.id,
 		confirmLabel,
 		content,
 		description,
-		globalOpen,
 		handleSubmit,
+		isCurrentModalOpen,
 		isOpen,
+		onCloseRef,
 		openModal,
 		title,
 	]);
-
-	useEffect(() => {
-		if (!isOpen || !globalOpen || config?.id !== modalId) {
-			return;
-		}
-	}, [config?.id, globalOpen, isOpen]);
 
 	return null;
 }

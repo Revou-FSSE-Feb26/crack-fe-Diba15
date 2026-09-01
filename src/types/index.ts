@@ -602,6 +602,18 @@ export interface FollowRecord {
 	created_at: string;
 }
 
+export interface FollowedArtist {
+	id: string;
+	name: string;
+	email: string;
+	profile?: {
+		id?: string;
+		avatar_url?: string | null;
+		bio?: string | null;
+		is_verified?: boolean;
+	};
+}
+
 // ── User Management Store ────────────────────────────────────────────────────
 
 export interface UserPayload {
@@ -786,4 +798,11 @@ export interface CuratorPerformanceQuery {
 	search?: string;
 	startDate?: string;
 	endDate?: string;
+}
+
+export interface VerificationProgress {
+	total: number;
+	approved: number;
+	isEligible: boolean;
+	neededForEligibility: number;
 }

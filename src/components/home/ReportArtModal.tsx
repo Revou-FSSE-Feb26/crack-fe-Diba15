@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import Textarea from "@/components/ui/form/Textarea";
-import { useModalStore } from "@/store/ModalStore";
+import { useFormModal } from "@/hooks/useFormModal";
 
 interface ReportFormValues {
 	reason: string;
@@ -25,15 +25,16 @@ export default function ReportArtModal({
 	onSubmit,
 }: ReportArtModalProps) {
 	const modalId = `report-art-form-modal-${artworkId}`;
-	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+	const { openModal, isCurrentModalOpen, onCloseRef } = useFormModal({
+		modalId,
+		isOpen,
+		onClose,
+	});
 
 	const onSubmitRef = useRef(onSubmit);
-	const onCloseRef = useRef(onClose);
-
 	useEffect(() => {
 		onSubmitRef.current = onSubmit;
-		onCloseRef.current = onClose;
-	}, [onSubmit, onClose]);
+	}, [onSubmit]);
 
 	const {
 		register,
@@ -91,14 +92,7 @@ export default function ReportArtModal({
 	);
 
 	useEffect(() => {
-		if (!isOpen) {
-			if (globalOpen && config?.id === modalId) {
-				closeModal();
-			}
-			return;
-		}
-
-		if (!globalOpen || config?.id !== modalId) {
+		if (isOpen && !isCurrentModalOpen) {
 			openModal({
 				id: modalId,
 				type: "form",
@@ -117,20 +111,19 @@ export default function ReportArtModal({
 					handleSubmit((values) => {
 						onSubmitRef.current(values.reason);
 					})(event);
-					return false; // Mencegah penutupan modal sebelum state diperbarui.
+					return false;
 				},
 			});
 		}
 	}, [
 		artworkTitle,
-		closeModal,
-		config?.id,
 		content,
-		globalOpen,
 		handleSubmit,
+		isCurrentModalOpen,
 		isOpen,
-		openModal,
 		modalId,
+		onCloseRef,
+		openModal,
 	]);
 
 	return null;

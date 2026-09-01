@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import Textarea from "@/components/ui/form/Textarea";
-import { useModalStore } from "@/store/ModalStore";
+import { useFormModal } from "@/hooks/useFormModal";
 
 interface RejectFormValues {
 	reason: string;
@@ -29,15 +29,16 @@ export default function RejectArtworkModal({
 	onSubmit,
 }: RejectArtworkModalProps) {
 	const modalId = "reject-artwork-form-modal";
-	const { openModal, closeModal, isOpen: globalOpen, config } = useModalStore();
+	const { openModal, isCurrentModalOpen, onCloseRef } = useFormModal({
+		modalId,
+		isOpen,
+		onClose,
+	});
 
 	const onSubmitRef = useRef(onSubmit);
-	const onCloseRef = useRef(onClose);
-
 	useEffect(() => {
 		onSubmitRef.current = onSubmit;
-		onCloseRef.current = onClose;
-	}, [onSubmit, onClose]);
+	}, [onSubmit]);
 
 	const {
 		register,
@@ -112,13 +113,7 @@ export default function RejectArtworkModal({
 	);
 
 	useEffect(() => {
-		if (!isOpen) {
-			if (globalOpen && config?.id === modalId) {
-				closeModal();
-			}
-			return;
-		}
-		if (!globalOpen || config?.id !== modalId) {
+		if (isOpen && !isCurrentModalOpen) {
 			openModal({
 				id: modalId,
 				type: "form",
@@ -141,20 +136,13 @@ export default function RejectArtworkModal({
 		}
 	}, [
 		artworkTitle,
-		closeModal,
-		config?.id,
 		content,
-		globalOpen,
 		handleSubmit,
+		isCurrentModalOpen,
 		isOpen,
+		onCloseRef,
 		openModal,
 	]);
-
-	useEffect(() => {
-		if (!isOpen || !globalOpen || config?.id !== modalId) {
-			return;
-		}
-	}, [config?.id, globalOpen, isOpen]);
 
 	return null;
 }

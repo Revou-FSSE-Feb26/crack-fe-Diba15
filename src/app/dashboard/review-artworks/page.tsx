@@ -1,21 +1,17 @@
 "use client";
 
-import {
-	CheckCircle2,
-	Clock3,
-	History,
-	ImageIcon,
-	RefreshCw,
-	Search,
-	ShieldAlert,
-	XCircle,
-} from "lucide-react";
-import Link from "next/link";
+import { RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import AccessDenied from "@/components/dashboard/AccessDenied";
 import ArtworkReviewCard from "@/components/dashboard/review-artworks/ArtworkReviewCard";
+import { RecentArtworksReviewList } from "@/components/dashboard/review-artworks/RecentArtworksReviewList";
 import RejectArtworkModal from "@/components/dashboard/review-artworks/RejectArtworkModal";
-import Stat from "@/components/ui/Stat";
+import { ReviewArtworksStats } from "@/components/dashboard/review-artworks/ReviewArtworksStats";
+import {
+	type ReviewArtworksTab,
+	ReviewArtworksToolbar,
+} from "@/components/dashboard/review-artworks/ReviewArtworksToolbar";
 import {
 	useCurateArtwork,
 	usePendingArtworks,
@@ -24,10 +20,7 @@ import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { ArtworkWithRelations } from "@/types";
-import { formatShortDate } from "@/utils";
 import { buildArtworkWithRelations } from "@/utils/search";
-
-type ViewTab = "pending" | "recent" | "all";
 
 export default function ReviewArtworksPage() {
 	const { user, isCurator } = useUserStore();
@@ -35,7 +28,7 @@ export default function ReviewArtworksPage() {
 	const { addToast } = useToastStore();
 
 	const [search, setSearch] = useState("");
-	const [activeTab, setActiveTab] = useState<ViewTab>("pending");
+	const [activeTab, setActiveTab] = useState<ReviewArtworksTab>("pending");
 	const [rejectTarget, setRejectTarget] = useState<ArtworkWithRelations | null>(
 		null,
 	);
@@ -114,12 +107,6 @@ export default function ReviewArtworksPage() {
 		};
 	}, [artworks, pendingArtworks.length]);
 
-	const getReviewerName = (reviewerId?: string | null) => {
-		if (!reviewerId) return "Kurator";
-		if (user && user.id === reviewerId) return user.name;
-		return "Kurator";
-	};
-
 	const handleApprove = (artwork: ArtworkWithRelations) => {
 		if (!user) return;
 
@@ -185,21 +172,7 @@ export default function ReviewArtworksPage() {
 
 	if (!isCurator()) {
 		return (
-			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 text-danger">
-					<ShieldAlert className="h-8 w-8" />
-				</div>
-				<h1 className="text-xl font-bold text-content">Akses Dibatasi</h1>
-				<p className="max-w-sm text-xs text-content-muted">
-					Halaman Review Artwork hanya dapat diakses oleh akun Kurator platform
-					TruBrush.
-				</p>
-				<Link href="/dashboard">
-					<button type="button" className="btn btn-primary btn-sm">
-						Kembali ke Dashboard
-					</button>
-				</Link>
-			</div>
+			<AccessDenied description="Halaman Review Artwork hanya dapat diakses oleh akun Kurator platform TruBrush." />
 		);
 	}
 
@@ -234,114 +207,23 @@ export default function ReviewArtworksPage() {
 					</div>
 				</div>
 
-				{/* KPI Summary Cards (2 Rows x 2 Columns) */}
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<Stat
-						variant="card"
-						label="Menunggu Kurasi"
-						value={
-							isLoading ? (
-								<span className="loading loading-dots loading-sm" />
-							) : (
-								`${counts.pending} Karya`
-							)
-						}
-						icon={Clock3}
-					/>
-					<Stat
-						variant="card"
-						label="Lolos Verifikasi (Disetujui)"
-						value={
-							isLoading ? (
-								<span className="loading loading-dots loading-sm" />
-							) : (
-								`${counts.approved} Karya`
-							)
-						}
-						icon={CheckCircle2}
-					/>
-					<Stat
-						variant="card"
-						label="Ditolak (Pelanggaran/AI)"
-						value={
-							isLoading ? (
-								<span className="loading loading-dots loading-sm" />
-							) : (
-								`${counts.rejected} Karya`
-							)
-						}
-						icon={XCircle}
-					/>
-					<Stat
-						variant="card"
-						label="Total Antrian Masuk"
-						value={
-							isLoading ? (
-								<span className="loading loading-dots loading-sm" />
-							) : (
-								`${counts.total} Karya`
-							)
-						}
-						icon={ImageIcon}
-					/>
-				</div>
+				{/* 1. Summary Cards */}
+				<ReviewArtworksStats counts={counts} isLoading={isLoading} />
 
-				{/* Filter Toolbar */}
-				<div className="rounded-2xl border border-content/10 bg-surface p-4 space-y-3 print:hidden">
-					{/* Search Box */}
-					<div className="relative w-full max-w-md">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
-						<input
-							type="text"
-							value={search}
-							onChange={(event) => setSearch(event.target.value)}
-							placeholder="Cari judul, nama artist, atau tag karya..."
-							className="input input-sm w-full pl-9 bg-background border-content/10 text-xs"
-						/>
-					</div>
+				{/* 2. Filter Toolbar */}
+				<ReviewArtworksToolbar
+					search={search}
+					onSearchChange={setSearch}
+					activeTab={activeTab}
+					onTabChange={setActiveTab}
+					counts={{
+						pending: counts.pending,
+						recent: recentReviews.length,
+						total: counts.total,
+					}}
+				/>
 
-					{/* View Tabs */}
-					<div className="flex flex-wrap items-center gap-2 pt-2 border-t border-content/5">
-						<span className="text-xs font-semibold text-content-muted mr-1">
-							Tampilan:
-						</span>
-						<button
-							type="button"
-							onClick={() => setActiveTab("pending")}
-							className={`btn btn-xs rounded-lg ${
-								activeTab === "pending"
-									? "btn-primary"
-									: "btn-ghost border border-content/10"
-							}`}
-						>
-							Menunggu Kurasi ({counts.pending})
-						</button>
-						<button
-							type="button"
-							onClick={() => setActiveTab("recent")}
-							className={`btn btn-xs rounded-lg ${
-								activeTab === "recent"
-									? "btn-primary"
-									: "btn-ghost border border-content/10"
-							}`}
-						>
-							Riwayat Keputusan ({recentReviews.length})
-						</button>
-						<button
-							type="button"
-							onClick={() => setActiveTab("all")}
-							className={`btn btn-xs rounded-lg ${
-								activeTab === "all"
-									? "btn-primary"
-									: "btn-ghost border border-content/10"
-							}`}
-						>
-							Semua ({counts.total})
-						</button>
-					</div>
-				</div>
-
-				{/* Pending Queue Section */}
+				{/* 3. Pending Queue Section */}
 				{(activeTab === "pending" || activeTab === "all") && (
 					<div className="rounded-2xl border border-content/10 bg-surface overflow-hidden">
 						<div className="border-b border-content/10 px-5 py-3.5 flex items-center justify-between">
@@ -363,15 +245,14 @@ export default function ReviewArtworksPage() {
 							{isLoading ? (
 								<div className="flex flex-col items-center justify-center py-12 text-content-muted">
 									<span className="loading loading-spinner loading-md text-primary mb-2" />
-									<p className="text-xs">Memuat antrean pending...</p>
+									<p className="text-xs">Memuat antrian kurasi karya...</p>
 								</div>
 							) : pendingArtworks.length === 0 ? (
 								<div className="flex flex-col items-center justify-center py-12 text-center">
-									<CheckCircle2 className="h-10 w-10 text-verified mb-2 opacity-60" />
 									<p className="text-sm font-semibold text-content">
-										Antrean Kurasi Bersih
+										Antrian Kurasi Bersih! 🎉
 									</p>
-									<p className="text-xs text-content-muted mt-1 max-w-xs">
+									<p className="text-xs text-content-muted mt-1 max-w-sm">
 										Semua karya seni telah ditinjau. Karya baru akan muncul saat
 										artis mengunggah karya dengan opsi pemeriksaan.
 									</p>
@@ -391,80 +272,17 @@ export default function ReviewArtworksPage() {
 					</div>
 				)}
 
-				{/* Recent Reviews History Section */}
+				{/* 4. Recent Reviews History Section */}
 				{(activeTab === "recent" || activeTab === "all") && (
-					<div className="rounded-2xl border border-content/10 bg-surface overflow-hidden">
-						<div className="border-b border-content/10 px-5 py-3.5 flex items-center justify-between">
-							<div>
-								<h2 className="text-sm font-bold text-content">
-									Riwayat Keputusan Kurasi
-								</h2>
-								<p className="text-xs text-content-muted">
-									Daftar karya yang telah selesai ditinjau beserta catatan
-									kurator.
-								</p>
-							</div>
-							<History className="h-4 w-4 text-content-muted" />
-						</div>
-
-						<div className="p-5">
-							{recentReviews.length === 0 ? (
-								<div className="flex flex-col items-center justify-center py-10 text-center">
-									<History className="h-8 w-8 text-content-muted mb-2 opacity-50" />
-									<p className="text-xs font-semibold text-content">
-										Belum ada riwayat review
-									</p>
-								</div>
-							) : (
-								<div className="divide-y divide-content/10">
-									{recentReviews.map((artwork) => (
-										<div
-											key={artwork.id}
-											className="flex flex-col gap-2 py-3.5 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between"
-										>
-											<div className="space-y-1">
-												<div className="flex flex-wrap items-center gap-2">
-													<p className="font-semibold text-sm text-content">
-														{artwork.title}
-													</p>
-													<span
-														className={`badge badge-sm uppercase font-bold ${
-															artwork.curation_status === "approved"
-																? "badge-success"
-																: "badge-error"
-														}`}
-													>
-														{artwork.curation_status === "approved"
-															? "Disetujui"
-															: "Ditolak"}
-													</span>
-												</div>
-												<p className="text-xs text-content-muted">
-													{artwork.artist.name} · Ditinjau pada{" "}
-													{formatShortDate(artwork.reviewed_at ?? "")} · Oleh{" "}
-													<span className="text-content font-medium">
-														{getReviewerName(artwork.reviewed_by)}
-													</span>
-												</p>
-												{artwork.curation_status === "rejected" &&
-													artwork.rejection_reason && (
-														<p className="mt-2 rounded-xl border border-danger/20 bg-danger/5 px-3 py-2 text-xs leading-relaxed text-danger">
-															<span className="font-semibold block mb-0.5">
-																Alasan Penolakan:
-															</span>
-															{artwork.rejection_reason}
-														</p>
-													)}
-											</div>
-										</div>
-									))}
-								</div>
-							)}
-						</div>
-					</div>
+					<RecentArtworksReviewList
+						recentReviews={recentReviews}
+						currentUserId={user?.id}
+						currentUserName={user?.name}
+					/>
 				)}
 			</div>
 
+			{/* Reject Modal */}
 			{rejectTarget && (
 				<RejectArtworkModal
 					artworkTitle={rejectTarget.title}

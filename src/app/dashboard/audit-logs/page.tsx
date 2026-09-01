@@ -10,13 +10,11 @@ import {
 	Printer,
 	RefreshCw,
 	Search,
-	ShieldAlert,
 	ShieldCheck,
 	Users,
 } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
-
+import AccessDenied from "@/components/dashboard/AccessDenied";
 import { AuditLogDetailModal } from "@/components/dashboard/audit-logs/AuditLogDetailModal";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
@@ -29,8 +27,8 @@ import {
 	categoryLabels,
 	createAuditTableColumns,
 } from "@/utils/dashboard/audit-logs/auditTableColumns";
-
-type DatePreset = "all" | "today" | "7d" | "30d" | "this_month";
+import { type DatePreset, getDatePresetRange } from "@/utils/datePresets";
+import { exportToCsv } from "@/utils/exportCsv";
 
 export default function AuditLogsPage() {
 	const { user } = useUserStore();
@@ -48,25 +46,8 @@ export default function AuditLogsPage() {
 	const [search, setSearch] = useState<string>("");
 	const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
 
-	// Date Range Calculation based on Preset
+	// Date Range Calculation based on Preset Utility
 	const computedDateRange = useMemo(() => {
-		const now = new Date();
-		if (datePreset === "today") {
-			const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "7d") {
-			const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "30d") {
-			const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
-		if (datePreset === "this_month") {
-			const start = new Date(now.getFullYear(), now.getMonth(), 1);
-			return { startDate: start.toISOString(), endDate: now.toISOString() };
-		}
 		if (customStartDate || customEndDate) {
 			return {
 				startDate: customStartDate
@@ -77,7 +58,7 @@ export default function AuditLogsPage() {
 					: undefined,
 			};
 		}
-		return { startDate: undefined, endDate: undefined };
+		return getDatePresetRange(datePreset);
 	}, [datePreset, customStartDate, customEndDate]);
 
 	// Backend Query
@@ -166,34 +147,25 @@ export default function AuditLogsPage() {
 		];
 
 		const rows = filteredLogs.map((l) => [
-			`"${l.id}"`,
-			`"${formatDateTime(l.createdAt ?? l.created_at)}"`,
-			`"${l.actor.name.replace(/"/g, '""')}"`,
-			`"${l.actor.email}"`,
-			`"${l.actor.role}"`,
-			`"${categoryLabels[l.category] || l.category}"`,
-			`"${l.action.replace(/"/g, '""')}"`,
-			`"${l.targetType ?? l.target_type ?? ""}"`,
-			`"${l.targetId ?? l.target_id ?? ""}"`,
-			`"${(l.targetTitle ?? l.target_title ?? l.targetId ?? l.target_id ?? "").replace(/"/g, '""')}"`,
-			`"${l.status}"`,
-			`"${(l.details || "").replace(/"/g, '""')}"`,
+			l.id,
+			formatDateTime(l.createdAt ?? l.created_at),
+			l.actor.name,
+			l.actor.email,
+			l.actor.role,
+			categoryLabels[l.category] || l.category,
+			l.action,
+			l.targetType ?? l.target_type ?? "",
+			l.targetId ?? l.target_id ?? "",
+			l.targetTitle ?? l.target_title ?? l.targetId ?? l.target_id ?? "",
+			l.status,
+			l.details || "",
 		]);
 
-		const csvContent =
-			"data:text/csv;charset=utf-8,\uFEFF" +
-			[headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-		const encodedUri = encodeURI(csvContent);
-		const link = document.createElement("a");
-		link.setAttribute("href", encodedUri);
-		link.setAttribute(
-			"download",
+		exportToCsv(
 			`Log_Audit_Moderasi_TruBrush_${new Date().toISOString().slice(0, 10)}.csv`,
+			headers,
+			rows,
 		);
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
 	};
 
 	// Print Handler
@@ -215,21 +187,7 @@ export default function AuditLogsPage() {
 
 	if (!isStaff) {
 		return (
-			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
-				<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 text-danger">
-					<ShieldAlert className="h-8 w-8" />
-				</div>
-				<h1 className="text-xl font-bold text-content">Akses Dibatasi</h1>
-				<p className="max-w-sm text-xs text-content-muted">
-					Halaman Log Audit Moderasi hanya dapat diakses oleh Admin dan Kurator
-					platform TruBrush.
-				</p>
-				<Link href="/dashboard">
-					<button type="button" className="btn btn-primary btn-sm">
-						Kembali ke Dashboard
-					</button>
-				</Link>
-			</div>
+			<AccessDenied description="Halaman Log Audit Moderasi hanya dapat diakses oleh Admin dan Kurator platform TruBrush." />
 		);
 	}
 

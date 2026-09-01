@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/form/Input";
+import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 
 interface LoginForm {
@@ -26,11 +27,18 @@ export default function Login() {
 	});
 
 	const { login } = useUserStore();
+	const { addToast } = useToastStore();
 	const router = useRouter();
 
 	const onSubmit = async (data: LoginForm) => {
 		const result = await login(data.email, data.password);
-		if (!result.success) return;
+		if (!result.success) {
+			addToast({
+				message: result.message || "Email atau password salah.",
+				type: "error",
+			});
+			return;
+		}
 
 		const currentUser = useUserStore.getState().user;
 		router.push(
