@@ -6,35 +6,19 @@ import {
 	ImageIcon,
 	Plus,
 	RefreshCw,
-	Search,
 	Sparkles,
 	Tags,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import AccessDenied from "@/components/dashboard/AccessDenied";
-import TagFormModal from "@/components/dashboard/manage-tags/TagFormModal";
-import DataTable from "@/components/ui/data-table/DataTable";
+import { CatalogManagementTab } from "@/components/dashboard/manage-tags/CatalogManagementTab";
+import { TagsManagementTab } from "@/components/dashboard/manage-tags/TagsManagementTab";
 import Stat from "@/components/ui/Stat";
-import {
-	useAllTags,
-	useArtworks,
-	useCreateTag,
-	useDeleteArtwork,
-	useDeleteTag,
-	useUpdateArtwork,
-	useUpdateTag,
-} from "@/hooks/useArtworkQueries";
-import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
-import { useLightboxStore } from "@/store/LightboxStore";
-import { useModalStore } from "@/store/ModalStore";
+import { useAllTags, useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserStore } from "@/store/UserStore";
-import type { ArtworkWithRelations, Tag } from "@/types";
-import { createCatalogTableColumns } from "@/utils/dashboard/manage-tags/catalogTableColumns";
-import { createTagTableColumns } from "@/utils/dashboard/manage-tags/tagTableColumns";
 
 type ActiveTab = "tags" | "catalog";
-type CatalogVisibilityFilter = "all" | "visible" | "hidden";
 
 export default function ManageTagsPage() {
 	const { isAdmin } = useUserStore();
@@ -51,24 +35,8 @@ export default function ManageTagsPage() {
 		refetch: refetchArtworks,
 	} = useArtworks();
 
-	const createTagMutation = useCreateTag();
-	const updateTagMutation = useUpdateTag();
-	const deleteTagMutation = useDeleteTag();
-	const updateArtworkMutation = useUpdateArtwork();
-	const deleteArtworkMutation = useDeleteArtwork();
-
-	const { openModal } = useModalStore();
-	const { openLightbox } = useLightboxStore();
-
 	const [activeTab, setActiveTab] = useState<ActiveTab>("tags");
-	const [tagSearch, setTagSearch] = useState("");
-	const [catalogSearch, setCatalogSearch] = useState("");
-	const [catalogFilter, setCatalogFilter] =
-		useState<CatalogVisibilityFilter>("all");
-
-	// Tag modal state
-	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
-	const [tagToEdit, setTagToEdit] = useState<Tag | null>(null);
+	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
 	// Stats calculation
 	const stats = useMemo(() => {
@@ -81,190 +49,6 @@ export default function ManageTagsPage() {
 			hiddenArtworks: hiddenArtworks.length,
 		};
 	}, [tagsList, artworksList]);
-
-	// ─── Pagination for Tags ──────────────────────────────────────────────────
-	const {
-		setPage: setTagPage,
-		setPerPage: setTagPerPage,
-		paginate: paginateTags,
-		resetPage: resetTagPage,
-	} = usePagination({ initialPerPage: 10 });
-
-	useResetPageOnChange(resetTagPage, [tagSearch]);
-
-	const filteredTags = useMemo(() => {
-		const query = tagSearch.trim().toLowerCase();
-		if (!query) return tagsList;
-		return tagsList.filter(
-			(t) =>
-				t.tag_name.toLowerCase().includes(query) ||
-				t.id.toLowerCase().includes(query),
-		);
-	}, [tagsList, tagSearch]);
-
-	const paginatedTags = useMemo(
-		() => paginateTags(filteredTags),
-		[filteredTags, paginateTags],
-	);
-
-	// ─── Pagination for Catalog ───────────────────────────────────────────────
-	const {
-		setPage: setCatalogPage,
-		setPerPage: setCatalogPerPage,
-		paginate: paginateCatalog,
-		resetPage: resetCatalogPage,
-	} = usePagination({ initialPerPage: 10 });
-
-	useResetPageOnChange(resetCatalogPage, [catalogSearch, catalogFilter]);
-
-	const filteredCatalog = useMemo(() => {
-		const query = catalogSearch.trim().toLowerCase();
-		let list = artworksList;
-
-		if (catalogFilter === "visible") {
-			list = list.filter((a) => a.is_visible_on_feed);
-		} else if (catalogFilter === "hidden") {
-			list = list.filter((a) => !a.is_visible_on_feed);
-		}
-
-		if (query) {
-			list = list.filter(
-				(a) =>
-					a.title.toLowerCase().includes(query) ||
-					a.artist?.name?.toLowerCase().includes(query) ||
-					a.id.toLowerCase().includes(query),
-			);
-		}
-
-		return list;
-	}, [artworksList, catalogSearch, catalogFilter]);
-
-	const paginatedCatalog = useMemo(
-		() => paginateCatalog(filteredCatalog),
-		[filteredCatalog, paginateCatalog],
-	);
-
-	// ─── Handlers for Tags ────────────────────────────────────────────────────
-	const handleOpenCreateTag = useCallback(() => {
-		setTagToEdit(null);
-		setIsTagModalOpen(true);
-	}, []);
-
-	const handleOpenEditTag = useCallback((tag: Tag) => {
-		setTagToEdit(tag);
-		setIsTagModalOpen(true);
-	}, []);
-
-	const handleSubmitTag = (tagName: string) => {
-		if (tagToEdit) {
-			updateTagMutation.mutate(
-				{ id: tagToEdit.id, payload: { tagName } },
-				{
-					onSuccess: () => {
-						setIsTagModalOpen(false);
-						setTagToEdit(null);
-					},
-				},
-			);
-		} else {
-			createTagMutation.mutate(
-				{ tagName },
-				{
-					onSuccess: () => {
-						setIsTagModalOpen(false);
-					},
-				},
-			);
-		}
-	};
-
-	const handleDeleteTag = useCallback(
-		(tag: Tag) => {
-			const count = tag.count ?? 0;
-			const warningExtra =
-				count > 0
-					? ` Tag ini saat ini masih digunakan pada ${count} karya seni. Menghapusnya akan melepaskan tag ini dari karya tersebut.`
-					: "";
-
-			openModal({
-				title: `Hapus Tag "${tag.tag_name}"?`,
-				description: `Apakah Anda yakin ingin menghapus tag #${tag.tag_name} dari database?${warningExtra}`,
-				type: "confirm",
-				variant: "danger",
-				confirmLabel: "Hapus Tag",
-				cancelLabel: "Batal",
-				onConfirm: () => {
-					deleteTagMutation.mutate(tag.id);
-				},
-			});
-		},
-		[openModal, deleteTagMutation],
-	);
-
-	// ─── Handlers for Catalog ─────────────────────────────────────────────────
-	const handleToggleVisibility = useCallback(
-		(artwork: ArtworkWithRelations) => {
-			const willHide = artwork.is_visible_on_feed;
-			const actionTitle = willHide
-				? "Takedown Karya?"
-				: "Pulihkan Karya ke Feed?";
-			const actionDesc = willHide
-				? `Apakah Anda yakin ingin menyembunyikan karya "${artwork.title}" dari feed publik? Karya ini tidak akan muncul dalam pencarian atau beranda publik.`
-				: `Apakah Anda yakin ingin memulihkan karya "${artwork.title}" agar kembali dapat dilihat di feed publik?`;
-
-			openModal({
-				title: actionTitle,
-				description: actionDesc,
-				type: "confirm",
-				variant: willHide ? "danger" : "default",
-				confirmLabel: willHide ? "Takedown Karya" : "Pulihkan Karya",
-				cancelLabel: "Batal",
-				onConfirm: () => {
-					updateArtworkMutation.mutate({
-						id: artwork.id,
-						isVisibleOnFeed: !willHide,
-					});
-				},
-			});
-		},
-		[openModal, updateArtworkMutation],
-	);
-
-	const handleDeleteArtwork = useCallback(
-		(artwork: ArtworkWithRelations) => {
-			openModal({
-				title: `Hapus Permanen "${artwork.title}"?`,
-				description: `Tindakan ini akan menghapus karya seni secara permanen dari basis data dan tidak dapat dibatalkan.`,
-				type: "confirm",
-				variant: "danger",
-				confirmLabel: "Hapus Permanen",
-				cancelLabel: "Batal",
-				onConfirm: () => {
-					deleteArtworkMutation.mutate(artwork.id);
-				},
-			});
-		},
-		[openModal, deleteArtworkMutation],
-	);
-
-	const tagColumns = useMemo(
-		() =>
-			createTagTableColumns({
-				onEdit: handleOpenEditTag,
-				onDelete: handleDeleteTag,
-			}),
-		[handleDeleteTag, handleOpenEditTag],
-	);
-
-	const catalogColumns = useMemo(
-		() =>
-			createCatalogTableColumns({
-				openLightbox,
-				onToggleVisibility: handleToggleVisibility,
-				onDeleteArtwork: handleDeleteArtwork,
-			}),
-		[handleDeleteArtwork, handleToggleVisibility, openLightbox],
-	);
 
 	const handleRefresh = () => {
 		if (activeTab === "tags") {
@@ -302,7 +86,7 @@ export default function ManageTagsPage() {
 						<button
 							type="button"
 							className="btn btn-primary btn-sm"
-							onClick={handleOpenCreateTag}
+							onClick={() => setIsCreateModalOpen(true)}
 						>
 							<Plus className="h-4 w-4 mr-1" />
 							Tambah Master Tag
@@ -406,139 +190,22 @@ export default function ManageTagsPage() {
 
 			{/* Tab 1: Master Tags Management */}
 			{activeTab === "tags" && (
-				<div className="space-y-4">
-					{/* Filter Toolbar */}
-					<div className="rounded-2xl border border-content/10 bg-surface p-4 space-y-3 print:hidden">
-						<div className="relative w-full max-w-md">
-							<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
-							<input
-								type="text"
-								value={tagSearch}
-								onChange={(event) => setTagSearch(event.target.value)}
-								placeholder="Cari nama tag atau ID..."
-								className="input input-sm w-full pl-9 bg-background border-content/10 text-xs"
-							/>
-						</div>
-					</div>
-
-					{/* Tags Table */}
-					<div className="rounded-2xl border border-content/10 bg-surface overflow-hidden">
-						<DataTable
-							columns={tagColumns}
-							pagination={paginatedTags}
-							getRowKey={(row) => row.id}
-							isLoading={isTagsLoading}
-							onPageChange={setTagPage}
-							onPerPageChange={setTagPerPage}
-							itemLabel="tag"
-							emptyState={
-								<div className="flex flex-col items-center justify-center py-12 text-center">
-									<Tags className="h-10 w-10 text-content-muted mb-2 opacity-40" />
-									<p className="text-sm font-semibold text-content">
-										Tidak Ada Tag Ditemukan
-									</p>
-									<p className="text-xs text-content-muted mt-1 max-w-xs">
-										Belum ada tag yang cocok dengan kata kunci pencarian Anda.
-									</p>
-								</div>
-							}
-						/>
-					</div>
-				</div>
+				<TagsManagementTab
+					tagsList={tagsList}
+					isLoading={isTagsLoading}
+					isCreateModalOpen={isCreateModalOpen}
+					onCloseCreateModal={() => setIsCreateModalOpen(false)}
+				/>
 			)}
 
 			{/* Tab 2: Global Artwork Catalog & Takedown */}
 			{activeTab === "catalog" && (
-				<div className="space-y-4">
-					{/* Filter Toolbar */}
-					<div className="rounded-2xl border border-content/10 bg-surface p-4 space-y-3 print:hidden">
-						<div className="relative w-full max-w-md">
-							<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-muted" />
-							<input
-								type="text"
-								value={catalogSearch}
-								onChange={(event) => setCatalogSearch(event.target.value)}
-								placeholder="Cari judul karya seni, nama artis, ID..."
-								className="input input-sm w-full pl-9 bg-background border-content/10 text-xs"
-							/>
-						</div>
-
-						{/* Visibility Filter Presets */}
-						<div className="flex flex-wrap items-center gap-2 pt-2 border-t border-content/5">
-							<span className="text-xs font-semibold text-content-muted mr-1">
-								Status Feed:
-							</span>
-							{(
-								[
-									{ id: "all", label: `Semua (${artworksList.length})` },
-									{
-										id: "visible",
-										label: `Tayang di Feed (${
-											artworksList.filter((a) => a.is_visible_on_feed).length
-										})`,
-									},
-									{
-										id: "hidden",
-										label: `Disembunyikan / Takedown (${stats.hiddenArtworks})`,
-									},
-								] as const
-							).map((preset) => (
-								<button
-									key={preset.id}
-									type="button"
-									onClick={() =>
-										setCatalogFilter(preset.id as CatalogVisibilityFilter)
-									}
-									className={`btn btn-xs rounded-lg ${
-										catalogFilter === preset.id
-											? "btn-primary"
-											: "btn-ghost border border-content/10"
-									}`}
-								>
-									{preset.label}
-								</button>
-							))}
-						</div>
-					</div>
-
-					{/* Catalog Table */}
-					<div className="rounded-2xl border border-content/10 bg-surface overflow-hidden">
-						<DataTable
-							columns={catalogColumns}
-							pagination={paginatedCatalog}
-							getRowKey={(row) => row.id}
-							isLoading={isArtworksLoading}
-							onPageChange={setCatalogPage}
-							onPerPageChange={setCatalogPerPage}
-							itemLabel="karya seni"
-							emptyState={
-								<div className="flex flex-col items-center justify-center py-12 text-center">
-									<ImageIcon className="h-10 w-10 text-content-muted mb-2 opacity-40" />
-									<p className="text-sm font-semibold text-content">
-										Tidak Ada Karya Seni Ditemukan
-									</p>
-									<p className="text-xs text-content-muted mt-1 max-w-xs">
-										Tidak ada karya seni yang sesuai dengan filter pencarian
-										saat ini.
-									</p>
-								</div>
-							}
-						/>
-					</div>
-				</div>
+				<CatalogManagementTab
+					artworksList={artworksList}
+					isLoading={isArtworksLoading}
+					hiddenCount={stats.hiddenArtworks}
+				/>
 			)}
-
-			{/* Tag Form Modal (Create / Edit) */}
-			<TagFormModal
-				isOpen={isTagModalOpen}
-				tagToEdit={tagToEdit}
-				isLoading={createTagMutation.isPending || updateTagMutation.isPending}
-				onClose={() => {
-					setIsTagModalOpen(false);
-					setTagToEdit(null);
-				}}
-				onSubmit={handleSubmitTag}
-			/>
 		</div>
 	);
 }
