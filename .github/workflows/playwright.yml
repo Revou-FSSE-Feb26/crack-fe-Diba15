@@ -18,7 +18,7 @@ jobs:
 
     env:
       NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
-      NESTJS_API_URL: "http://localhost:3001/api"
+      NESTJS_API_URL: ${{ secrets.NESTJS_API_URL || 'http://localhost:3001/api' }}
       NEXT_PUBLIC_DISABLE_DEVTOOLS: "true"
       CI: "true"
 
@@ -48,6 +48,11 @@ jobs:
       - name: 🌐 Install OS Dependencies if cache hit
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: bunx playwright install-deps chromium
+
+      - name: ⏳ Wake up Backend (Render Cold Start Ping)
+        run: |
+          echo "Pinging backend at $NESTJS_API_URL..."
+          curl -s -m 90 "$NESTJS_API_URL/artwork" || true
 
       - name: 🧪 Run Playwright E2E Tests
         run: bun run test:e2e
