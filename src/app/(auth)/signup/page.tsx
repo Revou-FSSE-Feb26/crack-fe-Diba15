@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, Mail, MoveLeft, User } from "lucide-react";
+import { Loader2, Lock, Mail, MoveLeft, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
@@ -26,7 +26,7 @@ export default function Signup() {
 		register,
 		handleSubmit,
 		control,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<Signup>({
 		defaultValues: {
 			name: "",
@@ -230,8 +230,20 @@ export default function Signup() {
 							</p>
 						)}
 					</div>
-					<Button type="submit" variant="primary">
-						Register
+					<Button
+						type="submit"
+						variant="primary"
+						disabled={isSubmitting}
+						className="w-full justify-center"
+					>
+						{isSubmitting ? (
+							<>
+								<Loader2 className="h-4 w-4 animate-spin mr-2" />
+								Mendaftarkan Akun...
+							</>
+						) : (
+							"Register"
+						)}
 					</Button>
 				</form>
 			</div>
