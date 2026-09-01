@@ -1,0 +1,61 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  e2e-test:
+    name: Run Playwright E2E & UI/UX Tests
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
+      NESTJS_API_URL: "http://localhost:3001/api"
+      NEXT_PUBLIC_DISABLE_DEVTOOLS: "true"
+      CI: "true"
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🥟 Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
+
+      - name: 📦 Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 💾 Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: 🌐 Install Playwright Chromium & OS Dependencies
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium --with-deps
+
+      - name: 🌐 Install OS Dependencies if cache hit
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps chromium
+
+      - name: 🧪 Run Playwright E2E Tests
+        run: bun run test:e2e
+
+      - name: 📊 Upload Playwright Test Report Artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

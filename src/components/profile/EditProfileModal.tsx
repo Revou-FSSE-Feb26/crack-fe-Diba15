@@ -42,7 +42,7 @@ export default function EditProfileModal({
 	isArtist = true,
 }: EditProfileModalProps) {
 	const modalId = "edit-profile-form-modal";
-	const { openModal, isCurrentModalOpen, onCloseRef } = useFormModal({
+	const { openModal, onCloseRef } = useFormModal({
 		modalId,
 		isOpen,
 		onClose,
@@ -252,7 +252,7 @@ export default function EditProfileModal({
 	);
 
 	useEffect(() => {
-		if (isOpen && !isCurrentModalOpen) {
+		if (isOpen) {
 			openModal({
 				id: modalId,
 				type: "form",
@@ -274,15 +274,7 @@ export default function EditProfileModal({
 				},
 			});
 		}
-	}, [
-		content,
-		handleSubmit,
-		isArtist,
-		isCurrentModalOpen,
-		isOpen,
-		onCloseRef,
-		openModal,
-	]);
+	}, [content, handleSubmit, isArtist, isOpen, onCloseRef, openModal]);
 
 	return null;
 }
