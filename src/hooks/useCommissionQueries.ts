@@ -32,6 +32,18 @@ export function useCommissionDetail(id: string) {
 			return res.data;
 		},
 		enabled: isAuthenticated && Boolean(id),
+		staleTime: 0,
+		refetchOnWindowFocus: true,
+		refetchIntervalInBackground: false,
+		refetchInterval: (query) => {
+			const status = query.state.data?.status;
+			// Berhenti polling otomatis jika transaksi sudah tuntas atau dibatalkan
+			if (status === "completed" || status === "cancelled") {
+				return false;
+			}
+			// Polling setiap 8 detik di latar belakang selama komisi masih aktif
+			return 8000;
+		},
 	});
 }
 

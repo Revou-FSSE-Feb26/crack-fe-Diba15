@@ -43,6 +43,7 @@ export function useArtworks(filters?: {
 			}
 			return res.data;
 		},
+		staleTime: 60 * 1000, // 1 menit: preservasi cache saat bernavigasi
 	});
 }
 
@@ -90,6 +91,7 @@ export function useInfiniteArtworks(
 			}
 			return undefined;
 		},
+		staleTime: 60 * 1000, // 1 menit: menjaga posisi scroll & mencegah refetch saat tekan tombol Back
 	});
 }
 
@@ -100,6 +102,7 @@ export function usePopularTags() {
 			const res = await axiosClient.get("/artwork/tags/popular");
 			return res.data;
 		},
+		staleTime: 2 * 60 * 1000, // 2 menit: tag populer relatif jarang berubah
 	});
 }
 
@@ -110,6 +113,7 @@ export function usePopularArtists() {
 			const res = await axiosClient.get("/artwork/artists/popular");
 			return res.data;
 		},
+		staleTime: 2 * 60 * 1000, // 2 menit: artist populer relatif jarang berubah
 	});
 }
 
