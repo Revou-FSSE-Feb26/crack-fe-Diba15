@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, Mail, MoveLeft } from "lucide-react";
+import { Loader2, Lock, Mail, MoveLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -18,7 +18,7 @@ export default function Login() {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<LoginForm>({
 		defaultValues: {
 			email: "",
@@ -143,8 +143,20 @@ export default function Login() {
 								Forgot password?
 							</Link>
 						</div>
-						<Button type="submit" variant="primary">
-							Login
+						<Button
+							type="submit"
+							variant="primary"
+							disabled={isSubmitting}
+							className="w-full justify-center"
+						>
+							{isSubmitting ? (
+								<>
+									<Loader2 className="h-4 w-4 animate-spin mr-2" />
+									Memproses Login...
+								</>
+							) : (
+								"Login"
+							)}
 						</Button>
 					</form>
 					<div>

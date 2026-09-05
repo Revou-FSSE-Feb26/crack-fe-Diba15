@@ -15,13 +15,24 @@ import { buildArtworkWithRelations } from "@/utils/search";
 export default function ArtworkList() {
 	const mounted = useMounted();
 	const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-		useInfiniteArtworks({}, 6);
+		useInfiniteArtworks({ isVisibleOnFeed: "true" }, 6);
 
 	const { user, isAuthenticated } = useUserStore();
 	const { data: followedArtistIds = [] } = useUserFollowingIds();
 
 	const [feedType, setFeedType] = useState<"all" | "followed">("all");
 	const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+	// Synchronize ref callbacks for stable observer without tearing down listener
+	const hasNextPageRef = useRef(hasNextPage);
+	const isFetchingNextPageRef = useRef(isFetchingNextPage);
+	const fetchNextPageRef = useRef(fetchNextPage);
+
+	useEffect(() => {
+		hasNextPageRef.current = hasNextPage;
+		isFetchingNextPageRef.current = isFetchingNextPage;
+		fetchNextPageRef.current = fetchNextPage;
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	// Flatten all paginated pages into a single artwork list
 	const allArtworks = useMemo(() => {
@@ -40,25 +51,52 @@ export default function ArtworkList() {
 		return allArtworks;
 	}, [allArtworks, feedType, followedArtistIds]);
 
-	// Infinite Scroll IntersectionObserver trigger
+	// 1. Stable Infinite Scroll IntersectionObserver trigger
 	useEffect(() => {
 		const element = sentinelRef.current;
-		if (!element || !hasNextPage || isFetchingNextPage) return;
+		if (!element) return;
 
 		const observer = new IntersectionObserver(
 			(entries) => {
-				if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-					fetchNextPage();
+				if (
+					entries[0]?.isIntersecting &&
+					hasNextPageRef.current &&
+					!isFetchingNextPageRef.current
+				) {
+					fetchNextPageRef.current();
 				}
 			},
 			{
-				rootMargin: "300px", // Trigger earlier for smooth seamless scrolling
+				rootMargin: "400px", // Trigger early before reaching the exact bottom
 			},
 		);
 
 		observer.observe(element);
 		return () => observer.disconnect();
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+	}, []);
+
+	// 2. Auto-fill Viewport: if total content is shorter than screen height, auto fetch next batch
+	useEffect(() => {
+		if (!mounted || isLoading || isFetchingNextPage || !hasNextPage) return;
+
+		const checkAndFill = () => {
+			if (typeof window === "undefined") return;
+			const scrollHeight = document.documentElement.scrollHeight;
+			const clientHeight = document.documentElement.clientHeight;
+
+			// If content is not tall enough to produce a scrollbar and more pages exist
+			if (
+				scrollHeight <= clientHeight + 150 &&
+				hasNextPageRef.current &&
+				!isFetchingNextPageRef.current
+			) {
+				fetchNextPageRef.current();
+			}
+		};
+
+		const timer = setTimeout(checkAndFill, 300);
+		return () => clearTimeout(timer);
+	}, [mounted, isLoading, isFetchingNextPage, hasNextPage]);
 
 	// Show tab switcher only if user is logged in as artist or client
 	const showTabs =
@@ -125,6 +163,19 @@ export default function ArtworkList() {
 					{isFetchingNextPage && (
 						<div className="flex flex-col gap-4 pt-2">
 							<ArtworkSkeleton />
+						</div>
+					)}
+
+					{/* Fallback Manual Trigger */}
+					{hasNextPage && !isFetchingNextPage && (
+						<div className="flex justify-center pt-2 pb-2">
+							<button
+								type="button"
+								onClick={() => fetchNextPage()}
+								className="text-xs font-semibold text-primary hover:text-primary-hover py-2 px-5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all cursor-pointer"
+							>
+								Muat Lebih Banyak Karya ↓
+							</button>
 						</div>
 					)}
 
