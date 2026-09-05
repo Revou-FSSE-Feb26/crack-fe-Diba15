@@ -4,6 +4,13 @@ import { axiosClient, setAccessToken } from "@/lib/axiosClient";
 import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { DbUserResponse, Profile, User, UserState } from "@/types";
 
+/**
+ * Memetakan respons data pengguna mentah dari database/API backend
+ * ke struktur objek model `User` lengkap dengan objek `profile` yang ternormalisasi.
+ *
+ * @param dbUser - Respons pengguna dari database/backend
+ * @returns Objek `User` yang siap digunakan di state frontend
+ */
 const mapDbUser = (dbUser: DbUserResponse): User => {
 	const mappedProfile: Profile | undefined = dbUser.profile
 		? {
@@ -41,12 +48,29 @@ const mapDbUser = (dbUser: DbUserResponse): User => {
 	};
 };
 
+/**
+ * Store Zustand untuk mengelola sesi autentikasi dan data pengguna yang sedang login saat ini (Current User).
+ *
+ * Fitur utama:
+ * - Autentikasi: login, register, logout, serta verifikasi sesi (`checkAuth`).
+ * - Sinkronisasi saldo dompet: top up dan penarikan dana (withdraw).
+ * - Pembaruan profil lokal pengguna aktif (`updateCurrentUser`).
+ * - Pengecekan otorisasi role pengguna (`isAdmin`, `isArtist`, `isClient`, `isCurator`).
+ * - Persistensi data ke localStorage (`trubrush-user`).
+ */
 export const useUserStore = create<UserState>()(
 	persist(
 		(set, get) => ({
+			/** Data pengguna yang sedang login (null jika belum login / guest) */
 			user: null,
+
+			/** Menandakan apakah pengguna telah terautentikasi */
 			isAuthenticated: false,
 
+			/**
+			 * Memeriksa validitas sesi pengguna ke backend (`GET /auth/me`).
+			 * Jika valid, state pengguna diperbarui; jika tidak valid/kedaluwarsa, sesi di-reset.
+			 */
 			checkAuth: async () => {
 				try {
 					const meRes = await axiosClient.get("/auth/me");
@@ -58,6 +82,15 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			/**
+			 * Menangani login pengguna dengan email dan password.
+			 * Jika backend aktif, mengirim request ke `/auth/login` dan menyimpan access token.
+			 * Jika backend offline, menerapkan fallback autentikasi lokal via mock data di `useUserManagementStore`.
+			 *
+			 * @param email - Alamat email pengguna
+			 * @param password - Kata sandi pengguna
+			 * @returns Objek status `{ success, message }`
+			 */
 			login: async (email, password) => {
 				try {
 					// 1. Coba login ke API Route Handler Next.js
@@ -107,6 +140,13 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			/**
+			 * Mendaftarkan akun baru ke sistem (`POST /auth/register`).
+			 * Jika registrasi berhasil, access token langsung disimpan dan sesi login diaktifkan.
+			 *
+			 * @param payload - Payload data pendaftaran (nama, email, password, role, dll.)
+			 * @returns Objek status `{ success, message }`
+			 */
 			register: async (payload) => {
 				try {
 					// 1. Coba daftar ke API Route Handler Next.js
@@ -134,6 +174,10 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			/**
+			 * Melakukan logout pengguna dari aplikasi.
+			 * Memanggil endpoint logout backend, membersihkan access token dari memori, dan mengosongkan state user.
+			 */
 			logout: async () => {
 				try {
 					await axiosClient.post("/auth/logout");
@@ -145,6 +189,12 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			/**
+			 * Menambahkan saldo dompet pengguna (`POST /user/topup`).
+			 *
+			 * @param amount - Nominal saldo yang ditambahkan
+			 * @returns Objek status `{ success, message }`
+			 */
 			topUp: async (amount) => {
 				try {
 					const res = await axiosClient.post("/user/topup", { amount });
@@ -165,6 +215,12 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			/**
+			 * Mengajukan penarikan saldo pengguna ke rekening/bank (`POST /user/withdraw`).
+			 *
+			 * @param payload - Informasi nominal dan detail tujuan penarikan
+			 * @returns Objek status `{ success, message }`
+			 */
 			withdraw: async (payload) => {
 				try {
 					const res = await axiosClient.post("/user/withdraw", payload);
@@ -188,15 +244,26 @@ export const useUserStore = create<UserState>()(
 				}
 			},
 
+			/**
+			 * Memperbarui data pengguna yang sedang aktif di state lokal secara langsung
+			 * (berguna setelah mutasi profil, pembaruan avatar, atau pengubahan nama).
+			 *
+			 * @param payload - Bagian data pengguna yang ingin diperbarui
+			 */
 			updateCurrentUser: (payload) =>
 				set((state) =>
 					state.user ? { user: { ...state.user, ...payload } } : state,
 				),
 
+			/** Memeriksa apakah role pengguna cocok dengan role tertentu */
 			hasRole: (role) => get().user?.role === role,
+			/** Memeriksa apakah pengguna ber-role 'artist' */
 			isArtist: () => get().user?.role === "artist",
+			/** Memeriksa apakah pengguna ber-role 'client' */
 			isClient: () => get().user?.role === "client",
+			/** Memeriksa apakah pengguna ber-role 'curator' */
 			isCurator: () => get().user?.role === "curator",
+			/** Memeriksa apakah pengguna ber-role 'admin' */
 			isAdmin: () => get().user?.role === "admin",
 		}),
 		{

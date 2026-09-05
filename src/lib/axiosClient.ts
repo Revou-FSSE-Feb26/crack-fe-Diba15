@@ -1,3 +1,28 @@
+/**
+ * @file axiosClient.ts
+ * @description
+ * Instance Axios untuk sisi client (browser) yang dikonfigurasi khusus untuk berkomunikasi
+ * dengan Next.js Route Handlers (`/api`).
+ *
+ * Tujuan & Fungsi Utama:
+ * 1. Base URL Routing:
+ *    - Mengarahkan semua request API client-side ke endpoint internal Next.js (`/api/*`),
+ *      yang bertindak sebagai Backend-for-Frontend (BFF) / reverse proxy ke backend NestJS / external.
+ *
+ * 2. Manajemen Akses Token Aman (In-Memory Storage):
+ *    - Menyimpan JWT `accessToken` di dalam memori variabel runtime (RAM) alih-alih `localStorage`/`sessionStorage`
+ *      untuk memitigasi risiko pencurian token melalui serangan Cross-Site Scripting (XSS).
+ *
+ * 3. Request Interceptor:
+ *    - Secara otomatis menyematkan header `Authorization: Bearer <accessToken>` pada setiap HTTP request keluar
+ *      jika token tersedia di memori.
+ *
+ * 4. Response Interceptor (Silent Token Refresh):
+ *    - Menangani respons error HTTP 401 Unauthorized secara otomatis dan transparan.
+ *    - Memanggil endpoint refresh token (`/api/auth/refresh`) yang memanfaatkan HTTP-only cookie,
+ *      memperbarui token di memori, dan mengulang request asli yang sempat gagal tanpa memutus alur pengguna (UX seamless).
+ */
+
 import axios from "axios";
 
 // Access Token disimpan di dalam memori (RAM) untuk keamanan maksimal dari XSS
