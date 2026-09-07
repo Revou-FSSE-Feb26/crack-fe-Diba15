@@ -22,6 +22,8 @@ interface CommissionActionControlsProps {
 		final_artwork_url?: string;
 	}) => Promise<unknown>;
 	onCompleteCommission: () => Promise<unknown>;
+	isResponding?: boolean;
+	isApprovingFinal?: boolean;
 }
 
 export default function CommissionActionControls({
@@ -35,6 +37,8 @@ export default function CommissionActionControls({
 	onOpenDispute,
 	onUpdateProgress,
 	onCompleteCommission,
+	isResponding = false,
+	isApprovingFinal = false,
 }: CommissionActionControlsProps) {
 	const isCommissionActive =
 		!["completed", "cancelled", "disputed"].includes(commission.status) &&
@@ -88,6 +92,7 @@ export default function CommissionActionControls({
 					price={commission.price}
 					isArtistView={isArtistView}
 					onRespond={onRespond}
+					isResponding={isResponding}
 				/>
 			)}
 
@@ -123,6 +128,7 @@ export default function CommissionActionControls({
 					canDispute={canDispute}
 					onApproveFinal={onApproveFinal}
 					onOpenDispute={onOpenDispute}
+					isApproving={isApprovingFinal}
 				/>
 			)}
 
