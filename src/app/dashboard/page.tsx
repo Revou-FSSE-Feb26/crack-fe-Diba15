@@ -14,30 +14,24 @@ import {
 	Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 import Stat from "@/components/ui/Stat";
 import { useArtworks } from "@/hooks/useArtworkQueries";
 import { useUserCommissions } from "@/hooks/useCommissionQueries";
 import { useDisputes } from "@/hooks/useDisputeQueries";
 import { useReports } from "@/hooks/useReportQueries";
-import { useUserManagementStore } from "@/store/UserManagementStore";
+import { useUsers } from "@/hooks/useUserQueries";
 import { useUserStore } from "@/store/UserStore";
 import { formatPrice } from "@/utils";
 
 export default function DashboardPage() {
 	const { user } = useUserStore();
-	const { users, fetchUsers } = useUserManagementStore();
+	const { data: users = [] } = useUsers({ enabled: user?.role === "admin" });
 	const { data: artworks = [] } = useArtworks();
 	const { data: commissionsData = [] } = useUserCommissions();
 	const { data: disputesData = [] } = useDisputes();
 	const { data: reportsData = [] } = useReports();
-
-	useEffect(() => {
-		if (user?.role === "admin") {
-			fetchUsers();
-		}
-	}, [fetchUsers, user?.role]);
 
 	const activeCommissionsList = commissionsData;
 

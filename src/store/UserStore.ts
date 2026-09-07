@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { axiosClient, setAccessToken } from "@/lib/axiosClient";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import type { DbUserResponse, Profile, User, UserState } from "@/types";
 
 /**
@@ -84,8 +83,7 @@ export const useUserStore = create<UserState>()(
 
 			/**
 			 * Menangani login pengguna dengan email dan password.
-			 * Jika backend aktif, mengirim request ke `/auth/login` dan menyimpan access token.
-			 * Jika backend offline, menerapkan fallback autentikasi lokal via mock data di `useUserManagementStore`.
+			 * Mengirim request ke `/auth/login`, menyimpan access token di memori, dan memuat profil pengguna.
 			 *
 			 * @param email - Alamat email pengguna
 			 * @param password - Kata sandi pengguna
@@ -108,29 +106,18 @@ export const useUserStore = create<UserState>()(
 					const safeUser = mapDbUser(meRes.data);
 
 					set({ user: safeUser, isAuthenticated: true });
-					return { success: true, message: "Login berhasil via API." };
+					return { success: true, message: "Login berhasil." };
 				} catch (error) {
 					const err = error as {
 						response?: { status?: number; data?: { message?: string } };
 					};
-					// Jika gagal karena masalah koneksi (backend offline), lakukan fallback ke data dummy lokal
+
+					// Jika gagal karena koneksi ke server terputus
 					if (!err.response) {
-						console.warn(
-							"NestJS API offline. Falling back to local mock login...",
-						);
-						const found = useUserManagementStore
-							.getState()
-							.users.find((u) => u.email === email && u.password === password);
-
-						if (!found) {
-							return { success: false, message: "Email atau password salah." };
-						}
-
-						const { password: _, ...safeUser } = found;
-						set({ user: safeUser, isAuthenticated: true });
 						return {
-							success: true,
-							message: "Login berhasil via Mock (Offline).",
+							success: false,
+							message:
+								"Gagal terhubung ke server. Pastikan backend sedang berjalan.",
 						};
 					}
 
