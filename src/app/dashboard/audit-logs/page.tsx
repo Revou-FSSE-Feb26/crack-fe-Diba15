@@ -16,6 +16,10 @@ import {
 import { useMemo, useState } from "react";
 import AccessDenied from "@/components/dashboard/AccessDenied";
 import { AuditLogDetailModal } from "@/components/dashboard/audit-logs/AuditLogDetailModal";
+import {
+	categoryLabels,
+	createAuditTableColumns,
+} from "@/components/dashboard/audit-logs/AuditTableColumns";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useAuditLogs } from "@/hooks/useAppealQueries";
@@ -23,10 +27,6 @@ import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useUserStore } from "@/store/UserStore";
 import type { AuditLogCategory, AuditLogItem } from "@/types";
 import { formatDateTime } from "@/utils";
-import {
-	categoryLabels,
-	createAuditTableColumns,
-} from "@/utils/dashboard/audit-logs/auditTableColumns";
 import { type DatePreset, getDatePresetRange } from "@/utils/datePresets";
 import { exportToCsv } from "@/utils/exportCsv";
 
@@ -115,10 +115,9 @@ export default function AuditLogsPage() {
 					l.action.toLowerCase().includes(q) ||
 					l.actor.name.toLowerCase().includes(q) ||
 					l.actor.email.toLowerCase().includes(q) ||
-					((l.targetTitle ?? l.target_title)?.toLowerCase().includes(q) ??
-						false) ||
+					(l.targetTitle?.toLowerCase().includes(q) ?? false) ||
 					(l.details?.toLowerCase().includes(q) ?? false) ||
-					(l.targetId ?? l.target_id ?? "").toLowerCase().includes(q),
+					l.targetId.toLowerCase().includes(q),
 			);
 		}
 
@@ -148,15 +147,15 @@ export default function AuditLogsPage() {
 
 		const rows = filteredLogs.map((l) => [
 			l.id,
-			formatDateTime(l.createdAt ?? l.created_at),
+			formatDateTime(l.createdAt),
 			l.actor.name,
 			l.actor.email,
 			l.actor.role,
 			categoryLabels[l.category] || l.category,
 			l.action,
-			l.targetType ?? l.target_type ?? "",
-			l.targetId ?? l.target_id ?? "",
-			l.targetTitle ?? l.target_title ?? l.targetId ?? l.target_id ?? "",
+			l.targetType,
+			l.targetId,
+			l.targetTitle ?? l.targetId,
 			l.status,
 			l.details || "",
 		]);

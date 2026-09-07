@@ -13,7 +13,7 @@ import {
 	auditStatusBadges,
 	categoryBadges,
 	categoryLabels,
-} from "@/utils/dashboard/audit-logs/auditTableColumns";
+} from "./AuditTableColumns";
 
 interface AuditLogDetailModalProps {
 	log: AuditLogItem | null;
@@ -87,7 +87,7 @@ export function AuditLogDetailModal({
 						<div className="flex justify-between items-center py-2 border-b border-content/5">
 							<span className="text-content-muted">Waktu Eksekusi:</span>
 							<span className="font-medium text-content">
-								{formatDateTime(log.createdAt ?? log.created_at)}
+								{formatDateTime(log.createdAt)}
 							</span>
 						</div>
 
@@ -137,7 +137,7 @@ export function AuditLogDetailModal({
 										Tipe Target:
 									</span>
 									<span className="font-medium text-content uppercase">
-										{log.targetType ?? log.target_type}
+										{log.targetType}
 									</span>
 								</div>
 								<div>
@@ -145,10 +145,7 @@ export function AuditLogDetailModal({
 										Subjek Target:
 									</span>
 									<span className="font-medium text-content truncate block">
-										{log.targetTitle ??
-											log.target_title ??
-											log.targetId ??
-											log.target_id}
+										{log.targetTitle ?? log.targetId}
 									</span>
 								</div>
 								<div className="col-span-2">
@@ -156,7 +153,7 @@ export function AuditLogDetailModal({
 										ID Target:
 									</span>
 									<span className="font-mono text-content text-[11px]">
-										{log.targetId ?? log.target_id}
+										{log.targetId}
 									</span>
 								</div>
 							</div>

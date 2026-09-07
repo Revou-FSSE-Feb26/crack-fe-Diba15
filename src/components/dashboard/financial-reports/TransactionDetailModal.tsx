@@ -7,7 +7,7 @@ import {
 	statusBadges,
 	transactionTypeBadges,
 	transactionTypeLabels,
-} from "@/utils/dashboard/financial-reports/financialTableColumns";
+} from "./FinancialTableColumns";
 
 interface TransactionDetailModalProps {
 	transaction: WalletTransaction | null;

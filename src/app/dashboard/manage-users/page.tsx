@@ -8,7 +8,7 @@ import {
 	ShieldCheck,
 	Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import AccessDenied from "@/components/dashboard/AccessDenied";
 import { ReviewAppealModal } from "@/components/dashboard/manage-users/ReviewAppealModal";
@@ -16,21 +16,30 @@ import UserFormModal from "@/components/dashboard/manage-users/UserFormModal";
 import UserRoleFilterTabs, {
 	type RoleFilter,
 } from "@/components/dashboard/manage-users/UserRoleFilterTabs";
+import { createUsersTableColumns } from "@/components/dashboard/manage-users/UsersTableColumns";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useAppeals, useResolveAppeal } from "@/hooks/useAppealQueries";
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
+import {
+	useCreateUser,
+	useDeleteUser,
+	useUpdateUser,
+	useUsers,
+} from "@/hooks/useUserQueries";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
-import { useUserManagementStore } from "@/store/UserManagementStore";
 import { useUserStore } from "@/store/UserStore";
-import type { Appeal, User, UserRole } from "@/types";
-import { createUsersTableColumns } from "@/utils/dashboard/manage-users/usersTableColumns";
+import type { Appeal, User, UserPayload, UserRole } from "@/types";
 
 export default function ManageUsersPage() {
 	const { user: currentUser, isAdmin } = useUserStore();
-	const { users, fetchUsers, createCurator, updateUser, deleteUser } =
-		useUserManagementStore();
+	const { data: users = [], isLoading, isFetching, refetch } = useUsers();
+	const createUserMutation = useCreateUser();
+	const updateUserMutation = useUpdateUser();
+	const deleteUserMutation = useDeleteUser();
+	const isRefreshing = isFetching && !isLoading;
+
 	const { openModal } = useModalStore();
 	const { addToast } = useToastStore();
 	const { setPage, setPerPage, paginate, resetPage } = usePagination({
@@ -41,23 +50,11 @@ export default function ManageUsersPage() {
 	const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
 	const [formOpen, setFormOpen] = useState(false);
 	const [editingUser, setEditingUser] = useState<User | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isRefreshing, setIsRefreshing] = useState(false);
-
-	// Fetch users dari backend saat halaman dimuat
-	useEffect(() => {
-		fetchUsers().finally(() => setIsLoading(false));
-	}, [fetchUsers]);
 
 	useResetPageOnChange(resetPage, [search, roleFilter]);
 
 	const handleRefresh = async () => {
-		setIsRefreshing(true);
-		try {
-			await fetchUsers();
-		} finally {
-			setIsRefreshing(false);
-		}
+		await refetch();
 	};
 
 	const filteredUsers = useMemo(() => {
@@ -113,7 +110,10 @@ export default function ManageUsersPage() {
 				confirmLabel: "Hapus",
 				cancelLabel: "Batal",
 				onConfirm: async () => {
-					const result = await deleteUser(target.id);
+					const result = await deleteUserMutation.mutateAsync({
+						id: target.id,
+						name: target.name,
+					});
 					addToast({
 						message: result.message,
 						type: result.success ? "success" : "error",
@@ -121,7 +121,7 @@ export default function ManageUsersPage() {
 				},
 			});
 		},
-		[addToast, currentUser?.id, deleteUser, openModal],
+		[addToast, currentUser?.id, deleteUserMutation, openModal],
 	);
 
 	const handleEditOpen = useCallback((target: User) => {
@@ -142,8 +142,7 @@ export default function ManageUsersPage() {
 				renderActions: (user) => {
 					const artistProfile = user.profile;
 					const pendingAppeal = appeals.find(
-						(a) =>
-							(a.artist_id ?? a.artistId) === user.id && a.status === "pending",
+						(a) => a.artistId === user.id && a.status === "pending",
 					);
 
 					return (
@@ -199,13 +198,16 @@ export default function ManageUsersPage() {
 	const handleCreate = async (values: {
 		name: string;
 		email: string;
-		password: string;
+		password?: string;
 		role: UserRole;
 	}) => {
-		const result = await createCurator({
+		if (!values.password) return;
+
+		const result = await createUserMutation.mutateAsync({
 			name: values.name,
 			email: values.email,
 			password: values.password,
+			role: values.role ?? "curator",
 		});
 
 		addToast({
@@ -219,7 +221,7 @@ export default function ManageUsersPage() {
 	const handleEdit = async (values: {
 		name: string;
 		email: string;
-		password: string;
+		password?: string;
 		role: UserRole;
 	}) => {
 		if (!editingUser) return;
@@ -232,11 +234,18 @@ export default function ManageUsersPage() {
 			return;
 		}
 
-		const result = await updateUser(editingUser.id, {
-			name: values.name,
-			email: values.email,
+		const payload: Partial<UserPayload> = {
+			name: values.name.trim(),
 			role: values.role,
-			password: values.password.trim() || undefined,
+		};
+
+		if (values.password && values.password.trim().length >= 8) {
+			payload.password = values.password.trim();
+		}
+
+		const result = await updateUserMutation.mutateAsync({
+			id: editingUser.id,
+			payload,
 		});
 
 		addToast({
@@ -393,7 +402,7 @@ export default function ManageUsersPage() {
 					try {
 						await resolveAppealMutation.mutateAsync({
 							id: appealId,
-							dto: { approved, resolution_notes: resolutionNotes },
+							dto: { approved, resolutionNotes },
 						});
 						addToast({
 							message: approved

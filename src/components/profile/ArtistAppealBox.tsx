@@ -19,9 +19,7 @@ export function ArtistAppealBox({ userId, strikeCount }: ArtistAppealBoxProps) {
 
 	if (strikeCount < 5) return null;
 
-	const userAppeals = appeals.filter(
-		(a: Appeal) => (a.artist_id ?? a.artistId) === userId,
-	);
+	const userAppeals = appeals.filter((a: Appeal) => a.artistId === userId);
 	const activeAppeal = userAppeals.find((a: Appeal) => a.status === "pending");
 	const rejectedAppeal = userAppeals.find(
 		(a: Appeal) => a.status === "rejected",
@@ -56,9 +54,7 @@ export function ArtistAppealBox({ userId, strikeCount }: ArtistAppealBoxProps) {
 		}
 	};
 
-	const appealCreatedAt = activeAppeal
-		? (activeAppeal.createdAt ?? activeAppeal.created_at ?? "")
-		: "";
+	const appealCreatedAt = activeAppeal ? activeAppeal.createdAt : "";
 
 	return (
 		<div className="mt-5 rounded-2xl border border-danger/20 bg-danger/5 p-4 sm:p-5 space-y-3">

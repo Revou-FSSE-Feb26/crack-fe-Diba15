@@ -42,7 +42,7 @@ export function createAuditTableColumns({
 			header: "Tanggal & Waktu",
 			cell: (item) => (
 				<span className="text-xs text-content-muted whitespace-nowrap">
-					{formatDateTime(item.createdAt ?? item.created_at)}
+					{formatDateTime(item.createdAt)}
 				</span>
 			),
 		},
@@ -97,13 +97,10 @@ export function createAuditTableColumns({
 			cell: (item) => (
 				<div className="flex flex-col min-w-0 max-w-[160px]">
 					<span className="text-xs text-content font-medium truncate">
-						{item.targetTitle ??
-							item.target_title ??
-							item.targetId ??
-							item.target_id}
+						{item.targetTitle ?? item.targetId}
 					</span>
 					<span className="text-[11px] text-content-muted uppercase truncate">
-						{item.targetType ?? item.target_type}
+						{item.targetType}
 					</span>
 				</div>
 			),
