@@ -337,6 +337,8 @@ export function CommissionDetailContent({
 							onCompleteCommission={() =>
 								completeMutation.mutateAsync(commission.id)
 							}
+							isResponding={respondMutation.isPending}
+							isApprovingFinal={approveStepMutation.isPending}
 						/>
 
 						{/* 4. Revision Logs & Comments */}
@@ -345,6 +347,7 @@ export function CommissionDetailContent({
 							artistName={artist?.name}
 							clientName={client?.name}
 							artistId={commission.artists_id}
+							isSubmitting={addRevisionMutation.isPending}
 							onAddComment={(commentText) =>
 								addRevisionMutation.mutate({
 									id: commission.id,

@@ -1,16 +1,18 @@
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 interface FinalApprovalPanelProps {
 	canDispute: boolean;
 	onApproveFinal: () => void;
 	onOpenDispute: () => void;
+	isApproving?: boolean;
 }
 
 export default function FinalApprovalPanel({
 	canDispute,
 	onApproveFinal,
 	onOpenDispute,
+	isApproving = false,
 }: FinalApprovalPanelProps) {
 	return (
 		<div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
@@ -23,16 +25,27 @@ export default function FinalApprovalPanel({
 			</p>
 			<div className="flex gap-2">
 				<Button
-					className="flex gap-1 items-center flex-1 justify-center text-sm font-semibold"
+					disabled={isApproving}
+					className="flex gap-1 items-center flex-1 justify-center text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
 					onClick={onApproveFinal}
 				>
-					<CheckCircle2 className="w-4 h-4" />
-					Approve Hasil Akhir
+					{isApproving ? (
+						<>
+							<Loader2 className="w-4 h-4 animate-spin mr-1" />
+							Menyetujui Hasil Akhir...
+						</>
+					) : (
+						<>
+							<CheckCircle2 className="w-4 h-4" />
+							Approve Hasil Akhir
+						</>
+					)}
 				</Button>
 				{canDispute && (
 					<Button
 						variant="danger"
-						className="flex gap-1 items-center justify-center text-sm"
+						disabled={isApproving}
+						className="flex gap-1 items-center justify-center text-sm disabled:opacity-60 disabled:cursor-not-allowed"
 						onClick={onOpenDispute}
 					>
 						<AlertTriangle className="w-4 h-4" />

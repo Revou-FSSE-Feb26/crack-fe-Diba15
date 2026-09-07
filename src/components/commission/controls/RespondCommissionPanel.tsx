@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { formatPrice } from "@/utils";
 
@@ -6,12 +6,14 @@ interface RespondCommissionPanelProps {
 	price: number;
 	isArtistView: boolean;
 	onRespond: (status: "accepted" | "cancelled", title: string) => void;
+	isResponding?: boolean;
 }
 
 export default function RespondCommissionPanel({
 	price,
 	isArtistView,
 	onRespond,
+	isResponding = false,
 }: RespondCommissionPanelProps) {
 	if (isArtistView) {
 		return (
@@ -25,18 +27,29 @@ export default function RespondCommissionPanel({
 				</p>
 				<div className="flex gap-2">
 					<Button
-						className="flex items-center gap-1 flex-1 justify-center text-sm"
+						disabled={isResponding}
+						className="flex items-center gap-1 flex-1 justify-center text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
 						onClick={() => onRespond("accepted", "Terima komisi?")}
 					>
-						<CheckCircle2 className="w-4 h-4" />
-						Terima Pesanan
+						{isResponding ? (
+							<>
+								<Loader2 className="w-4 h-4 animate-spin mr-1" />
+								Memproses...
+							</>
+						) : (
+							<>
+								<CheckCircle2 className="w-4 h-4 mr-1" />
+								Terima Pesanan
+							</>
+						)}
 					</Button>
 					<Button
 						variant="danger"
-						className="flex items-center gap-1 flex-1 justify-center text-sm"
+						disabled={isResponding}
+						className="flex items-center gap-1 flex-1 justify-center text-sm disabled:opacity-60 disabled:cursor-not-allowed"
 						onClick={() => onRespond("cancelled", "Tolak komisi?")}
 					>
-						<XCircle className="w-4 h-4" />
+						<XCircle className="w-4 h-4 mr-1" />
 						Tolak Pesanan
 					</Button>
 				</div>

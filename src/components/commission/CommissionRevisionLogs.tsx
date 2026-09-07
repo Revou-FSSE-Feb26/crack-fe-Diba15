@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import type { Revision } from "@/types";
@@ -10,6 +10,7 @@ interface CommissionRevisionLogsProps {
 	artistName?: string;
 	clientName?: string;
 	artistId?: string;
+	isSubmitting?: boolean;
 }
 
 export default function CommissionRevisionLogs({
@@ -18,12 +19,13 @@ export default function CommissionRevisionLogs({
 	artistName = "Artist",
 	clientName = "Client",
 	artistId,
+	isSubmitting = false,
 }: CommissionRevisionLogsProps) {
 	const [comment, setComment] = useState("");
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!comment.trim()) return;
+		if (!comment.trim() || isSubmitting) return;
 		onAddComment(comment.trim());
 		setComment("");
 	};
@@ -59,12 +61,24 @@ export default function CommissionRevisionLogs({
 			>
 				<input
 					value={comment}
+					disabled={isSubmitting}
 					onChange={(event) => setComment(event.target.value)}
 					placeholder="Tulis komentar, negosiasi harga, atau balasan..."
-					className="min-w-0 flex-1 rounded-lg border border-content/10 bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+					className="min-w-0 flex-1 rounded-lg border border-content/10 bg-background px-3 py-2 text-sm outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
 				/>
-				<Button type="submit" className="justify-center text-sm">
-					Kirim
+				<Button
+					type="submit"
+					disabled={isSubmitting || !comment.trim()}
+					className="justify-center text-sm min-w-[90px] font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+				>
+					{isSubmitting ? (
+						<>
+							<Loader2 className="w-4 h-4 animate-spin mr-1" />
+							Mengirim...
+						</>
+					) : (
+						"Kirim"
+					)}
 				</Button>
 			</form>
 		</div>
