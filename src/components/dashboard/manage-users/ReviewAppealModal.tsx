@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
@@ -38,7 +38,17 @@ export function ReviewAppealModal({
 				aria-label="Tutup"
 			/>
 			<div className="relative z-10 w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-content/10 p-6 space-y-4">
-				<div className="space-y-1">
+				<button
+					type="button"
+					onClick={onClose}
+					disabled={isLoading}
+					aria-label="Tutup modal"
+					className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-content/5 text-content-muted hover:text-content transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					<X className="w-4 h-4" />
+				</button>
+
+				<div className="space-y-1 pr-6">
 					<h2 className="text-lg font-bold text-content flex items-center gap-2">
 						Tinjau Banding Pemulihan Akun
 					</h2>

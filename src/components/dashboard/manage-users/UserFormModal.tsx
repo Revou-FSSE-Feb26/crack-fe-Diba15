@@ -1,11 +1,12 @@
 "use client";
 
-import { Lock, Mail, User } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { KeyRound, Lock, Mail, User } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import Input from "@/components/ui/form/Input";
 import Select from "@/components/ui/form/Select";
+import { useFormModal } from "@/hooks/useFormModal";
 import type { User as AppUser, UserRole } from "@/types";
 
 type FormMode = "create" | "edit";
@@ -13,8 +14,8 @@ type FormMode = "create" | "edit";
 interface UserFormValues {
 	name: string;
 	email: string;
-	password: string;
-	confirmPassword: string;
+	password?: string;
+	confirmPassword?: string;
 	role: UserRole;
 }
 
@@ -33,7 +34,7 @@ const roleOptions: { value: UserRole; label: string }[] = [
 	{ value: "admin", label: "Admin" },
 ];
 
-import { useFormModal } from "@/hooks/useFormModal";
+const MODAL_ID = "manage-user-form-modal";
 
 export default function UserFormModal({
 	mode,
@@ -42,12 +43,13 @@ export default function UserFormModal({
 	onClose,
 	onSubmit,
 }: UserFormModalProps) {
-	const modalId = "manage-user-form-modal";
-	const { openModal, isCurrentModalOpen, onCloseRef } = useFormModal({
-		modalId,
+	const { openModal, onCloseRef } = useFormModal({
+		modalId: MODAL_ID,
 		isOpen,
 		onClose,
 	});
+
+	const [showPasswordFields, setShowPasswordFields] = useState(false);
 
 	const onSubmitRef = useRef(onSubmit);
 	useEffect(() => {
@@ -58,7 +60,6 @@ export default function UserFormModal({
 		register,
 		handleSubmit,
 		reset,
-		control,
 		formState: { errors },
 	} = useForm<UserFormValues>({
 		defaultValues: {
@@ -70,11 +71,13 @@ export default function UserFormModal({
 		},
 	});
 
-	const password = useWatch({ control, name: "password" });
-
 	useEffect(() => {
-		if (!isOpen) return;
+		if (!isOpen) {
+			setShowPasswordFields(false);
+			return;
+		}
 
+		setShowPasswordFields(false);
 		reset({
 			name: user?.name ?? "",
 			email: user?.email ?? "",
@@ -117,15 +120,28 @@ export default function UserFormModal({
 				</div>
 
 				<div>
-					<label htmlFor="user-email" className="form-label">
-						Email
+					<label
+						htmlFor="user-email"
+						className="mb-1.5 flex items-center justify-between text-sm font-semibold text-content"
+					>
+						<span>Email</span>
+						{!isCreate && (
+							<span className="text-[11px] font-normal text-content-muted">
+								(Tidak dapat diubah)
+							</span>
+						)}
 					</label>
 					<Input
 						id="user-email"
 						type="email"
 						placeholder="nama@email.com"
+						disabled={!isCreate}
+						readOnly={!isCreate}
+						className={
+							!isCreate ? "opacity-60 cursor-not-allowed bg-content/5" : ""
+						}
 						{...register("email", {
-							required: "Email wajib diisi",
+							required: isCreate ? "Email wajib diisi" : false,
 							pattern: {
 								value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 								message: "Format email tidak valid",
@@ -135,7 +151,7 @@ export default function UserFormModal({
 						<Mail className="form-input-icon" />
 					</Input>
 					{errors.email && (
-						<p className="form-error-msg">{errors.email.message}</p>
+						<p className="mt-1 text-xs text-danger">{errors.email.message}</p>
 					)}
 				</div>
 
@@ -156,7 +172,9 @@ export default function UserFormModal({
 						<Select
 							id="user-role"
 							label="Role"
-							{...register("role", { required: "Role wajib dipilih" })}
+							{...register("role", {
+								required: "Role wajib dipilih",
+							})}
 						>
 							{roleOptions.map((option) => (
 								<option key={option.value} value={option.value}>
@@ -170,82 +188,164 @@ export default function UserFormModal({
 					</div>
 				)}
 
-				<div>
-					<label
-						htmlFor="user-password"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
-						{isCreate ? "Password" : "Password Baru (opsional)"}
-					</label>
-					<Input
-						id="user-password"
-						type="password"
-						placeholder={
-							isCreate ? "Minimal 8 karakter" : "Kosongkan jika tidak diubah"
-						}
-						{...register(
-							"password",
-							isCreate
-								? {
-										required: "Password wajib diisi",
-										minLength: { value: 8, message: "Minimal 8 karakter" },
-									}
-								: {
-										minLength: { value: 8, message: "Minimal 8 karakter" },
+				{isCreate ? (
+					<>
+						<div>
+							<label
+								htmlFor="user-password"
+								className="mb-1.5 block text-sm font-semibold text-content"
+							>
+								Password
+							</label>
+							<Input
+								id="user-password"
+								type="password"
+								autoComplete="new-password"
+								placeholder="Minimal 8 karakter"
+								{...register("password", {
+									required: "Password wajib diisi",
+									minLength: {
+										value: 8,
+										message: "Minimal 8 karakter",
 									},
-						)}
-					>
-						<Lock className="h-5 w-5 text-gray-400" />
-					</Input>
-					{errors.password && (
-						<p className="mt-1 text-xs text-danger">
-							{errors.password.message}
-						</p>
-					)}
-				</div>
+								})}
+							>
+								<Lock className="h-5 w-5 text-gray-400" />
+							</Input>
+							{errors.password && (
+								<p className="mt-1 text-xs text-danger">
+									{errors.password.message}
+								</p>
+							)}
+						</div>
 
-				<div>
-					<label
-						htmlFor="user-confirm-password"
-						className="mb-1.5 block text-sm font-semibold text-content"
-					>
-						{isCreate ? "Konfirmasi Password" : "Konfirmasi Password Baru"}
-					</label>
-					<Input
-						id="user-confirm-password"
-						type="password"
-						placeholder="Ulangi password"
-						{...register(
-							"confirmPassword",
-							isCreate
-								? {
-										required: "Konfirmasi password wajib diisi",
-										validate: (value) =>
-											value === password || "Password tidak sama",
+						<div>
+							<label
+								htmlFor="user-confirm-password"
+								className="mb-1.5 block text-sm font-semibold text-content"
+							>
+								Konfirmasi Password
+							</label>
+							<Input
+								id="user-confirm-password"
+								type="password"
+								autoComplete="new-password"
+								placeholder="Ulangi password"
+								{...register("confirmPassword", {
+									required: "Konfirmasi password wajib diisi",
+									validate: (value, formValues) =>
+										value === formValues.password || "Password tidak sama",
+								})}
+							>
+								<Lock className="h-5 w-5 text-gray-400" />
+							</Input>
+							{errors.confirmPassword && (
+								<p className="mt-1 text-xs text-danger">
+									{errors.confirmPassword.message}
+								</p>
+							)}
+						</div>
+					</>
+				) : (
+					<div className="space-y-4 pt-1">
+						<div className="flex items-center justify-between rounded-lg border border-content/10 bg-content/5 px-3.5 py-2.5">
+							<div className="flex items-center gap-2">
+								<KeyRound className="h-4 w-4 text-primary" />
+								<span className="text-xs font-medium text-content">
+									Ubah Password Pengguna
+								</span>
+							</div>
+							<button
+								type="button"
+								onClick={() => {
+									const next = !showPasswordFields;
+									setShowPasswordFields(next);
+									if (!next) {
+										reset({
+											name: user?.name ?? "",
+											email: user?.email ?? "",
+											password: "",
+											confirmPassword: "",
+											role: user?.role ?? "curator",
+										});
 									}
-								: {
-										validate: (value) =>
-											!password || value === password || "Password tidak sama",
-									},
+								}}
+								className="btn btn-xs btn-outline btn-primary cursor-pointer text-[11px]"
+							>
+								{showPasswordFields ? "Batal" : "Ubah Password"}
+							</button>
+						</div>
+
+						{showPasswordFields && (
+							<div className="space-y-4 rounded-lg border border-primary/20 bg-primary/5 p-3.5 animate-fade-in">
+								<div>
+									<label
+										htmlFor="user-password"
+										className="mb-1.5 block text-xs font-semibold text-content"
+									>
+										Password Baru
+									</label>
+									<Input
+										id="user-password"
+										type="password"
+										autoComplete="new-password"
+										placeholder="Minimal 8 karakter"
+										{...register("password", {
+											required: "Password baru wajib diisi",
+											minLength: {
+												value: 8,
+												message: "Minimal 8 karakter",
+											},
+										})}
+									>
+										<Lock className="h-5 w-5 text-gray-400" />
+									</Input>
+									{errors.password && (
+										<p className="mt-1 text-xs text-danger">
+											{errors.password.message}
+										</p>
+									)}
+								</div>
+
+								<div>
+									<label
+										htmlFor="user-confirm-password"
+										className="mb-1.5 block text-xs font-semibold text-content"
+									>
+										Konfirmasi Password Baru
+									</label>
+									<Input
+										id="user-confirm-password"
+										type="password"
+										autoComplete="new-password"
+										placeholder="Ulangi password baru"
+										{...register("confirmPassword", {
+											required: "Konfirmasi password baru wajib diisi",
+											validate: (value, formValues) =>
+												value === formValues.password || "Password tidak sama",
+										})}
+									>
+										<Lock className="h-5 w-5 text-gray-400" />
+									</Input>
+									{errors.confirmPassword && (
+										<p className="mt-1 text-xs text-danger">
+											{errors.confirmPassword.message}
+										</p>
+									)}
+								</div>
+							</div>
 						)}
-					>
-						<Lock className="h-5 w-5 text-gray-400" />
-					</Input>
-					{errors.confirmPassword && (
-						<p className="mt-1 text-xs text-danger">
-							{errors.confirmPassword.message}
-						</p>
-					)}
-				</div>
+					</div>
+				)}
 			</>
 		),
-		[errors, isCreate, password, register],
+		[errors, isCreate, register, reset, showPasswordFields, user],
 	);
 
 	useEffect(() => {
-		if (isOpen && !isCurrentModalOpen) {
+		if (isOpen) {
 			openModal({
-				id: modalId,
+				id: MODAL_ID,
 				type: "form",
 				title,
 				description,
@@ -259,7 +359,6 @@ export default function UserFormModal({
 				},
 				onSubmit: (event) => {
 					handleSubmit((values) => onSubmitRef.current(values))(event);
-					// Biarkan parent yang mengontrol kapan modal ditutup.
 					return false;
 				},
 			});
@@ -269,7 +368,6 @@ export default function UserFormModal({
 		content,
 		description,
 		handleSubmit,
-		isCurrentModalOpen,
 		isOpen,
 		onCloseRef,
 		openModal,
