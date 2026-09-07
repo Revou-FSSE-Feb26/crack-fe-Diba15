@@ -53,6 +53,16 @@ Ditampilkan sebagai artist premium dan dipercayai oleh professional.
   - **Backend**: Endpoint REST API CRUD tag (`POST /api/artworks/tags`, `PATCH /api/artworks/tags/:id`, `DELETE /api/artworks/tags/:id`) khusus Administrator dengan validasi class-validator & relasi counter karya.
   - **Frontend**: Halaman `/dashboard/manage-tags` dengan 4 Kartu KPI, Tab Switcher Master Tag & Katalog Global, Modal Form Tambah/Ubah Tag, serta tombol Takedown/Pulihkan karya terpublikasi.
 
+[x] TODO 17: Pembersihan Arsitektural & Eliminasi Beban YAGNI (Selesai - Penghapusan 17 Repository Interfaces & db/schema.sql di BE, Migrasi UserManagementStore ke TanStack Query, Relokasi Kolom Tabel ke components/dashboard/ & PascalCase, Pembersihan Dependensi Phantom, Standarisasi Strict Typing Appeal & AuditLogItem, serta Perbaikan Bug resolutionNotes).
+  - **Backend**: Hapus 17 interface repository di `src/common/interfaces/`; inject kelas konkret repository langsung ke service.
+  - **Backend**: Hapus berkas duplikasi `db/schema.sql` (Prisma schema sebagai single source of truth).
+  - **Backend**: Hapus dependensi phantom (`@nestjs/mapped-types`, `@sinonjs/commons`).
+  - **Backend**: Ganti boilerplate `app.controller/service` dengan modul resmi `HealthModule` (repository pattern, 27 test suites, 178 tests passed).
+  - **Frontend**: Migrasi `UserManagementStore` ke hook TanStack Query `useUserQueries.ts` dan hapus store Zustand terkait.
+  - **Frontend**: Pindahkan 8 komponen kolom tabel dari `src/utils/dashboard/` ke `src/components/dashboard/` dan standarisasi nama berkas ke PascalCase (`AuditTableColumns.tsx`, dll.).
+  - **Frontend**: Pembersihan in-place tipe zombie (~90 baris) di `src/types/index.ts`.
+  - **Frontend**: Standarisasi strict camelCase untuk `Appeal` dan `AuditLogItem`, eliminasi properti ganda opsional, dan perbaikan bug `resolutionNotes` admin.
+
 ## TODO Test
 
 1. Test Upload condition (Harusnya Sudah)

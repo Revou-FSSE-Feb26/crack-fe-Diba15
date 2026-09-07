@@ -119,13 +119,38 @@ Berikut temuan evaluasi YAGNI yang dikelompokkan ke dalam kategori arsitektural:
 ### 🔍 TEMUAN 4: Over-Engineering Lapisan BFF (*Backend-For-Frontend*) di Frontend
 
 **Lokasi:** `src/app/api/` *(Frontend)*
-- Terdapat **sekitar 40 berkas `route.ts`** di dalam folder `src/app/api/` (misalnya: `api/curator-performance/route.ts`, `api/disputes/[id]/route.ts`, `api/reports/route.ts`, `api/upload/commissions/...`, dll.).
-- **Karakteristik Kode:**
-  90% dari berkas-berkas ini kodenya identik: membaca query/body → memanggil `axiosServer.get(...)` / `post(...)` ke NestJS → membungkusnya dengan `NextResponse.json(...)`.
-- **Kacamata YAGNI:**
-  - Pembuatan Route Handler manual per-endpoint masuk akal **hanya untuk endpoint autentikasi** (`/api/auth/*`) karena perlu menangani cookie `HttpOnly` secara langsung di browser origin.
-  - Namun untuk seluruh endpoint CRUD lainnya, membuat ~35 berkas perantara yang hanya bertindak sebagai "tukang teruskan paket" (*dumb proxy*) adalah beban pemeliharaan yang sangat besar.
-  - Kebutuhan reverse proxy ini sebenarnya dapat diselesaikan **hanya dengan 5 baris konfigurasi `rewrites()` di `next.config.ts`** atau dipanggil langsung menggunakan Client SDK tanpa perlu membuat puluhan file route handler manual.
+- Terdapat **58 berkas `route.ts`** di dalam folder `src/app/api/` (terbagi ke dalam 13 modul: `appeals`, `artwork`, `audit-logs`, `auth`, `commissions`, `curator-performance`, `disputes`, `profile`, `reports`, `social`, `transactions`, `upload`, `user`).
+
+#### A. Analisis Mendalam & Fakta Kode (Beyond Surface Audit)
+Hasil investigasi mendalam menemukan bahwa lapisan ini bukan sekadar *dumb pass-through proxy*, melainkan telah menjadi **lapisan tambal-sulam (*duct-tape adapter*)** yang menutupi ketidaksinkronan kontrak antara Frontend dan Backend:
+1. **Divergensi Penamaan Endpoint (Singular vs Plural):**
+   - Backend NestJS menggunakan standar jamak: `/artworks` (10 rute), `/users` (4 rute), `/profiles` (1 rute).
+   - Frontend memanggil rute tunggal: `/api/artwork`, `/api/user`, `/api/profile`. Lapisan `route.ts` diam-diam memetakan rute tunggal ke jamak.
+2. **Payload/Field Mismatch (Snake_case ⟷ CamelCase Translator):**
+   - `src/app/api/commissions/route.ts`: Mengonversi `artistsId: body.artistsId || body.artist_id || body.artists_id`, `commissionTitle: body.commissionTitle || body.commission_title`, `paymentMethod: body.paymentMethod || body.payment_method`.
+   - `src/app/api/disputes/route.ts`: Mengonversi `commissionId: body.commissionId || body.commission_id`.
+   - `src/app/api/reports/route.ts`: Mengonversi `artworkId: body.artworkId || body.target_id`, `targetType: body.targetType || body.target_type`.
+   - `src/app/api/profile/route.ts`: Menjalankan regex pembersihan underscore `key.replace(/_/g, "")`.
+3. **Kebutuhan Nyata BFF (Modul Auth):**
+   - 7 berkas di `src/app/api/auth/*` (`login`, `logout`, `refresh`, `register`, `me`, `forgot-password`, `reset-password`) **TIDAK BOLEH dihapus**.
+   - Endpoint ini bertugas menyinkronkan cookie `HttpOnly` (`refresh_token`) pada domain Next.js, yang sangat dibutuhkan oleh Next.js Route Guard Middleware (`src/proxy.ts`) untuk proteksi rute SSR (`/dashboard`, `/post-art`, guest guards).
+4. **Inefisiensi Triple-Hop:**
+   - Server Component `src/app/(main)/artists/[id]/page.tsx` memanggil `fetch()` ke Next.js Route Handler-nya sendiri, yang kemudian memanggil NestJS via `axiosServer` (2x network overhead).
+
+#### B. Risiko Jika Langsung Dihapus (Naive YAGNI Trap)
+Jika ~50 route handler non-auth langsung dihapus dan diganti dengan 1 baris generic rewrite `rewrites: /api/:path* -> NestJS/:path*`:
+- Seluruh fitur `artwork`, `user`, dan `profile` akan mengalami **HTTP 404 Not Found**.
+- Form pengajuan komisi, sengketa, dan laporan akan mengalami **HTTP 400 Bad Request** karena DTO NestJS menolak nama field snake_case.
+
+#### C. Solusi & Rencana Tindak Lanjut (Status: DITUNDA / DEFERRED)
+Diputuskan untuk **menunda (*defer*) refaktor besar Temuan 4** demi stabilitas fitur saat ini, dengan rencana aksi bertahap bila kelak akan dieksekusi:
+- **Fase 1 (Harmonisasi Kontrak DTO):**
+  - Standarisasi form input dan DTO frontend agar mengirim payload camelCase murni yang sesuai dengan DTO NestJS (`commissionId`, `artistsId`, dll).
+  - Standarisasi pemanggilan endpoint hooks/komponen menjadi bentuk jamak (`/artworks`, `/users`).
+- **Fase 2 (Penerapan Rewrites & Eliminasi File):**
+  - Pasang konfigurasi `rewrites()` di `next.config.ts`.
+  - Hapus 51 berkas `route.ts` non-auth.
+  - Pertahankan folder `src/app/api/auth/` (7 berkas) sebagai true BFF untuk manajemen cookie dan token.
 
 ---
 
@@ -164,28 +189,35 @@ Berikut temuan evaluasi YAGNI yang dikelompokkan ke dalam kategori arsitektural:
 
 ---
 
-### 🔍 TEMUAN 8: Monolithic Type Definitions di Frontend
+### 🔍 TEMUAN 8: Monolithic Type Definitions & Inkonsistensi Kontrak Tipe di Frontend
 
 **Lokasi:** `src/types/index.ts` *(Frontend)*
-- Berkas ini memiliki **809 baris kode** dan menampung seluruh definisi tipe proyek (Database models, Enums, DTOs, API responses, Store states, UI props, KPI metrics).
-- Walaupun aturan workspace frontend mewajibkan tipe terpusat di `types/`, menumpuk seluruh domain ke dalam 1 file raksasa membuat file ini rawan menampung definisi tipe usang (*stale types*) yang sudah tidak terpakai lagi karena sulit diaudit secara visual dibandingkan bila dipecah per domain (misal `types/auth.ts`, `types/commission.ts`, `types/artwork.ts`).
+- Berkas ini awalnya memiliki **809 baris kode** dan menampung seluruh definisi tipe proyek (Database models, Enums, DTOs, API responses, Store states, UI props, KPI metrics).
+- **Masalah Nyata:**
+  1. **Tipe Zombie / Dead Code:** Terdapat ~90 baris tipe yang sudah tidak pernah dipanggil di mana pun (misal `CommissionState`, `CommissionWithRelations`, `CreateCommissionPayload`, `ApiSuccess`, `ApiResponse`, `FeedFilter`, dll.).
+  2. **Inkonsistensi Dual-Naming:** Beberapa interface seperti `Appeal` dan `AuditLogItem` memiliki properti ganda opsional (`artist_id?` & `artistId?`, `target_type?` & `targetType?`, `created_at?` & `createdAt?`). Hal ini memaksa komponen UI menulis rantai fallback nullish coalescing rumit seperti `item.targetTitle ?? item.target_title ?? item.targetId ?? item.target_id`.
+  3. **Bug Kehilangan Data Catatan Banding (`resolutionNotes`):** Pada interface `ResolveAppealDto`, properti didefinisikan sebagai `resolution_notes`. Backend NestJS mengharapkan `resolutionNotes` (camelCase) dengan `ValidationPipe({ whitelist: true })`. Akibatnya, catatan banding admin yang dikirim frontend selalu terbuang dan bernilai `null` di basis data.
+- **Tindakan & Solusi:**
+  - Membersihkan seluruh tipe zombie (~90 baris kode).
+  - Menstandarisasi interface `Appeal`, `ResolveAppealDto`, dan `AuditLogItem` menjadi strict camelCase murni 1:1 dengan model Prisma / DTO backend.
+  - Memperbaiki payload mutasi admin agar mengirim `resolutionNotes`, sehingga catatan banding tersimpan dengan benar di database.
+  - Menyederhanakan seluruh komponen UI pemanggil (`manage-users`, `ArtistAppealBox`, `ReviewAppealModal`, `AuditTableColumns`, `AuditLogDetailModal`, `audit-logs`).
 
 ---
 
 ## 3. Matriks Evaluasi YAGNI (Ringkasan Komparatif)
 
-| Komponen / Berkas | Status Saat Ini | Dampak Terhadap Proyek | Rekomendasi Pragmatis |
+| Komponen / Berkas | Status Awal | Dampak | Status Terkini / Tindakan |
 | :--- | :--- | :--- | :--- |
-| **`UserEntity` (BE)** | Berkas kosong tak terpakai | Membingungkan developer baru | Hapus berkas & foldernya. |
-| **`app.controller/service` (BE)** | Hanya return "Hello World!" | Boilerplate tidak berguna | Ubah jadi endpoint `/api/health` atau hapus. |
-| **17 Repository Interfaces (BE)** | 15 tidak dipakai, 2 inkonsisten | Beban ganda saat edit method | Hapus interface; inject langsung class repo. |
-| **`db/schema.sql` (BE)** | DDL duplikasi Prisma | Rawan desinkronisasi schema | Hapus; gunakan `prisma migrate` / `db push`. |
-| **Dependencies Phantom (BE)** | `@nestjs/mapped-types`, `@sinonjs/commons` | Membengkakkan `node_modules` | Jalankan `pnpm remove <pkg>`. |
-| **Public SVGs (FE)** | 5 SVG bawaan Next.js | Aset mati | Hapus berkas SVG yang tidak dipakai. |
-| **Mock Login Fallback (FE)** | Dead code di `UserStore.ts` | Logika membingungkan | Bersihkan percabangan `if (!err.response)`. |
-| **~40 API Route Handlers (FE)** | Dumb forwarding proxy | Puluhan file boilerplate redundant | Gantikan dengan Next.js `rewrites` di config. |
-| **`UserManagementStore` (FE)** | Masih pakai Zustand sendiri | Inkonsisten dengan TanStack Query | Migrasi ke hook `useUserQueries` (React Query). |
-| **`.tsx` di `utils/` (FE)** | UI ditaruh di helper utility | Melanggar *separation of concerns* | Pindahkan ke `components/dashboard/`. |
+| **`app.controller/service` (BE)** | Boilerplate statis "Hello World!" | Tidak berguna | **SELESAI** ✅ (Dikonversi ke HealthModule & repo pattern). |
+| **17 Repository Interfaces (BE)** | 15 tidak dipakai, 2 inkonsisten | Beban sinkronisasi ganda | **SELESAI** ✅ (Seluruh interface dihapus; inject class repo langsung). |
+| **`db/schema.sql` (BE)** | DDL duplikasi Prisma | Rawan desinkronisasi schema | **SELESAI** ✅ (Dihapus; Prisma single source of truth). |
+| **Dependencies Phantom (BE)** | `@nestjs/mapped-types`, `@sinonjs/commons` | Membengkakkan `node_modules` | **SELESAI** ✅ (Dihapus bersih). |
+| **`UserEntity` & SVGs (BE/FE)** | File kosong & 5 SVG bawaan template | Aset mati | **DIABAIKAN** ⏸️ (Sesuai keputusan user). |
+| **58 API Route Handlers (FE)** | 51 pass-through + adapter, 7 auth | Mismatch kontrak & double hop | **DITUNDA** 📋 (Perlu harmonisasi DTO sebelum eliminasi). |
+| **`UserManagementStore` (FE)** | Zustand terpisah untuk 1 halaman | Inkonsistensi state management | **SELESAI** ✅ (Migrasi penuh ke TanStack Query). |
+| **`.tsx` di `utils/` (FE)** | Kolom tabel ditaruh di helper utility | Melanggar *separation of concerns* | **SELESAI** ✅ (Direlokasi ke `components/dashboard/` & PascalCase). |
+| **Tipe Monolitik `types/` (FE)** | 800 baris berisi tipe zombie & dual-naming | Kebisingan kode, tipe mati & bug data | **SELESAI** ✅ (Pembersihan tipe zombie, strict camelCase, & fix bug `resolutionNotes`). |
 
 ---
 

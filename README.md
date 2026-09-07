@@ -64,8 +64,9 @@ crack-fe-diba15/
 │   ├── ARCHITECTURE_CHECKLIST.md       # Audit Prinsip SOLID, DRY, KISS
 │   ├── BUSINESS_PROCESS.md             # Alur Proses Bisnis End-to-End
 │   ├── LOGIC_DOCS.md                   # Logika Bisnis & Perhitungan Inti
+│   ├── REPORT_YAGNI.md                 # Laporan Audit & Solusi Prinsip YAGNI
 │   ├── TEST_SCENARIO.md                # Skenario Pengujian Fungsional
-│   └── TODO.md                         # Log Progres Pengembangan (TODO 1-16)
+│   └── TODO.md                         # Log Progres Pengembangan (TODO 1-17)
 ├── src/
 │   ├── app/                            # Next.js App Router Pages & BFF API Routes
 │   │   ├── (auth)/                     # Halaman Login, Signup, Forgot/Reset Password
@@ -75,14 +76,14 @@ crack-fe-diba15/
 │   │   ├── profile/                    # Profil Seniman/Klien & Kotak Banding
 │   │   └── layout.tsx                  # Layout Global & Provider Wrapper
 │   ├── components/                     # Komponen UI Terisolasi & Modular
-│   │   ├── dashboard/                  # Sub-Komponen Dashboard (Spotlight, Filter Toolbars, Modals)
+│   │   ├── dashboard/                  # Sub-Komponen Dashboard (Spotlight, Filter Toolbars, Modals, Table Columns PascalCase)
 │   │   ├── ui/                         # Komponen Presentasional Generik (DataTable, Stat, Modal)
 │   │   └── ...
 │   ├── hooks/                          # Kustom Hooks TanStack Query & Utility
 │   ├── lib/                            # Konfigurasi Axios & Centralized Query Keys
 │   ├── store/                          # Zustand Global Stores (UserStore, ToastStore, ModalStore)
 │   ├── types/                          # Kontrak Tipe Data Terpusat (Shared Interfaces)
-│   └── utils/                          # Helper Formatters (Price, Date, Columns)
+│   └── utils/                          # Helper Formatters (Price, Date, Currency, File Validation)
 ├── biome.json                          # Konfigurasi Linter Biome
 ├── package.json                        # Dependencies & Script Eksekusi
 └── tsconfig.json                       # Konfigurasi TypeScript
@@ -136,5 +137,6 @@ bun run build
 Untuk pemahaman alur kerja dan formula perhitungan lebih mendalam, silakan baca dokumentasi di folder `docs/`:
 - 📄 [**Alur Bisnis Lengkap (BUSINESS_PROCESS.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/BUSINESS_PROCESS.md)
 - 📐 [**Dokumentasi Logika & Formula Matematika (LOGIC_DOCS.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/LOGIC_DOCS.md)
+- 📑 [**Laporan Audit & Solusi Prinsip YAGNI (REPORT_YAGNI.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/REPORT_YAGNI.md)
 - 🧪 [**Naskah Skenario Pengujian Manual (TEST_SCENARIO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TEST_SCENARIO.md)
 - ✅ [**Daftar Capaian Fitur (TODO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TODO.md)
