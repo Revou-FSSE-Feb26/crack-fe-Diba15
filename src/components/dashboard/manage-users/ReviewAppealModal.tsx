@@ -26,8 +26,7 @@ export function ReviewAppealModal({
 
 	if (!appeal || typeof document === "undefined") return null;
 
-	const createdAtDate =
-		appeal.createdAt ?? appeal.created_at ?? new Date().toISOString();
+	const createdAtDate = appeal.createdAt ?? new Date().toISOString();
 
 	return createPortal(
 		<div className="fixed inset-0 z-9998 flex items-center justify-center p-4">

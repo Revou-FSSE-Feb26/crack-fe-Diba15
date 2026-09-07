@@ -251,38 +251,24 @@ export interface TransactionFilterParams {
 
 export interface Appeal {
 	id: string;
-	artist_id?: string;
-	artistId?: string;
+	artistId: string;
 	reason: string;
 	status: AppealStatus;
-	resolved_by_id?: string | null;
 	resolvedById?: string | null;
-	resolution_notes?: string | null;
 	resolutionNotes?: string | null;
-	created_at?: string;
-	createdAt?: string;
-	updated_at?: string;
-	updatedAt?: string;
+	createdAt: string;
+	updatedAt: string;
 	artist?: {
 		id: string;
 		name: string;
 		email: string;
 		role: string;
 		profile?: {
-			strike_count?: number;
 			strikeCount?: number;
-			is_verified?: boolean;
 			isVerified?: boolean;
-			avatar_url?: string | null;
 			avatarUrl?: string | null;
 		};
 	};
-	resolved_by?: {
-		id: string;
-		name: string;
-		email: string;
-		role: string;
-	} | null;
 	resolvedBy?: {
 		id: string;
 		name: string;
@@ -297,7 +283,7 @@ export interface CreateAppealDto {
 
 export interface ResolveAppealDto {
 	approved: boolean;
-	resolution_notes?: string;
+	resolutionNotes?: string;
 }
 
 export type AuditLogCategory =
@@ -319,16 +305,12 @@ export interface AuditLogItem {
 	category: "curation" | "report" | "dispute" | "appeal";
 	action: string;
 	actor: AuditLogActor;
-	target_type?: string;
-	targetType?: string;
-	target_id?: string;
-	targetId?: string;
-	target_title?: string | null;
+	targetType: string;
+	targetId: string;
 	targetTitle?: string | null;
 	details?: string | null;
 	status: string;
-	created_at?: string;
-	createdAt?: string;
+	createdAt: string;
 }
 
 export interface AuditLogFilterParams {
@@ -411,15 +393,6 @@ export interface DbUserResponse {
 	} | null;
 }
 
-/** Komisi lengkap dengan semua relasi — untuk commission detail page */
-export interface CommissionWithRelations extends Commission {
-	artist: Pick<User, "id" | "name">;
-	client: Pick<User, "id" | "name">;
-	progress: CommissionProgress | null;
-	revisions: Revision[];
-	dispute: DisputeLog | null;
-}
-
 /** Sengketa lengkap dengan komisi, progress, client, dan artist — untuk tabel sengketa */
 export interface JoinedDispute extends DisputeLog {
 	commission?: Commission | null;
@@ -467,34 +440,12 @@ export interface JoinedReport extends Report {
 // BAGIAN 2: API, DATA TRANSPORT & PAGINATION
 // =============================================================================
 
-export interface ApiSuccess<T> {
-	success: true;
-	data: T;
-}
-
-export interface ApiError {
-	success: false;
-	message: string;
-	code?: string;
-}
-
-export type ApiResponse<T> = ApiSuccess<T> | ApiError;
-
 export interface PaginatedResponse<T> {
 	data: T[];
 	total: number;
 	page: number;
 	per_page: number;
 	total_pages: number;
-}
-
-export interface FeedFilter {
-	tag_id?: string;
-	curation_status?: CurationStatus;
-	upload_type?: UploadType;
-	sort_by?: "latest" | "popular";
-	page?: number;
-	per_page?: number;
 }
 
 export type SearchType = "title" | "tags" | "artists";
@@ -538,69 +489,7 @@ export interface CreateArtworkPayload {
 	tag_names: string[];
 }
 
-export interface UpdateProfilePayload {
-	avatar_url?: string | null;
-	bio?: string | null;
-	is_open_for_commission?: boolean;
-	base_price_idr?: number | null;
-	is_verified?: boolean;
-	approved_portfolio_count?: number;
-	strike_count?: number;
-}
-
-// ── Commission Store ─────────────────────────────────────────────────────────
-
-export interface CreateCommissionPayload {
-	artists_id: string;
-	client_id: string;
-	commission_title: string;
-	description: string | null;
-	price: number;
-}
-
-export interface CommissionState {
-	commissions: Commission[];
-	progress: CommissionProgress[];
-	revisions: Revision[];
-	disputes: DisputeLog[];
-	createCommission: (payload: CreateCommissionPayload) => Commission;
-	setCommissionStatus: (id: string, status: CommissionStatus) => void;
-	setPaymentStatus: (
-		id: string,
-		payment_status: PaymentStatus,
-		payment_method?: "wallet" | "credit_card",
-		card_last_four?: string,
-	) => ActionResult;
-	uploadDummyResult: (id: string) => void;
-	approveResult: (id: string) => void;
-	addRevision: (
-		commission_id: string,
-		user_id: string,
-		comment: string,
-	) => void;
-	fileDispute: (commission_id: string, reason: string) => ActionResult;
-	resolveDispute: (
-		commission_id: string,
-		approved: boolean,
-		mediator_id: string,
-	) => ActionResult;
-}
-
-export interface CreateReportPayload {
-	reporter_id: string;
-	target_type: ReportTargetType;
-	target_id: string;
-	reason: string;
-}
-
-export type FavoriteByUser = Record<string, string[]>;
-
-export interface FollowRecord {
-	id: string;
-	follower_id: string;
-	artist_id: string;
-	created_at: string;
-}
+// ── Social & Follow ──────────────────────────────────────────────────────────
 
 export interface FollowedArtist {
 	id: string;

@@ -142,8 +142,7 @@ export default function ManageUsersPage() {
 				renderActions: (user) => {
 					const artistProfile = user.profile;
 					const pendingAppeal = appeals.find(
-						(a) =>
-							(a.artist_id ?? a.artistId) === user.id && a.status === "pending",
+						(a) => a.artistId === user.id && a.status === "pending",
 					);
 
 					return (
@@ -403,7 +402,7 @@ export default function ManageUsersPage() {
 					try {
 						await resolveAppealMutation.mutateAsync({
 							id: appealId,
-							dto: { approved, resolution_notes: resolutionNotes },
+							dto: { approved, resolutionNotes },
 						});
 						addToast({
 							message: approved
