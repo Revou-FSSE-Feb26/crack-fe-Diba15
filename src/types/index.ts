@@ -619,21 +619,9 @@ export interface FollowedArtist {
 export interface UserPayload {
 	name: string;
 	email: string;
-	password: string;
-	role: UserRole;
+	password?: string;
+	role?: UserRole;
 	balance?: number;
-}
-
-export interface UserManagementState {
-	users: User[];
-	fetchUsers: () => Promise<void>;
-	createUser: (payload: UserPayload) => Promise<ActionResult>;
-	createCurator: (payload: Omit<UserPayload, "role">) => Promise<ActionResult>;
-	updateUser: (
-		id: string,
-		payload: Partial<UserPayload>,
-	) => Promise<ActionResult>;
-	deleteUser: (id: string) => Promise<ActionResult>;
 }
 
 // ── User Store (Auth) ────────────────────────────────────────────────────────
