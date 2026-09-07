@@ -8,7 +8,7 @@ import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import type { ArtworkWithRelations } from "@/types";
-import { createCatalogTableColumns } from "@/utils/dashboard/manage-tags/catalogTableColumns";
+import { createCatalogTableColumns } from "./CatalogTableColumns";
 
 type CatalogVisibilityFilter = "all" | "visible" | "hidden";
 

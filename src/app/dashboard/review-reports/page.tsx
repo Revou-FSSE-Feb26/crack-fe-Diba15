@@ -11,6 +11,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 
 import AccessDenied from "@/components/dashboard/AccessDenied";
+import { createReportsTableColumns } from "@/components/dashboard/review-reports/ReportsTableColumns";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
@@ -19,7 +20,6 @@ import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 import type { JoinedReport } from "@/types";
-import { createReportsTableColumns } from "@/utils/dashboard/review-reports/reportsTableColumns";
 
 type ReportStatusFilter = "all" | "pending" | "resolved" | "dismissed";
 

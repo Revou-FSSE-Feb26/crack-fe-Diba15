@@ -16,6 +16,7 @@ import UserFormModal from "@/components/dashboard/manage-users/UserFormModal";
 import UserRoleFilterTabs, {
 	type RoleFilter,
 } from "@/components/dashboard/manage-users/UserRoleFilterTabs";
+import { createUsersTableColumns } from "@/components/dashboard/manage-users/UsersTableColumns";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useAppeals, useResolveAppeal } from "@/hooks/useAppealQueries";
@@ -30,7 +31,6 @@ import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { Appeal, User, UserPayload, UserRole } from "@/types";
-import { createUsersTableColumns } from "@/utils/dashboard/manage-users/usersTableColumns";
 
 export default function ManageUsersPage() {
 	const { user: currentUser, isAdmin } = useUserStore();

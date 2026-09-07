@@ -16,6 +16,10 @@ import {
 import { useMemo, useState } from "react";
 import AccessDenied from "@/components/dashboard/AccessDenied";
 import { AuditLogDetailModal } from "@/components/dashboard/audit-logs/AuditLogDetailModal";
+import {
+	categoryLabels,
+	createAuditTableColumns,
+} from "@/components/dashboard/audit-logs/AuditTableColumns";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useAuditLogs } from "@/hooks/useAppealQueries";
@@ -23,10 +27,6 @@ import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useUserStore } from "@/store/UserStore";
 import type { AuditLogCategory, AuditLogItem } from "@/types";
 import { formatDateTime } from "@/utils";
-import {
-	categoryLabels,
-	createAuditTableColumns,
-} from "@/utils/dashboard/audit-logs/auditTableColumns";
 import { type DatePreset, getDatePresetRange } from "@/utils/datePresets";
 import { exportToCsv } from "@/utils/exportCsv";
 

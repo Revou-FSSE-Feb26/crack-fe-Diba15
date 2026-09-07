@@ -11,6 +11,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 
 import AccessDenied from "@/components/dashboard/AccessDenied";
+import { createDisputesTableColumns } from "@/components/dashboard/review-disputes/DisputesTableColumns";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
 import { useDisputes, useResolveDispute } from "@/hooks/useDisputeQueries";
@@ -20,7 +21,6 @@ import { useModalStore } from "@/store/ModalStore";
 import { useUserStore } from "@/store/UserStore";
 import type { JoinedDispute } from "@/types";
 import { formatPrice } from "@/utils";
-import { createDisputesTableColumns } from "@/utils/dashboard/review-disputes/disputesTableColumns";
 
 type DisputeStatusFilter = "all" | "pending" | "approved" | "rejected";
 

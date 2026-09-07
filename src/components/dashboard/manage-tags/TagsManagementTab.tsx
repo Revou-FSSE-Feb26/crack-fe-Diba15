@@ -12,7 +12,7 @@ import {
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useModalStore } from "@/store/ModalStore";
 import type { Tag } from "@/types";
-import { createTagTableColumns } from "@/utils/dashboard/manage-tags/tagTableColumns";
+import { createTagTableColumns } from "./TagTableColumns";
 
 interface TagsManagementTabProps {
 	tagsList: Tag[];

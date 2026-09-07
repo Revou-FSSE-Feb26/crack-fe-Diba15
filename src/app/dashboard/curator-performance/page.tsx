@@ -12,6 +12,7 @@ import {
 import { useMemo, useState } from "react";
 
 import AccessDenied from "@/components/dashboard/AccessDenied";
+import { createCuratorPerformanceTableColumns } from "@/components/dashboard/curator-performance/CuratorPerformanceTableColumns";
 import PerformanceFilterToolbar, {
 	type DatePreset,
 } from "@/components/dashboard/curator-performance/PerformanceFilterToolbar";
@@ -21,7 +22,6 @@ import Stat from "@/components/ui/Stat";
 import { useCuratorPerformance } from "@/hooks/useCuratorPerformanceQueries";
 import { usePagination, useResetPageOnChange } from "@/hooks/usePagination";
 import { useUserStore } from "@/store/UserStore";
-import { createCuratorPerformanceTableColumns } from "@/utils/dashboard/curator-performance/curatorPerformanceTableColumns";
 import { getDatePresetRange } from "@/utils/datePresets";
 import { exportToCsv } from "@/utils/exportCsv";
 

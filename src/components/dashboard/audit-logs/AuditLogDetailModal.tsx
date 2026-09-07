@@ -13,7 +13,7 @@ import {
 	auditStatusBadges,
 	categoryBadges,
 	categoryLabels,
-} from "@/utils/dashboard/audit-logs/auditTableColumns";
+} from "./AuditTableColumns";
 
 interface AuditLogDetailModalProps {
 	log: AuditLogItem | null;

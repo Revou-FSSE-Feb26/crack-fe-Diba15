@@ -15,6 +15,10 @@ import AccessDenied from "@/components/dashboard/AccessDenied";
 import FinancialFilterToolbar, {
 	type DatePreset,
 } from "@/components/dashboard/financial-reports/FinancialFilterToolbar";
+import {
+	createFinancialTableColumns,
+	transactionTypeLabels,
+} from "@/components/dashboard/financial-reports/FinancialTableColumns";
 import TransactionDetailModal from "@/components/dashboard/financial-reports/TransactionDetailModal";
 import DataTable from "@/components/ui/data-table/DataTable";
 import Stat from "@/components/ui/Stat";
@@ -26,10 +30,6 @@ import {
 import { useUserStore } from "@/store/UserStore";
 import type { TransactionType, WalletTransaction } from "@/types";
 import { formatDateTime, formatPrice } from "@/utils";
-import {
-	createFinancialTableColumns,
-	transactionTypeLabels,
-} from "@/utils/dashboard/financial-reports/financialTableColumns";
 import { getDatePresetRange } from "@/utils/datePresets";
 import { exportToCsv } from "@/utils/exportCsv";
 
