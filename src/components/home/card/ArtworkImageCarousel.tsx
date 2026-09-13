@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { triggerProtectedToast } from "@/hooks/useCopyProtection";
+import { useToastStore } from "@/store/ToastStore";
 import type { ArtworkWithRelations } from "@/types";
 
 interface ArtworkImageCarouselProps {
@@ -11,6 +13,7 @@ interface ArtworkImageCarouselProps {
 }
 
 export function ArtworkImageCarousel({ artwork }: ArtworkImageCarouselProps) {
+	const { addToast } = useToastStore();
 	const images = artwork.images_url || [
 		"https://picsum.photos/seed/antariksa/800/600",
 	];
@@ -76,7 +79,15 @@ export function ArtworkImageCarousel({ artwork }: ArtworkImageCarouselProps) {
 		>
 			<Link
 				href={`/detail/${artwork.id}`}
-				className="block w-full h-full cursor-pointer relative"
+				className="block w-full h-full cursor-pointer relative select-none"
+				onContextMenu={(e) => {
+					e.preventDefault();
+					triggerProtectedToast(
+						"Aksi Dibatasi: Klik kanan pada karya dinonaktifkan untuk melindungi hak cipta artis TruBrush.",
+						addToast,
+					);
+				}}
+				onDragStart={(e) => e.preventDefault()}
 			>
 				{imageCount > 0 ? (
 					<Image
@@ -85,8 +96,9 @@ export function ArtworkImageCarousel({ artwork }: ArtworkImageCarouselProps) {
 						fill
 						quality={90}
 						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 700px, 800px"
-						className="object-cover transition-opacity duration-300"
+						className="object-cover transition-opacity duration-300 select-none pointer-events-none"
 						priority={currentImageIndex === 0}
+						draggable={false}
 					/>
 				) : (
 					<div className="w-full h-full flex items-center justify-center text-content-muted">

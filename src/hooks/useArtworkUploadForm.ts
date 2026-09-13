@@ -7,6 +7,7 @@ import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
 import type { UploadType } from "@/types";
+import { isValidTagName } from "@/utils";
 import {
 	validateArtworkFiles,
 	validateWipFile,
@@ -83,7 +84,11 @@ export function useArtworkUploadForm() {
 
 	const updateTags = (nextTags: string[]) => {
 		const uniqueTags = Array.from(
-			new Set(nextTags.map((tag) => tag.trim()).filter(Boolean)),
+			new Set(
+				nextTags
+					.map((tag) => tag.trim())
+					.filter((tag) => Boolean(tag) && isValidTagName(tag)),
+			),
 		);
 		setValue("tags", uniqueTags.join(", "), {
 			shouldDirty: true,
@@ -94,6 +99,13 @@ export function useArtworkUploadForm() {
 	const addTag = (tagName: string) => {
 		const trimmed = tagName.trim();
 		if (!trimmed) return;
+		if (!isValidTagName(trimmed)) {
+			addToast({
+				message: `Tag "${tagName}" tidak valid. Tag hanya boleh berisi huruf, angka, dan tanda hubung (- atau _).`,
+				type: "error",
+			});
+			return;
+		}
 		updateTags([...selectedTags, trimmed]);
 		setTagInput("");
 	};

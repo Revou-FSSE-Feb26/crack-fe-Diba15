@@ -1,3 +1,5 @@
+import { sanitizeCsvCell } from "./validation/securityValidation";
+
 /**
  * Universal CSV export utility with UTF-8 BOM support (\uFEFF)
  * for seamless compatibility with Microsoft Excel, Google Sheets, and LibreOffice.
@@ -12,7 +14,8 @@ export function exportToCsv(
 	const formattedRows = rows.map((row) =>
 		row.map((cell) => {
 			if (cell === null || cell === undefined) return '""';
-			const stringVal = String(cell);
+			const rawVal = String(cell);
+			const stringVal = sanitizeCsvCell(rawVal);
 			// Escape quotes if cell contains comma, quote, or newline
 			if (
 				stringVal.includes(",") ||

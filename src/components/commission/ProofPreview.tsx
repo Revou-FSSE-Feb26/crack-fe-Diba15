@@ -17,7 +17,7 @@ export default function ProofPreview({
 }) {
 	const [hasError, setHasError] = useState(false);
 	const { openLightbox } = useLightboxStore();
-	const { isWindowBlurred } = useCopyProtection();
+	const { isCurtainActive, dismissCurtain } = useCopyProtection();
 
 	const isVideo =
 		src &&
@@ -55,71 +55,83 @@ export default function ProofPreview({
 						</video>
 					</div>
 				) : (
-					<button
-						type="button"
-						onClick={handleOpenLightbox}
-						onContextMenu={(e) => e.preventDefault()}
-						onDragStart={(e) => e.preventDefault()}
-						className="relative aspect-video w-full bg-content/5 overflow-hidden group cursor-pointer block select-none focus:outline-none p-0 border-0 text-left"
-						style={{
-							WebkitTouchCallout: "none",
-							WebkitUserSelect: "none",
-							KhtmlUserSelect: "none",
-							MozUserSelect: "none",
-							msUserSelect: "none",
-							userSelect: "none",
-						}}
-					>
-						<div className="relative w-full h-full">
-							<Image
-								src={src}
-								alt={title}
-								fill
-								loading={"eager"}
-								unoptimized
-								onError={() => setHasError(true)}
-								className={`object-cover group-hover:scale-105 transition-all duration-300 pointer-events-none ${
-									isWindowBlurred ? "filter blur-2xl scale-110 opacity-30" : ""
-								}`}
-								draggable={false}
-								priority={false}
-							/>
+					<div className="relative aspect-video w-full bg-content/5 overflow-hidden group">
+						<button
+							type="button"
+							onClick={handleOpenLightbox}
+							disabled={isCurtainActive}
+							onContextMenu={(e) => e.preventDefault()}
+							onDragStart={(e) => e.preventDefault()}
+							className="relative w-full h-full bg-transparent cursor-pointer block select-none focus:outline-none p-0 border-0 text-left disabled:cursor-default"
+							style={{
+								WebkitTouchCallout: "none",
+								WebkitUserSelect: "none",
+								KhtmlUserSelect: "none",
+								MozUserSelect: "none",
+								msUserSelect: "none",
+								userSelect: "none",
+							}}
+						>
+							<div className="relative w-full h-full">
+								<Image
+									src={src}
+									alt={title}
+									fill
+									loading={"eager"}
+									unoptimized
+									onError={() => setHasError(true)}
+									className={`object-cover group-hover:scale-105 pointer-events-none ${
+										isCurtainActive
+											? "filter blur-3xl opacity-0 transition-none"
+											: "transition-all duration-300"
+									}`}
+									draggable={false}
+									priority={false}
+								/>
 
-							{/* Window Blur Defense Anti-Screenshot Curtain */}
-							{isWindowBlurred && (
-								<div className="absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center p-4 text-center gap-2 backdrop-blur-md">
-									<ShieldAlert className="w-8 h-8 text-white/80 animate-pulse" />
-									<p className="text-xs font-bold text-white tracking-wide">
-										Pratinjau Disamarkan
-									</p>
-									<p className="text-[11px] text-white/60 max-w-xs">
-										Layar kehilangan fokus atau terdeteksi tangkapan layar. Klik
-										kembali pada browser untuk melanjutkan.
-									</p>
+								{/* Watermark Diagonal Overlay */}
+								<div
+									className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-25 mix-blend-overlay"
+									style={{
+										backgroundImage:
+											"repeating-linear-gradient(45deg, var(--color-content, #000) 0, var(--color-content, #000) 1px, transparent 0, transparent 50%)",
+										backgroundSize: "24px 24px",
+									}}
+								/>
+
+								{/* Center Watermark Text */}
+								<div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+									<span className="text-content/20 dark:text-content/30 font-extrabold tracking-widest text-lg md:text-xl uppercase select-none font-display drop-shadow-sm">
+										TRUBRUSH PREVIEW ONLY
+									</span>
 								</div>
-							)}
 
-							{/* Watermark Diagonal Overlay */}
-							<div
-								className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-25 mix-blend-overlay"
-								style={{
-									backgroundImage:
-										"repeating-linear-gradient(45deg, var(--color-content, #000) 0, var(--color-content, #000) 1px, transparent 0, transparent 50%)",
-									backgroundSize: "24px 24px",
-								}}
-							/>
-
-							{/* Center Watermark Text */}
-							<div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-								<span className="text-content/20 dark:text-content/30 font-extrabold tracking-widest text-lg md:text-xl uppercase select-none font-display drop-shadow-sm">
-									TRUBRUSH PREVIEW ONLY
-								</span>
+								{/* Transparent Anti-Touch Cover */}
+								<div className="absolute inset-0 z-10 bg-transparent pointer-events-none" />
 							</div>
+						</button>
 
-							{/* Transparent Anti-Touch Cover */}
-							<div className="absolute inset-0 z-10 bg-transparent pointer-events-none" />
-						</div>
-					</button>
+						{/* Persistent Warning Curtain */}
+						{isCurtainActive && (
+							<button
+								type="button"
+								onClick={dismissCurtain}
+								className="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center p-4 text-center gap-2 backdrop-blur-md select-none cursor-pointer border-0 text-white"
+							>
+								<ShieldAlert className="w-8 h-8 text-white/90 pointer-events-none" />
+								<p className="text-xs font-bold text-white tracking-wide pointer-events-none">
+									Peringatan Hak Cipta
+								</p>
+								<p className="text-[11px] text-white/70 max-w-xs leading-relaxed pointer-events-none">
+									Dilarang mengambil tangkapan layar, menyimpan, atau
+									mendistribusikan karya tanpa izin artis TruBrush.
+								</p>
+								<span className="mt-1 px-3.5 py-1 text-xs font-semibold rounded-lg bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 transition-all pointer-events-none shadow-sm">
+									Klik untuk melanjutkan
+								</span>
+							</button>
+						)}
+					</div>
 				)
 			) : (
 				<div className="aspect-video bg-content/5 flex flex-col items-center justify-center px-4 text-center gap-2">
