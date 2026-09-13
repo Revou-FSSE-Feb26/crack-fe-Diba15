@@ -4,6 +4,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	RotateCcw,
+	ShieldAlert,
 	X,
 	ZoomIn,
 	ZoomOut,
@@ -12,6 +13,7 @@ import Image from "next/image";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useCopyProtection } from "@/hooks/useCopyProtection";
 import { useLightboxStore } from "@/store/LightboxStore";
 
 const MIN_SCALE = 1;
@@ -19,6 +21,12 @@ const MAX_SCALE = 4;
 const ZOOM_STEP = 0.5;
 
 function LightboxContent() {
+	// Proteksi anti-screenshot dan tirai peringatan persisten pada Lightbox
+	const { isCurtainActive, dismissCurtain } = useCopyProtection({
+		mode: "strict",
+		preventInspect: false,
+	});
+
 	const { images, initialIndex, title, isProtected, closeLightbox } =
 		useLightboxStore();
 	const [index, setIndex] = useState(initialIndex);
@@ -154,6 +162,27 @@ function LightboxContent() {
 				aria-hidden="true"
 			/>
 
+			{/* Fullscreen Persistent Warning Curtain */}
+			{isCurtainActive && (
+				<button
+					type="button"
+					onClick={dismissCurtain}
+					className="absolute inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center gap-3 select-none backdrop-blur-xl cursor-pointer border-0 text-white"
+				>
+					<ShieldAlert className="w-14 h-14 text-white/90 pointer-events-none" />
+					<p className="text-lg sm:text-xl font-bold text-white tracking-wide pointer-events-none">
+						Peringatan Hak Cipta
+					</p>
+					<p className="text-xs sm:text-sm text-white/70 max-w-sm leading-relaxed pointer-events-none">
+						Dilarang mengambil tangkapan layar, menyimpan, atau mendistribusikan
+						karya tanpa izin artis TruBrush.
+					</p>
+					<span className="mt-2 px-5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 transition-all pointer-events-none shadow-sm">
+						Klik untuk melanjutkan
+					</span>
+				</button>
+			)}
+
 			{/* Top bar */}
 			<div className="relative z-10 flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
 				<div className="min-w-0">
@@ -257,7 +286,11 @@ function LightboxContent() {
 							priority
 							draggable={false}
 							onContextMenu={(e) => e.preventDefault()}
-							className="object-contain transition-transform duration-150 ease-out pointer-events-none"
+							className={`object-contain transition-transform duration-150 ease-out pointer-events-none ${
+								isCurtainActive
+									? "filter blur-3xl opacity-0 transition-none"
+									: ""
+							}`}
 							style={{
 								transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
 							}}

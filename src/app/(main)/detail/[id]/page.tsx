@@ -9,6 +9,7 @@ import {
 	Loader2,
 	PenTool,
 	Share2,
+	ShieldAlert,
 	ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
@@ -21,6 +22,7 @@ import AvatarInitials from "@/components/home/AvatarInitials";
 import ReportArtModal from "@/components/home/ReportArtModal";
 import { useArtworkDetail } from "@/hooks/useArtworkQueries";
 import { useCopyLink } from "@/hooks/useCopyLink";
+import { useCopyProtection } from "@/hooks/useCopyProtection";
 import { useCreateReport } from "@/hooks/useReportQueries";
 import { useLightboxStore } from "@/store/LightboxStore";
 import { useModalStore } from "@/store/ModalStore";
@@ -28,6 +30,12 @@ import { useUserStore } from "@/store/UserStore";
 import type { User } from "@/types";
 
 export default function Detail() {
+	// Proteksi hak cipta dengan Tirai Peringatan Persisten pada halaman detail karya
+	const { isCurtainActive, dismissCurtain } = useCopyProtection({
+		mode: "strict",
+		preventInspect: false,
+	});
+
 	const params = useParams();
 	const router = useRouter();
 	const id = params.id as string;
@@ -133,9 +141,16 @@ export default function Detail() {
 										<button
 											type="button"
 											onClick={() =>
-												openLightbox(artwork.images_url, index, artwork.title)
+												openLightbox(
+													artwork.images_url,
+													index,
+													artwork.title,
+													true,
+												)
 											}
-											className="w-full h-auto bg-transparent cursor-pointer"
+											disabled={isCurtainActive}
+											onDragStart={(e) => e.preventDefault()}
+											className="w-full h-auto bg-transparent cursor-pointer select-none relative block overflow-hidden disabled:cursor-default"
 										>
 											<Image
 												src={imgUrl}
@@ -143,11 +158,37 @@ export default function Detail() {
 												width={0}
 												height={0}
 												sizes="100vw"
-												className="w-full h-auto"
+												className={`w-full h-auto select-none pointer-events-none ${
+													isCurtainActive
+														? "filter blur-3xl opacity-0 transition-none"
+														: "transition-opacity duration-200"
+												}`}
 												priority={index === 0}
 												unoptimized
+												draggable={false}
 											/>
 										</button>
+
+										{/* Persistent Warning Curtain */}
+										{isCurtainActive && (
+											<button
+												type="button"
+												onClick={dismissCurtain}
+												className="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center p-6 text-center gap-3 backdrop-blur-md select-none cursor-pointer border-0 text-white"
+											>
+												<ShieldAlert className="w-10 h-10 text-white/90 pointer-events-none" />
+												<p className="text-sm sm:text-base font-bold text-white tracking-wide pointer-events-none">
+													Peringatan Hak Cipta
+												</p>
+												<p className="text-xs sm:text-sm text-white/70 max-w-sm leading-relaxed pointer-events-none">
+													Dilarang mengambil tangkapan layar, menyimpan, atau
+													mendistribusikan karya tanpa izin artis TruBrush.
+												</p>
+												<span className="mt-1 px-4 py-1.5 text-xs font-semibold rounded-lg bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 transition-all pointer-events-none shadow-sm">
+													Klik untuk melanjutkan
+												</span>
+											</button>
+										)}
 									</div>
 								);
 							})
@@ -190,18 +231,47 @@ export default function Detail() {
 														],
 														0,
 														artwork.title,
+														true,
 													)
 												}
-												className="w-full h-auto bg-transparent cursor-pointer"
+												disabled={isCurtainActive}
+												onDragStart={(e) => e.preventDefault()}
+												className="w-full h-full min-h-[220px] bg-transparent cursor-pointer select-none relative block overflow-hidden disabled:cursor-default"
 											>
 												<Image
 													src={artwork.wip_proof_url}
 													alt={`WIP proof ${artwork.title}`}
 													fill
 													unoptimized
-													className="object-cover"
+													className={`object-cover select-none pointer-events-none ${
+														isCurtainActive
+															? "filter blur-3xl opacity-0 transition-none"
+															: ""
+													}`}
+													draggable={false}
 												/>
 											</button>
+
+											{/* Persistent Warning Curtain for WIP Proof */}
+											{isCurtainActive && (
+												<button
+													type="button"
+													onClick={dismissCurtain}
+													className="absolute inset-0 z-30 bg-black/90 flex flex-col items-center justify-center p-4 text-center gap-2 backdrop-blur-md select-none cursor-pointer border-0 text-white"
+												>
+													<ShieldAlert className="w-8 h-8 text-white/90 pointer-events-none" />
+													<p className="text-xs sm:text-sm font-bold text-white tracking-wide pointer-events-none">
+														Peringatan Hak Cipta
+													</p>
+													<p className="text-[11px] sm:text-xs text-white/70 max-w-xs leading-relaxed pointer-events-none">
+														Dilarang mengambil tangkapan layar, menyimpan, atau
+														mendistribusikan karya tanpa izin artis TruBrush.
+													</p>
+													<span className="mt-1 px-3.5 py-1 text-xs font-semibold rounded-lg bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 transition-all pointer-events-none shadow-sm">
+														Klik untuk melanjutkan
+													</span>
+												</button>
+											)}
 										</div>
 									</div>
 								)}

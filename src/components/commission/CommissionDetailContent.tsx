@@ -62,7 +62,8 @@ const paymentStatusConfig: Record<
 export function CommissionDetailContent({
 	commissionId,
 }: CommissionDetailContentProps) {
-	useCopyProtection();
+	// Proteksi ketat (Escrow Vault): tirai window blur defense & proteksi clipboard
+	useCopyProtection({ mode: "strict" });
 	const mounted = useMounted();
 	const { user, isAuthenticated } = useUserStore();
 	const { openModal } = useModalStore();

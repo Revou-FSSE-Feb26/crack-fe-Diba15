@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArtworkCard } from "@/components/home/ArtworkCard";
 import ArtworkSkeleton from "@/components/home/ArtworkSkeleton";
 import { useInfiniteArtworks } from "@/hooks/useArtworkQueries";
+import { useCopyProtection } from "@/hooks/useCopyProtection";
 import { useMounted } from "@/hooks/useMounted";
 import { useUserFollowingIds } from "@/hooks/useSocialQueries";
 import { useUserStore } from "@/store/UserStore";
@@ -13,6 +14,9 @@ import { buildArtworkWithRelations } from "@/utils/search";
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function ArtworkList() {
+	// Intersepsi screenshot multi-platform pada feed publik (tanpa blokir klik kanan umum agar navigasi tetap wajar)
+	useCopyProtection({ mode: "notice", preventRightClick: false });
+
 	const mounted = useMounted();
 	const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
 		useInfiniteArtworks({ isVisibleOnFeed: "true" }, 6);

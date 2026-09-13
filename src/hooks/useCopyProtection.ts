@@ -1,18 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToastStore } from "@/store/ToastStore";
 
-interface CopyProtectionOptions {
+export interface CopyProtectionOptions {
+	/**
+	 * Mode proteksi:
+	 * - "strict": Proteksi ketat untuk komisi/escrow WIP dan detail (aktifkan persistent warning curtain, printscreen interceptor, dsb).
+	 * - "notice": Proteksi edukatif untuk feed (hanya toast peringatan hak cipta saat klik kanan atau screenshot, tanpa tirai blur).
+	 * Default: "strict".
+	 */
+	mode?: "strict" | "notice";
+
 	/**
 	 * Apakah proteksi F12 dan shortcut inspect element diaktifkan.
-	 * Default membaca dari NEXT_PUBLIC_DISABLE_DEVTOOLS ("true") atau production environment.
+	 * Default: false (DevTools diizinkan agar ramah penguji & developer).
 	 */
 	preventInspect?: boolean;
 
 	/**
-	 * Apakah Window Blur Defense (Anti-Screenshot saat ganti jendela / Snipping Tool) diaktifkan.
-	 * Default: true.
+	 * Apakah tirai peringatan persisten diaktifkan pada mode strict saat shortcut screenshot atau klik kanan terpicu.
+	 * Default: true pada mode "strict", false pada mode "notice".
 	 */
 	windowBlurDefense?: boolean;
 
@@ -23,15 +31,25 @@ interface CopyProtectionOptions {
 	preventRightClick?: boolean;
 
 	/**
-	 * Apakah tombol PrintScreen diintersepsi dan clipboard dibersihkan.
+	 * Apakah tombol PrintScreen dan shortcut screenshot diintersepsi.
 	 * Default: true.
 	 */
 	preventPrintScreen?: boolean;
+
+	/**
+	 * Pesan toast kustom untuk pencegahan klik kanan.
+	 */
+	rightClickMessage?: string;
+
+	/**
+	 * Pesan toast kustom untuk peringatan screenshot.
+	 */
+	screenshotMessage?: string;
 }
 
 let lastToastTimestamp = 0;
 
-function triggerProtectedToast(
+export function triggerProtectedToast(
 	message: string,
 	addToast: (toast: { message: string; type: "error" }) => void,
 ) {
@@ -47,50 +65,104 @@ function triggerProtectedToast(
 
 /**
  * 🛡️ useCopyProtection
- * Hook keamanan terintegrasi TruBrush untuk melindungi karya seni dari screenshot liar,
- * inspect element (F12), klik kanan, dan pencurian clipboard.
+ * Hook keamanan terintegrasi TruBrush untuk melindungi karya seni dari screenshot
+ * (PrintScreen, shortcut screenshot) dan klik kanan dengan Tirai Peringatan Persisten.
+ * Tirai tetap aktif sampai pengguna secara sadar mengklik peringatan ("Klik untuk melanjutkan").
  */
 export function useCopyProtection(options: CopyProtectionOptions = {}) {
+	const mode = options.mode ?? "strict";
+	const isStrict = mode === "strict";
+
 	const {
-		preventInspect = process.env.NEXT_PUBLIC_DISABLE_DEVTOOLS === "true" ||
-			process.env.NODE_ENV === "production",
-		windowBlurDefense = true,
+		preventInspect = false,
+		windowBlurDefense = isStrict,
 		preventRightClick = true,
 		preventPrintScreen = true,
+		rightClickMessage = "Aksi Dibatasi: Klik kanan pada karya dinonaktifkan untuk melindungi hak cipta artis TruBrush.",
+		screenshotMessage = "Dilarang mengambil tangkapan layar, menyimpan, atau mendistribusikan karya tanpa izin artis TruBrush.",
 	} = options;
 
-	const [isWindowBlurred, setIsWindowBlurred] = useState(false);
+	const [isCurtainActive, setIsCurtainActive] = useState(false);
+	const dismissCooldownRef = useRef(0);
 	const { addToast } = useToastStore();
 
+	const dismissCurtain = () => {
+		dismissCooldownRef.current = Date.now();
+		setIsCurtainActive(false);
+	};
+
+	const triggerCurtain = () => {
+		setIsCurtainActive(true);
+	};
+
 	useEffect(() => {
-		// 1. ─── Window Blur Defense (Anti-Screenshot / Snipping Tool) ───────
-		const handleBlur = () => {
+		// 1. ─── Focus Loss Defense (Aktifkan Tirai Persisten saat Kehilangan Fokus) ───
+		const handleBlur = (e: Event) => {
+			// Cegah pengaktifan ulang jika baru saja di-dismiss (cooldown 1 detik)
+			if (Date.now() - dismissCooldownRef.current < 1000) {
+				return;
+			}
+			// Abaikan event blur dari elemen DOM internal (hanya window blur yang direspons)
+			if (e.target && e.target !== window) {
+				return;
+			}
 			if (windowBlurDefense) {
-				setIsWindowBlurred(true);
+				setIsCurtainActive(true);
 			}
 		};
 
-		const handleFocus = () => {
+		const handlePageHide = () => {
+			if (Date.now() - dismissCooldownRef.current < 1000) {
+				return;
+			}
 			if (windowBlurDefense) {
-				setIsWindowBlurred(false);
+				setIsCurtainActive(true);
 			}
 		};
 
 		const handleVisibilityChange = () => {
-			if (windowBlurDefense) {
-				setIsWindowBlurred(document.hidden);
+			if (Date.now() - dismissCooldownRef.current < 1000) {
+				return;
+			}
+			if (windowBlurDefense && document.hidden) {
+				setIsCurtainActive(true);
 			}
 		};
 
+		let poller: ReturnType<typeof setInterval> | null = null;
+
 		if (windowBlurDefense) {
-			window.addEventListener("blur", handleBlur);
-			window.addEventListener("focus", handleFocus);
-			document.addEventListener("visibilitychange", handleVisibilityChange);
+			window.addEventListener("blur", handleBlur, false);
+			window.addEventListener("pagehide", handlePageHide, false);
+			document.addEventListener(
+				"visibilitychange",
+				handleVisibilityChange,
+				false,
+			);
+
+			// Deteksi transisi dari fokus ke non-fokus (misal saat Snipping Tool muncul)
+			let wasFocused =
+				typeof document !== "undefined" && document.hasFocus
+					? document.hasFocus()
+					: true;
+			poller = setInterval(() => {
+				if (typeof document === "undefined") return;
+				if (Date.now() - dismissCooldownRef.current < 1000) {
+					wasFocused = document.hasFocus() && !document.hidden;
+					return;
+				}
+				const hasFocus = document.hasFocus ? document.hasFocus() : true;
+				const isHidden = document.hidden;
+				if (wasFocused && (!hasFocus || isHidden)) {
+					setIsCurtainActive(true);
+				}
+				wasFocused = hasFocus && !isHidden;
+			}, 200);
 		}
 
-		// 2. ─── Keyboard Interceptor (F12, Inspect, Shortcuts) ───────────────
+		// 2. ─── Keyboard Interceptor (Screenshot Shortcuts & Inspect) ───────
 		const handleKeyDown = (e: KeyboardEvent) => {
-			// F12 Blocker
+			// F12 Blocker (hanya jika preventInspect diaktifkan secara eksplisit)
 			if (preventInspect && (e.key === "F12" || e.keyCode === 123)) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -135,28 +207,35 @@ export function useCopyProtection(options: CopyProtectionOptions = {}) {
 				return false;
 			}
 
-			// PrintScreen Keydown
-			if (preventPrintScreen && (e.key === "PrintScreen" || e.keyCode === 44)) {
-				setIsWindowBlurred(true);
-				if (navigator.clipboard?.writeText) {
-					navigator.clipboard.writeText("").catch(() => {});
+			// 📸 Deteksi Shortcut Screenshot:
+			// PrintScreen atau shortcut kombo (Cmd/Ctrl + Shift, Win+Shift+S)
+			const isComboScreenshot =
+				(e.metaKey || e.ctrlKey) &&
+				(e.shiftKey || e.key === "S" || e.key === "s");
+			const isPrintScreen = e.key === "PrintScreen" || e.keyCode === 44;
+
+			if (preventPrintScreen && (isPrintScreen || isComboScreenshot)) {
+				if (windowBlurDefense) {
+					setIsCurtainActive(true);
+					if (navigator.clipboard?.writeText) {
+						navigator.clipboard.writeText("").catch(() => {});
+					}
 				}
+				triggerProtectedToast(screenshotMessage, addToast);
 			}
 		};
 
-		// 3. ─── PrintScreen Keyup (Clear Clipboard) ─────────────────────────
+		// 3. ─── PrintScreen Keyup (Bersihkan clipboard, tirai tetap aktif sampai user dismiss) ──
 		const handleKeyUp = (e: KeyboardEvent) => {
-			if (preventPrintScreen && (e.key === "PrintScreen" || e.keyCode === 44)) {
-				if (navigator.clipboard?.writeText) {
-					navigator.clipboard.writeText("").catch(() => {});
+			if (
+				preventPrintScreen &&
+				(e.code === "PrintScreen" || e.keyCode === 44)
+			) {
+				if (windowBlurDefense) {
+					if (navigator.clipboard?.writeText) {
+						navigator.clipboard.writeText("").catch(() => {});
+					}
 				}
-				triggerProtectedToast(
-					"Tangkapan layar dinonaktifkan pada pratinjau terproteksi ini.",
-					addToast,
-				);
-				setTimeout(() => {
-					setIsWindowBlurred(false);
-				}, 1000);
 			}
 		};
 
@@ -164,6 +243,10 @@ export function useCopyProtection(options: CopyProtectionOptions = {}) {
 		const handleContextMenu = (e: MouseEvent) => {
 			if (preventRightClick) {
 				e.preventDefault();
+				if (windowBlurDefense) {
+					setIsCurtainActive(true);
+				}
+				triggerProtectedToast(rightClickMessage, addToast);
 				return false;
 			}
 		};
@@ -175,12 +258,16 @@ export function useCopyProtection(options: CopyProtectionOptions = {}) {
 		}
 
 		return () => {
+			if (poller) {
+				clearInterval(poller);
+			}
 			if (windowBlurDefense) {
-				window.removeEventListener("blur", handleBlur);
-				window.removeEventListener("focus", handleFocus);
+				window.removeEventListener("blur", handleBlur, false);
+				window.removeEventListener("pagehide", handlePageHide, false);
 				document.removeEventListener(
 					"visibilitychange",
 					handleVisibilityChange,
+					false,
 				);
 			}
 			window.removeEventListener("keydown", handleKeyDown, true);
@@ -194,11 +281,17 @@ export function useCopyProtection(options: CopyProtectionOptions = {}) {
 		windowBlurDefense,
 		preventRightClick,
 		preventPrintScreen,
+		rightClickMessage,
+		screenshotMessage,
 		addToast,
 	]);
 
 	return {
-		isWindowBlurred,
-		setIsWindowBlurred,
+		isCurtainActive,
+		// Alias isWindowBlurred untuk kompatibilitas mundur
+		isWindowBlurred: isCurtainActive,
+		dismissCurtain,
+		triggerCurtain,
+		setIsCurtainActive,
 	};
 }
