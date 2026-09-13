@@ -12,6 +12,7 @@ import Input from "@/components/ui/form/Input";
 import Textarea from "@/components/ui/form/Textarea";
 import { useFormModal } from "@/hooks/useFormModal";
 import type { Profile } from "@/types";
+import { isValidExternalUrl } from "@/utils";
 
 export interface EditProfileFormValues {
 	name: string;
@@ -189,8 +190,23 @@ export default function EditProfileModal({
 							<div>
 								<Input
 									id="profile-instagram"
-									placeholder="https://instagram.com/username"
-									{...register("instagram_url")}
+									placeholder="https://instagram.com/username atau @username"
+									{...register("instagram_url", {
+										validate: (val) => {
+											if (!val) return true;
+											const trimmed = val.trim();
+											if (trimmed.startsWith("http")) {
+												return (
+													isValidExternalUrl(trimmed) ||
+													"URL Instagram tidak valid"
+												);
+											}
+											return (
+												/^@?[a-zA-Z0-9._]+$/.test(trimmed) ||
+												"Format username Instagram tidak valid"
+											);
+										},
+									})}
 								>
 									<Image
 										src={instagramIcon}
@@ -200,13 +216,33 @@ export default function EditProfileModal({
 										className="w-4.5 h-4.5 object-contain opacity-60 dark:invert"
 									/>
 								</Input>
+								{errors.instagram_url && (
+									<p className="mt-1 text-xs text-danger">
+										{errors.instagram_url.message}
+									</p>
+								)}
 							</div>
 
 							<div>
 								<Input
 									id="profile-twitter"
-									placeholder="https://x.com/username"
-									{...register("twitter_url")}
+									placeholder="https://x.com/username atau @username"
+									{...register("twitter_url", {
+										validate: (val) => {
+											if (!val) return true;
+											const trimmed = val.trim();
+											if (trimmed.startsWith("http")) {
+												return (
+													isValidExternalUrl(trimmed) ||
+													"URL Twitter/X tidak valid"
+												);
+											}
+											return (
+												/^@?[a-zA-Z0-9_]+$/.test(trimmed) ||
+												"Format username Twitter/X tidak valid"
+											);
+										},
+									})}
 								>
 									<Image
 										src={xIcon}
@@ -216,13 +252,32 @@ export default function EditProfileModal({
 										className="w-4.5 h-4.5 object-contain opacity-60 dark:invert"
 									/>
 								</Input>
+								{errors.twitter_url && (
+									<p className="mt-1 text-xs text-danger">
+										{errors.twitter_url.message}
+									</p>
+								)}
 							</div>
 
 							<div>
 								<Input
 									id="profile-pixiv"
-									placeholder="https://pixiv.net/users/id (Pixiv)"
-									{...register("pixiv_url")}
+									placeholder="https://pixiv.net/users/id atau User ID Pixiv"
+									{...register("pixiv_url", {
+										validate: (val) => {
+											if (!val) return true;
+											const trimmed = val.trim();
+											if (trimmed.startsWith("http")) {
+												return (
+													isValidExternalUrl(trimmed) || "URL Pixiv tidak valid"
+												);
+											}
+											return (
+												/^[a-zA-Z0-9._-]+$/.test(trimmed) ||
+												"Format Pixiv ID tidak valid"
+											);
+										},
+									})}
 								>
 									<Image
 										src={pixivIcon}
@@ -232,23 +287,51 @@ export default function EditProfileModal({
 										className="w-4.5 h-4.5 object-contain opacity-60 dark:invert"
 									/>
 								</Input>
+								{errors.pixiv_url && (
+									<p className="mt-1 text-xs text-danger">
+										{errors.pixiv_url.message}
+									</p>
+								)}
 							</div>
 
 							<div>
 								<Input
 									id="profile-website"
 									placeholder="https://username.carrd.co (Website/Linktree)"
-									{...register("website_url")}
+									{...register("website_url", {
+										validate: (val) => {
+											if (!val) return true;
+											return (
+												isValidExternalUrl(val.trim()) ||
+												"Format URL website tidak valid (contoh: https://domain.com)"
+											);
+										},
+									})}
 								>
 									<Globe className="h-5 w-5 text-gray-400" />
 								</Input>
+								{errors.website_url && (
+									<p className="mt-1 text-xs text-danger">
+										{errors.website_url.message}
+									</p>
+								)}
 							</div>
 						</div>
 					</>
 				)}
 			</div>
 		),
-		[errors.bio, errors.base_price_idr, register, errors.name, isArtist],
+		[
+			errors.bio,
+			errors.base_price_idr,
+			register,
+			errors.name,
+			errors.instagram_url,
+			errors.twitter_url,
+			errors.pixiv_url,
+			errors.website_url,
+			isArtist,
+		],
 	);
 
 	useEffect(() => {

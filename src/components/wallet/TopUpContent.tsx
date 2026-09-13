@@ -19,7 +19,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { useModalStore } from "@/store/ModalStore";
 import { useToastStore } from "@/store/ToastStore";
 import { useUserStore } from "@/store/UserStore";
-import { formatPrice } from "@/utils";
+import { formatPrice, getSafeRedirectUrl } from "@/utils";
 import { formatCardNumber, formatCvv, formatExpiry } from "@/utils/payments";
 
 const QUICK_AMOUNTS = [50000, 100000, 250000, 500000, 1000000, 2000000];
@@ -27,7 +27,10 @@ const QUICK_AMOUNTS = [50000, 100000, 250000, 500000, 1000000, 2000000];
 export function TopUpContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const redirectUrl = searchParams.get("redirect") || "/profile";
+	const redirectUrl = getSafeRedirectUrl(
+		searchParams.get("redirect"),
+		"/profile",
+	);
 
 	const mounted = useMounted();
 	const queryClient = useQueryClient();

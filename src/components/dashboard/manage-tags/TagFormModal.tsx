@@ -3,6 +3,7 @@
 import { Tag as TagIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Tag } from "@/types";
+import { isValidTagName } from "@/utils";
 
 interface TagFormModalProps {
 	isOpen: boolean;
@@ -45,6 +46,12 @@ export default function TagFormModal({
 		}
 		if (normalized.length > 30) {
 			setError("Nama tag maksimal 30 karakter.");
+			return;
+		}
+		if (!isValidTagName(normalized)) {
+			setError(
+				"Nama tag hanya boleh berisi huruf, angka, dan tanda hubung (- atau _).",
+			);
 			return;
 		}
 		onSubmit(normalized);
