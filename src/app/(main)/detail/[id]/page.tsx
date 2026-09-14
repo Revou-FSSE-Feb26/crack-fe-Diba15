@@ -92,6 +92,7 @@ export default function Detail() {
 		[user, artwork, createReportMutation],
 	);
 
+	// Loading state
 	if (isLoading) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-background text-content">
@@ -100,6 +101,7 @@ export default function Detail() {
 		);
 	}
 
+	// Kalo gk ada, tampilkan pesan error
 	if (!artwork) {
 		return (
 			<main className="min-h-screen bg-background text-content pb-20">
@@ -130,7 +132,9 @@ export default function Detail() {
 		<main className="min-h-screen bg-background text-content pb-20">
 			<div className="max-w-6xl mx-auto px-4 py-6">
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+					{/* Images Gallery */}
 					<div className="lg:col-span-2 space-y-4">
+						{/* Images */}
 						{artwork.images_url.length > 0 ? (
 							artwork.images_url.map((imgUrl: string, index: number) => {
 								return (
@@ -198,6 +202,7 @@ export default function Detail() {
 							</div>
 						)}
 
+						{/* WIP */}
 						{artwork.wip_proof_url && (
 							<div className="rounded-xl border border-content/10 overflow-hidden bg-surface">
 								<button
@@ -236,7 +241,7 @@ export default function Detail() {
 												}
 												disabled={isCurtainActive}
 												onDragStart={(e) => e.preventDefault()}
-												className="w-full h-full min-h-[220px] bg-transparent cursor-pointer select-none relative block overflow-hidden disabled:cursor-default"
+												className="w-full h-full min-h-55 bg-transparent cursor-pointer select-none relative block overflow-hidden disabled:cursor-default"
 											>
 												<Image
 													src={artwork.wip_proof_url}
@@ -279,6 +284,7 @@ export default function Detail() {
 						)}
 					</div>
 
+					{/* Artist Profile */}
 					<aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
 						<div className="bg-surface p-5 rounded-xl border border-content/5 shadow-sm">
 							<Link
