@@ -1,142 +1,194 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/wEWvHaXF)
+# TruBrush Frontend
 
-# 🎨 TruBrush — Frontend Web Application
-> **Platform Sosial Media Portofolio Seni Digital Otentik & Pasar Komisi Aman Berbasis Escrow (Anti-AI Human Art)**
+Aplikasi web untuk platform portofolio seni digital dan pemesanan komisi berbasis escrow. TruBrush hanya menerima karya buatan manusia: seniman diminta melampirkan bukti proses pengerjaan, dan karya diperiksa kurator sebelum tampil di galeri publik.
 
----
+Repositori ini berisi sisi frontend, dibangun dengan Next.js (App Router) dan React. Frontend berkomunikasi dengan REST API backend TruBrush.
 
-## 🌟 1. Gambaran Umum (*Overview*)
+## Demo
 
-**TruBrush Frontend** adalah aplikasi antarmuka web modern berbasis **Next.js (App Router)** dan **React**. Aplikasi ini dirancang khusus untuk memfasilitasi seniman digital dan klien/kolektor dalam berinteraksi, memamerkan karya seni otentik manusia (*Proof of Work*), melakukan pemesanan komisi berbasis *escrow*, serta menyediakan panel administrasi eksekutif dan kurasi moderasi yang komprehensif.
+| Layanan             | URL                                                 |
+| ------------------- | --------------------------------------------------- |
+| Frontend            | https://trubrush.vercel.app                         |
+| Backend (API)       | https://trubrush-be.up.railway.app/api              |
+| Backend (DOCS)      | https://trubrush-be.up.railway.app/docs             |
+| Repositori frontend | https://github.com/Revou-FSSE-Feb26/crack-fe-Diba15 |
+| Repositori backend  | https://github.com/Revou-FSSE-Feb26/crack-be-Diba15 |
 
----
+## Daftar Isi
 
-## 🚀 2. Fitur Utama Frontend (*Key Features*)
+- [Demo](#demo)
+- [Fitur](#fitur)
+- [Tech Stack](#tech-stack)
+- [Tampilan Aplikasi](#tampilan-aplikasi)
+- [Struktur Direktori](#struktur-direktori)
+- [Instalasi](#instalasi)
+- [Cara Penggunaan](#cara-penggunaan)
+- [Skrip yang Tersedia](#skrip-yang-tersedia)
+- [Dokumentasi Tambahan](#dokumentasi-tambahan)
 
-### 🛡️ Proteksi Karya & Kurasi Anti-AI
-- **Form Unggah Karya Multimoda (`/post-art`):** Mendukung unggah gambar karya resolusi tinggi beserta bukti alur kerja (*WIP / Work In Progress* sketsa, video timelapse, layer).
-- **Infinite Feed & Galeri Penjelajah (`/`):** Feed publik karya seni dengan *infinite scroll batch loading* dan penyaringan kategori tag instan.
-- **Client-Side Anti-Scraping Defense:** Dilengkapi pelindung browser cerdas:
-  - *Window Blur Shield:* Memburamkan kanvas saat pengguna beralih tab atau membuka Snipping Tool.
-  - *DevTools & Shortcut Blocker:* Memblokir tombol inspeksi browser (`F12`, `Ctrl+Shift+I`, `Ctrl+U`).
-  - *Context Menu Shield:* Mencegah klik kanan simpan gambar liar (*Save Image As...*).
+## Fitur
 
-### 🔒 Siklus Pasar Komisi & Escrow
-- **Form Pemesanan Komisi Interaktif:** Klien dapat memesan karya kustom langsung dari profil seniman terverifikasi.
-- **Halaman Pembayaran Mandiri (`/commissions/:id/payment`):** Pembayaran terisolasi yang mengunci dana ke rekening bersama (*Escrow*) platform.
-- **Pelacak Progres Milestone & Revisi:** Pratinjau sketsa, persetujuan bertahap, dan pengiriman deliverable karya akhir.
+### Galeri dan unggah karya
 
-### 💳 Dompet Digital & Penarikan Dana
-- **Top Up Saldo Instan (`/topup`):** Pengisian saldo dompet digital untuk pembayaran komisi.
-- **Pencairan Dana Seniman (`/withdraw`):** Penarikan pendapatan komisi artis dengan batas minimal Rp 100.000.
+- Unggah karya di `/post-art`, dengan lampiran bukti proses (sketsa, video timelapse, atau layer).
+- Feed publik di `/` dengan infinite scroll dan filter berdasarkan tag.
+- Proteksi sisi klien untuk mempersulit penyalinan gambar:
+  - Kanvas diburamkan saat jendela kehilangan fokus (misalnya saat berpindah tab atau membuka Snipping Tool).
+  - Menu klik kanan dinonaktifkan pada gambar.
 
-### 📊 Panel Dashboard Moderasi & Eksekutif
-- **Dashboard Ringkasan (`/dashboard`):** Metrik ringkas transaksi aktif dan status akun.
-- **Kurasi Karya Seni (`/dashboard/review-artworks`):** Antrean verifikasi bukti sketsa karya anti-AI.
-- **Penanganan Laporan Aduan (`/dashboard/review-reports`):** Penindakan karya terindikasi plagiat/AI.
-- **Mediasi Sengketa Komisi (`/dashboard/review-disputes`):** Panel mediasi admin untuk klaim *refund* komisi.
-- **Kelola Pengguna & Banding Akun (`/dashboard/manage-users`):** Manajemen pengguna, role switcher, dan peninjauan formulir banding (*Appeals*).
-- **Manajemen Tag & Katalog Global (`/dashboard/manage-tags`):** CRUD master tag dan moderasi *takedown* karya global.
-- **Laporan Finansial & Buku Kas (`/dashboard/financial-reports`):** Audit perputaran GMV, saldo escrow, fee platform 5%, ekspor CSV, dan print report.
-- **Laporan Kinerja & SLA Kurator (`/dashboard/curator-performance`):** Evaluasi kecepatan SLA respons kurator, rasio kelolosan anti-AI, kartu Top Moderator, dan ekspor CSV.
-- **Log Audit Kronologis (`/dashboard/audit-logs`):** Transparansi seluruh rekam jejak keputusan staf kurator/admin.
+  Proteksi ini hanya menyulitkan penyalinan biasa dan tidak dapat mencegahnya sepenuhnya.
 
----
+### Komisi dan escrow
 
-## 🛠️ 3. Tumpukan Teknologi (*Tech Stack*)
+- Klien memesan komisi langsung dari profil seniman yang sudah terverifikasi.
+- Pembayaran dilakukan di `/commissions/:id/payment`. Dana ditahan di rekening escrow platform sampai pekerjaan selesai.
+- Progres komisi dilacak per milestone: pratinjau sketsa, persetujuan, revisi, dan pengiriman hasil akhir.
 
-| Lapisan / Kategori | Teknologi yang Digunakan |
-|---|---|
-| **Framework Inti** | [Next.js](https://nextjs.org/) (App Router, Turbopack, Server Actions) |
-| **Library UI & State** | [React](https://react.dev/), [Zustand](https://zustand-demo.pmnd.rs/) (Client Stores), [TanStack Query v5](https://tanstack.com/query) (Server State & Cache) |
-| **Styling & Komponen** | [Tailwind CSS v4](https://tailwindcss.com/), [DaisyUI v5](https://daisyui.com/), [Lucide React](https://lucide.dev/) Icons |
-| **Klien HTTP & Validasi** | [Axios](https://axios-http.com/), [Zod](https://zod.dev/) |
-| **Linter & Formatter** | [Biome](https://biomejs.dev/) |
-| **Package Manager** | [Bun](https://bun.sh/) |
+### Dompet digital
 
----
+- Top up saldo di `/topup` untuk membayar komisi.
+- Penarikan pendapatan seniman di `/withdraw`, dengan minimum Rp 100.000.
 
-## 📂 4. Struktur Direktori Proyek
+### Dashboard admin dan kurator
+
+| Rute                             | Fungsi                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `/dashboard`                     | Ringkasan transaksi aktif dan status akun                                      |
+| `/dashboard/review-artworks`     | Antrean verifikasi bukti proses karya                                          |
+| `/dashboard/review-reports`      | Penanganan laporan karya yang diduga plagiat atau buatan AI                    |
+| `/dashboard/review-disputes`     | Mediasi sengketa dan klaim refund komisi                                       |
+| `/dashboard/manage-users`        | Manajemen pengguna, pengubahan role, dan peninjauan banding akun               |
+| `/dashboard/manage-tags`         | CRUD tag dan takedown karya                                                    |
+| `/dashboard/financial-reports`   | Laporan GMV, saldo escrow, dan fee platform 5%; ekspor CSV dan cetak           |
+| `/dashboard/curator-performance` | SLA respons kurator, rasio kelolosan verifikasi, dan Top Moderator; ekspor CSV |
+| `/dashboard/audit-logs`          | Riwayat keputusan staf kurator dan admin secara kronologis                     |
+
+## Tech Stack
+
+| Kategori             | Teknologi                                                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bahasa               | [TypeScript](https://www.typescriptlang.org/) (5.9.3)                                                                                                            |
+| Framework            | [Next.js 16](https://nextjs.org/) (App Router, Turbopack, Server Actions)                                                                                        |
+| UI dan state         | [React 19](https://react.dev/), [Zustand](https://zustand-demo.pmnd.rs/) (state klien), [TanStack Query v5](https://tanstack.com/query) (server state dan cache) |
+| Styling              | [Tailwind CSS v4](https://tailwindcss.com/), [DaisyUI v5](https://daisyui.com/), [Lucide React](https://lucide.dev/)                                             |
+| HTTP dan validasi    | [Axios](https://axios-http.com/), [Zod](https://zod.dev/)                                                                                                        |
+| Linter dan formatter | [Biome](https://biomejs.dev/)                                                                                                                                    |
+| Package manager      | [Bun](https://bun.sh/)                                                                                                                                           |
+
+## Tampilan Aplikasi
+
+### Home
+
+![Halaman utama berisi feed karya dengan filter tag](docs/screenshots/home.png)
+
+### Commission
+
+![Halaman detail komisi beserta progres milestone](docs/screenshots/commission.png)
+
+### Profile
+
+![Halaman profil seniman](docs/screenshots/profile.png)
+
+### Dashboard
+
+![Dashboard admin dan kurator](docs/screenshots/dashboard.png)
+
+## Struktur Direktori
 
 ```
-crack-fe-diba15/
-├── docs/                               # Dokumentasi Arsitektur & Bisnis
-│   ├── ARCHITECTURE_CHECKLIST.md       # Audit Prinsip SOLID, DRY, KISS
-│   ├── BUSINESS_PROCESS.md             # Alur Proses Bisnis End-to-End
-│   ├── LOGIC_DOCS.md                   # Logika Bisnis & Perhitungan Inti
-│   ├── REPORT_YAGNI.md                 # Laporan Audit & Solusi Prinsip YAGNI
-│   ├── TEST_SCENARIO.md                # Skenario Pengujian Fungsional
-│   └── TODO.md                         # Log Progres Pengembangan (TODO 1-17)
+crack-fe-Diba15/
+├── docs/                   # Dokumentasi arsitektur dan proses bisnis
+│   ├── screenshots/        # Gambar untuk bagian Tampilan Aplikasi
+│   ├── ARCHITECTURE_CHECKLIST.md
+│   ├── BUSINESS_PROCESS.md
+│   ├── ERD.md
+│   ├── LOGIC_DOCS.md
+│   ├── REPORT_YAGNI.md
+│   ├── TEST_SCENARIO.md
+│   └── TODO.md
 ├── src/
-│   ├── app/                            # Next.js App Router Pages & BFF API Routes
-│   │   ├── (auth)/                     # Halaman Login, Signup, Forgot/Reset Password
-│   │   ├── api/                        # Route Handlers BFF (/api/auth, /api/artwork, dll.)
-│   │   ├── commissions/                # Detail Komisi & Halaman Pembayaran
-│   │   ├── dashboard/                  # 8 Sub-Halaman Panel Admin & Kurator
-│   │   ├── profile/                    # Profil Seniman/Klien & Kotak Banding
-│   │   └── layout.tsx                  # Layout Global & Provider Wrapper
-│   ├── components/                     # Komponen UI Terisolasi & Modular
-│   │   ├── dashboard/                  # Sub-Komponen Dashboard (Spotlight, Filter Toolbars, Modals, Table Columns PascalCase)
-│   │   ├── ui/                         # Komponen Presentasional Generik (DataTable, Stat, Modal)
+│   ├── app/                # Halaman App Router dan route handler BFF
+│   │   ├── (auth)/         # Login, signup, lupa dan reset password
+│   │   ├── api/            # Route handler BFF (/api/auth, /api/artwork, dll.)
+│   │   ├── commissions/    # Detail komisi dan pembayaran
+│   │   ├── dashboard/      # Halaman admin dan kurator
+│   │   ├── profile/        # Profil seniman/klien dan banding
+│   │   └── layout.tsx      # Layout global dan provider
+│   ├── components/
+│   │   ├── dashboard/      # Komponen khusus dashboard
+│   │   ├── ui/             # Komponen generik (DataTable, Stat, Modal)
 │   │   └── ...
-│   ├── hooks/                          # Kustom Hooks TanStack Query & Utility
-│   ├── lib/                            # Konfigurasi Axios & Centralized Query Keys
-│   ├── store/                          # Zustand Global Stores (UserStore, ToastStore, ModalStore)
-│   ├── types/                          # Kontrak Tipe Data Terpusat (Shared Interfaces)
-│   └── utils/                          # Helper Formatters (Price, Date, Currency, File Validation)
-├── biome.json                          # Konfigurasi Linter Biome
-├── package.json                        # Dependencies & Script Eksekusi
-└── tsconfig.json                       # Konfigurasi TypeScript
+│   ├── hooks/              # Custom hook (TanStack Query dan utilitas)
+│   ├── lib/                # Konfigurasi Axios dan query key
+│   ├── store/              # Store Zustand (UserStore, ToastStore, ModalStore)
+│   ├── types/              # Tipe dan interface bersama
+│   └── utils/              # Formatter harga, tanggal, mata uang; validasi file
+├── biome.json
+├── package.json
+└── tsconfig.json
 ```
 
----
+## Instalasi
 
-## ⚙️ 5. Panduan Instalasi & Menjalankan Aplikasi (*Getting Started*)
+### Prasyarat
 
-### 1. Prasyarat (*Prerequisites*)
-Pastikan telah menginstal [Bun](https://bun.sh/) pada sistem Anda:
-```bash
-bun --version
-```
+- [Bun](https://bun.sh/). Cek dengan `bun --version`.
+- Backend TruBrush, dari [repositori backend](https://github.com/Revou-FSSE-Feb26/crack-be-Diba15). Alternatifnya, arahkan `NEXT_PUBLIC_API_URL` ke backend yang sudah dideploy (lihat bagian [Demo](#demo)).
 
-### 2. Instalasi Dependensi
-```bash
-bun install
-```
+### Langkah
 
-### 3. Konfigurasi Environment Variables (`.env.local`)
-Salin atau buat berkas `.env.local` pada *root directory* frontend:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
-```
+1. Pasang dependensi:
 
-### 4. Menjalankan Server Development
-```bash
-bun run dev
-```
-Aplikasi akan berjalan pada port default: [http://localhost:3000](http://localhost:3000).
+   ```bash
+   bun install
+   ```
 
----
+2. Buat berkas `.env.local` di root proyek:
 
-## 🧪 6. Pengujian & Jaminan Kualitas (*Quality Gates*)
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:3001/api
+   ```
 
-Frontend TruBrush menerapkan pengujian kualitas kode ketat sebelum rilis:
+3. Jalankan server development:
 
-```bash
-# 1. Pengecekan Linting & Formatting dengan Biome (0 Error, 0 Warning)
-bun run check
+   ```bash
+   bun run dev
+   ```
 
-# 2. Kompilasi Produksi Next.js (60/60 Rute Terkompilasi Sukses)
-bun run build
-```
+   Aplikasi dapat diakses di <http://localhost:3000>.
 
----
+## Cara Penggunaan
 
-## 📖 7. Referensi Dokumentasi Tambahan
+Akun demo untuk mencoba tiap role:
 
-Untuk pemahaman alur kerja dan formula perhitungan lebih mendalam, silakan baca dokumentasi di folder `docs/`:
-- 📄 [**Alur Bisnis Lengkap (BUSINESS_PROCESS.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/BUSINESS_PROCESS.md)
-- 📐 [**Dokumentasi Logika & Formula Matematika (LOGIC_DOCS.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/LOGIC_DOCS.md)
-- 📑 [**Laporan Audit & Solusi Prinsip YAGNI (REPORT_YAGNI.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/REPORT_YAGNI.md)
-- 🧪 [**Naskah Skenario Pengujian Manual (TEST_SCENARIO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TEST_SCENARIO.md)
-- ✅ [**Daftar Capaian Fitur (TODO.md)**](file:///d:/Revou/Assignment/crack_project/crack-fe-diba15/docs/TODO.md)
+| Role    | Email               | Password   |
+| ------- | ------------------- | ---------- |
+| Client  | dimas@example.com   | client123  |
+| Artist  | nadia@example.com   | artist123  |
+| Curator | hendra@trubrush.com | curator123 |
+
+Alur yang bisa dicoba:
+
+1. Masuk sebagai artist, lalu unggah karya di `/post-art` beserta bukti proses.
+2. Masuk sebagai curator, lalu setujui karya di `/dashboard/review-artworks`.
+3. Masuk sebagai client, pesan komisi dari profil artist, lalu bayar lewat halaman pembayaran.
+4. Kembali sebagai artist untuk mengirim progres, lalu tarik dana di `/withdraw`.
+
+## Skrip yang Tersedia
+
+| Perintah        | Fungsi                                              |
+| --------------- | --------------------------------------------------- |
+| `bun run dev`   | Menjalankan server development                      |
+| `bun run build` | Membuat build produksi                              |
+| `bun run check` | Menjalankan lint dan pengecekan format dengan Biome |
+
+Sebelum membuka pull request, pastikan `bun run check` dan `bun run build` selesai tanpa error.
+
+## Dokumentasi Tambahan
+
+- [Proses bisnis](docs/BUSINESS_PROCESS.md)
+- [Logika bisnis dan rumus perhitungan](docs/LOGIC_DOCS.md)
+- [Laporan audit YAGNI](docs/REPORT_YAGNI.md)
+- [Skenario pengujian manual](docs/TEST_SCENARIO.md)
+- [Log progres pengembangan](docs/TODO.md)
+- [ERD](docs/ERD.md)
