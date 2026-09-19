@@ -10,6 +10,7 @@ Repositori ini berisi sisi frontend, dibangun dengan Next.js (App Router) dan Re
 | ------------------- | --------------------------------------------------- |
 | Frontend            | https://trubrush.vercel.app                         |
 | Backend (API)       | https://trubrush-be.up.railway.app/api              |
+| Backend (DOCS)      | https://trubrush-be.up.railway.app/docs             |
 | Repositori frontend | https://github.com/Revou-FSSE-Feb26/crack-fe-Diba15 |
 | Repositori backend  | https://github.com/Revou-FSSE-Feb26/crack-be-Diba15 |
 
